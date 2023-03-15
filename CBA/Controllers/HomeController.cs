@@ -230,12 +230,12 @@ namespace GIS.Controllers
 
         public class HttpItemFace
         {
-           
+
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
             public string device { get; set; } = "";
             public string codeSystem { get; set; } = "";
-            public string image { get; set; } = "";
+            public byte[] image { get; set; } = new byte[0];
         }
         [HttpPost]
         [Route("createFace")]
@@ -245,9 +245,9 @@ namespace GIS.Controllers
             long id = Program.api_user.checkUser(token);
             if (id >= 0)
             {
-                byte [] array = System.Text.Encoding.UTF8.GetBytes(face.image);
-                Console.WriteLine(array.ToString());
-                bool flag = await Program.api_face.createFace(face.age, face.gender, array,face.device, face.codeSystem);
+                //byte [] array = System.Text.Encoding.UTF8.GetBytes(face.image);
+                //Console.WriteLine(array.ToString());
+                bool flag = await Program.api_face.createFace(face.age, face.gender, face.image,face.device, face.codeSystem);
                 if (flag)
                 {
                     return Ok();

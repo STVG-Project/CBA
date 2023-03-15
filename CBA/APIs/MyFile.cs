@@ -67,7 +67,7 @@ namespace CBA.APIs
             }
         }
 
-        public async Task<byte[]>? getImageChanged(byte[] data)
+       /* public async Task<byte[]>? getImageChanged(byte[] data)
         {
             var client = new RestClient("http://office.stvg.vn:59073/image");
             var request = new RestRequest();
@@ -85,6 +85,6 @@ namespace CBA.APIs
             {
                 return null;
             }
-        }
+        }*/
     }
 }

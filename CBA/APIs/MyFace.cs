@@ -9,11 +9,11 @@ namespace CBA.APIs
 
         public async Task<bool> createFace(int age, string gender, byte[] image, string device, string codeSystem)
         {
-            //string codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
+            string codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
             int totalAge = 0;
-            string codefile = Encoding.Unicode.GetString(image);
+            //string codefile = Encoding.Unicode.GetString(image);
 
-            if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile))
+            if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile)|| string.IsNullOrEmpty(device))
             {
                 return false;
             }
@@ -58,6 +58,7 @@ namespace CBA.APIs
 
                 face.createdTime = DateTime.Now.ToUniversalTime();
                 face.image = codefile;
+                
                 face.device = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
                 face.isdeleted = false;
 
@@ -77,40 +78,7 @@ namespace CBA.APIs
             }
         }
 
-        public async Task<bool> updateAge(string codeSystem)
-        {
-            int totalAge = 0;
-            if (string.IsNullOrEmpty(codeSystem))
-            {
-                return false;
-            }
-            using (DataContext context = new DataContext())
-            {
-                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).FirstOrDefault();
-
-                if (m_person == null)
-                {
-                    return false;
-                }
-
-                foreach (SqlFace item in m_person.faces!)
-                {
-                    totalAge += item.age;
-                }
-                m_person.age = totalAge / m_person.faces.Count;
-                m_person.lastestTime = DateTime.Now.ToUniversalTime();
-                int rows = await context.SaveChangesAsync();
-                if (rows > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
+       
 
         public class ItemDeviceForFace
         {
