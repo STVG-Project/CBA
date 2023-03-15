@@ -29,15 +29,30 @@ namespace CBA.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "tb_file",
+                columns: table => new
+                {
+                    ID = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    key = table.Column<string>(type: "text", nullable: false),
+                    link = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
+                    time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tb_file", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tb_group",
                 columns: table => new
                 {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     code = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "text", nullable: false),
                     des = table.Column<string>(type: "text", nullable: false),
-                    createdTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    lastestTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     isdeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -69,6 +84,7 @@ namespace CBA.Migrations
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     code = table.Column<string>(type: "text", nullable: false),
+                    codeSystem = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
                     gender = table.Column<string>(type: "text", nullable: false),
                     age = table.Column<int>(type: "integer", nullable: false),
@@ -120,7 +136,7 @@ namespace CBA.Migrations
                 {
                     ID = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    age = table.Column<string>(type: "text", nullable: false),
+                    age = table.Column<int>(type: "integer", nullable: false),
                     gender = table.Column<string>(type: "text", nullable: false),
                     image = table.Column<string>(type: "text", nullable: false),
                     personID = table.Column<long>(type: "bigint", nullable: true),
@@ -142,35 +158,6 @@ namespace CBA.Migrations
                         principalTable: "tb_person",
                         principalColumn: "ID");
                 });
-
-            migrationBuilder.CreateTable(
-                name: "SqlGroupSqlUser",
-                columns: table => new
-                {
-                    groupsID = table.Column<long>(type: "bigint", nullable: false),
-                    usersID = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SqlGroupSqlUser", x => new { x.groupsID, x.usersID });
-                    table.ForeignKey(
-                        name: "FK_SqlGroupSqlUser_tb_group_groupsID",
-                        column: x => x.groupsID,
-                        principalTable: "tb_group",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SqlGroupSqlUser_tb_user_usersID",
-                        column: x => x.usersID,
-                        principalTable: "tb_user",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SqlGroupSqlUser_usersID",
-                table: "SqlGroupSqlUser",
-                column: "usersID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_tb_face_deviceID",
@@ -197,10 +184,10 @@ namespace CBA.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "SqlGroupSqlUser");
+                name: "tb_face");
 
             migrationBuilder.DropTable(
-                name: "tb_face");
+                name: "tb_file");
 
             migrationBuilder.DropTable(
                 name: "tb_user");

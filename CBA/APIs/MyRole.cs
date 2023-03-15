@@ -51,16 +51,16 @@ namespace CBA.APIs
                     context.roles!.Add(role);
                 }
 
-				roles = context.roles!.Where(s => s.code.CompareTo("specialist") == 0 && s.isdeleted == false).ToList();
+				roles = context.roles!.Where(s => s.code.CompareTo("system") == 0 && s.isdeleted == false).ToList();
 				if (roles.Count <= 0)
 				{
 					SqlRole role = new SqlRole();
 					role.ID = DateTime.Now.Ticks;
-					role.code = "specialist";
-					role.name = "specialist";
-					role.des = "specialist";
+					role.code = "system";
+					role.name = "system";
+					role.des = "system";
 					role.isdeleted = false;
-					role.note = "specialist";
+					role.note = "system";
 					context.roles!.Add(role);
 				}
 				int rows = await context.SaveChangesAsync();

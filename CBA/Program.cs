@@ -10,6 +10,12 @@ public class Program
 {
 
     public static MyRole api_role = new MyRole();
+    public static MyUser api_user = new MyUser();
+    public static MyFile api_file = new MyFile();
+    public static MyDevice api_device = new MyDevice();
+    public static MyGroup api_group = new MyGroup();
+    public static MyPerson api_person = new MyPerson();
+    public static MyFace api_face = new MyFace();
 
     public static async Task Main(string[] args)
     {
@@ -71,8 +77,11 @@ public class Program
 
 
             app.MapControllers();
-            app.MapGet("/", () => string.Format("GIS of STVG - {0}", DateTime.Now));
+            app.MapGet("/", () => string.Format("CBA of STVG - {0}", DateTime.Now));
             await api_role.initAsync();
+            await api_user.initAsync();
+            await api_device.initAsync();
+            await api_group.initAsync();
 
             app.Run();
         }

@@ -6,7 +6,7 @@ namespace CBA.Models
     public class SqlFace
     {
         public long ID { get; set; }
-        public string age { get; set; } = "";
+        public int age { get; set; } = 0;
         public string gender { get; set; } = "";
         public string image { get; set; } = "";
         public SqlPerson? person { get; set; }

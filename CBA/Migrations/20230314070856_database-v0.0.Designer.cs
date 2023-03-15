@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CBA.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230313043400_database-v0.0")]
+    [Migration("20230314070856_database-v0.0")]
     partial class databasev00
     {
         /// <inheritdoc />
@@ -61,9 +61,8 @@ namespace CBA.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
 
-                    b.Property<string>("age")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("age")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("createdTime")
                         .HasColumnType("timestamp with time zone");
@@ -94,6 +93,34 @@ namespace CBA.Migrations
                     b.ToTable("tb_face");
                 });
 
+            modelBuilder.Entity("CBA.Models.SqlFile", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ID"));
+
+                    b.Property<string>("key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("link")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("tb_file");
+                });
+
             modelBuilder.Entity("CBA.Models.SqlGroup", b =>
                 {
                     b.Property<long>("ID")
@@ -106,9 +133,6 @@ namespace CBA.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("createdTime")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("des")
                         .IsRequired()
                         .HasColumnType("text");
@@ -116,8 +140,9 @@ namespace CBA.Migrations
                     b.Property<bool>("isdeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("lastestTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("ID");
 
@@ -136,6 +161,10 @@ namespace CBA.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("codeSystem")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -251,21 +280,6 @@ namespace CBA.Migrations
                     b.ToTable("tb_user");
                 });
 
-            modelBuilder.Entity("SqlGroupSqlUser", b =>
-                {
-                    b.Property<long>("groupsID")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("usersID")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("groupsID", "usersID");
-
-                    b.HasIndex("usersID");
-
-                    b.ToTable("SqlGroupSqlUser");
-                });
-
             modelBuilder.Entity("CBA.Models.SqlFace", b =>
                 {
                     b.HasOne("CBA.Models.SqlDevice", "device")
@@ -297,21 +311,6 @@ namespace CBA.Migrations
                         .HasForeignKey("roleID");
 
                     b.Navigation("role");
-                });
-
-            modelBuilder.Entity("SqlGroupSqlUser", b =>
-                {
-                    b.HasOne("CBA.Models.SqlGroup", null)
-                        .WithMany()
-                        .HasForeignKey("groupsID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CBA.Models.SqlUser", null)
-                        .WithMany()
-                        .HasForeignKey("usersID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CBA.Models.SqlGroup", b =>

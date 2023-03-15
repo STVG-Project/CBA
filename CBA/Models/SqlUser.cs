@@ -18,6 +18,5 @@ namespace CBA.Models
         public string des { get; set; } = "";
         public string avatar { get; set; } = "";
         public SqlRole? role { get; set; }
-        public List<SqlGroup>? groups { get; set; }
     }
 }

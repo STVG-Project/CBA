@@ -9,9 +9,10 @@ namespace CBA.Models
         public DbSet<SqlUser>? users { get; set; }
         public DbSet<SqlRole>? roles { get; set; }
         public DbSet<SqlPerson>? persons { get; set; }
-        public DbSet<SqlDevice>? devides { get; set; }
+        public DbSet<SqlDevice>? devices { get; set; }
         public DbSet<SqlGroup>? groups { get; set; }
         public DbSet<SqlFace>? faces { get; set; }
+        public DbSet<SqlFile>? files { get; set; }
 
 
         public static string randomString(int length)
@@ -20,7 +21,7 @@ namespace CBA.Models
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public static string configSql = "Host=office.stvg.vn:59052;Database=db_stvg_cba;Username=stvg;Password=stvg";
+        public static string configSql = "Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg";
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -31,7 +32,6 @@ namespace CBA.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SqlGroup>().HasMany<SqlPerson>(s => s.persons).WithOne(s => s.group);
-            modelBuilder.Entity<SqlGroup>().HasMany<SqlUser>(s => s.users).WithMany(s => s.groups);
             modelBuilder.Entity<SqlPerson>().HasMany<SqlFace>(s => s.faces).WithOne(s => s.person);
         }
 
