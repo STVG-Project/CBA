@@ -18,7 +18,7 @@ namespace CBA.Controllers
         [Route("listDevice")]
         public IActionResult ListDevice([FromHeader] string token)
         {
-            long id = Program.api_user.checkUser(token);
+            long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
                 return Ok(Program.api_device.getListDevice());
@@ -35,7 +35,7 @@ namespace CBA.Controllers
         public async Task<IActionResult> CreateDeviceAsync([FromHeader] string token, HttpItemDevice device)
         {
 
-            long id = Program.api_user.checkUser(token);
+            long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
                 if (string.IsNullOrEmpty(device.code) || string.IsNullOrEmpty(device.name))
@@ -63,7 +63,7 @@ namespace CBA.Controllers
         [Route("editDevice")]
         public async Task<IActionResult> EditDeviceAsync([FromHeader] string token, HttpItemDevice device)
         {
-            long id = Program.api_user.checkUser(token);
+            long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
                 if (string.IsNullOrEmpty(device.code) || string.IsNullOrEmpty(device.name))
@@ -91,7 +91,7 @@ namespace CBA.Controllers
         [Route("{code}/deleteDevice")]
         public async Task<IActionResult> DeleteDeviceAsync([FromHeader] string token, string code)
         {
-            long id = Program.api_user.checkUser(token);
+            long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
                 if (string.IsNullOrEmpty(code))

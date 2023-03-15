@@ -22,7 +22,7 @@ namespace CBA.Controllers
             public int age { get; set; } = 0;
             public string device { get; set; } = "";
             public string codeSystem { get; set; } = "";
-            public IFormFile image { get; set; }
+            public IFormFile? image { get; set; }
         }
 
         [HttpPost]
@@ -30,23 +30,30 @@ namespace CBA.Controllers
         public async Task<IActionResult> CreateFaceAsync([FromHeader] string token, [FromForm] HttpCreateFace face)
         {
 
-            long id = Program.api_user.checkUser(token);
+            long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
-                /*
-                byte[] array = System.Text.Encoding.UTF8.GetBytes(face.image);
-                Console.WriteLine(array.ToString());
-                bool flag = await Program.api_face.createFace(face.age, face.gender, array, face.device, face.codeSystem);
-                if (flag)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    return Ok();
+                    if (face.image != null)
+                    {
+                        face.image.CopyTo(ms);
+                        bool flag = await Program.api_face.createFace(face.age, face.gender, ms.ToArray(), face.device, face.codeSystem);
+                        if (flag)
+                        {
+                            return Ok();
+                        }
+                        else
+                        {
+                            return BadRequest();
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest();
+                    }
                 }
-                else
-                {
-                    return BadRequest();
-                }
-                */
-                return Ok();
+
             }
             else
             {

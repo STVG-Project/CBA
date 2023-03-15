@@ -69,9 +69,9 @@ namespace CBA.APIs
                     SqlUser item = new SqlUser();
                     item.ID = DateTime.Now.Ticks;
                     item.user = "stvg";
-                    item.username = "stvg";
+                    item.username = "backend";
                     item.password = "123456";
-                    item.role = context.roles!.Where(s => s.isdeleted == false && s.code.CompareTo("specialist") == 0).FirstOrDefault();
+                    item.role = context.roles!.Where(s => s.isdeleted == false && s.code.CompareTo("system") == 0).FirstOrDefault();
                     item.token = createToken();
                     item.displayName = "stvg";
                     item.des = "stvg";
