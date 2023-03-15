@@ -13,6 +13,7 @@ namespace CBA.Models
         public DbSet<SqlGroup>? groups { get; set; }
         public DbSet<SqlFace>? faces { get; set; }
         public DbSet<SqlFile>? files { get; set; }
+        public DbSet<SqlLogPerson>? logs { get; set; }
 
 
         public static string randomString(int length)

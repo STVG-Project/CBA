@@ -30,6 +30,7 @@ namespace CBA.APIs
                 face.ID = DateTime.Now.Ticks;
                 face.age = age;
                 face.gender = gender;
+                string note = "";
                 face.person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
                 if (face.person == null)
                 {
@@ -44,7 +45,10 @@ namespace CBA.APIs
                     tmp.isdeleted = false;
 
                     face.person = tmp;
+                    note = string.Format("New person created : ", tmp.code);
                     context.persons!.Add(tmp);
+
+                    
                 }
                 else
                 {
@@ -54,6 +58,8 @@ namespace CBA.APIs
                     }
                     face.person.age = (totalAge + age) / (face.person.faces.Count + 1);
                     face.person.lastestTime = DateTime.Now.ToUniversalTime();
+
+                    note = string.Format("Person arrived : ", string.IsNullOrEmpty(face.person.name) ? face.person.code : face.person.name);
                 }
 
                 face.createdTime = DateTime.Now.ToUniversalTime();
@@ -77,6 +83,14 @@ namespace CBA.APIs
 
 
                 context.faces!.Add(face);
+
+                SqlLogPerson log = new SqlLogPerson();
+                log.ID = DateTime.Now.Ticks;
+                log.person = face.person;
+                log.device = face.device;
+                log.image = face.image;
+                log.note = note;
+                log.time = DateTime.Now.ToUniversalTime();
 
                 int rows = await context.SaveChangesAsync();
                 if (rows > 0)
@@ -141,6 +155,51 @@ namespace CBA.APIs
 
                         list.Add(item);
                     }
+                }
+                return list;
+            }
+        }
+
+        public class ItemLog
+        {
+            public string person { get; set; } = "";
+            public string device { get; set; } = "";
+            public string image { get; set; } = "";
+            public string note { get; set; } = "";
+            public string time { get; set; } = "";
+        }
+
+        public List<ItemLog> getListHistoryForPerson (string code)
+        {
+            if(string.IsNullOrEmpty(code))
+            {
+                return new List<ItemLog>();
+            }
+
+            List<ItemLog> list = new List<ItemLog>();
+
+            using (DataContext context = new DataContext())
+            {
+                SqlPerson? m_person = context.persons!.Where(s => s.code.CompareTo(code) == 0).FirstOrDefault();
+                if(m_person == null)
+                {
+                    return new List<ItemLog>();
+                }
+
+                List<SqlLogPerson>? logs = context.logs!.Include(s => s.person).Where(s => s.person!.ID == m_person.ID).OrderByDescending(s => s.time).ToList();
+                if(logs.Count > 0)
+                {
+                    foreach(SqlLogPerson log in logs)
+                    {
+                        ItemLog tmp = new ItemLog();
+                        tmp.person = log.person!.code;
+                        tmp.device = log.device!.code;
+                        tmp.image = log.image;
+                        tmp.note = log.note;
+                        tmp.time = log.time.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+
+                        list.Add(tmp);
+                    }    
                 }
                 return list;
             }

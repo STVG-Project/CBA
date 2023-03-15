@@ -53,5 +53,13 @@ namespace CBA.Controllers
                 return Unauthorized();
             }
         }
+
+        [HttpGet]
+        [Route("getHistoryFacePerson")]
+        public IActionResult ListPerson(string person)
+        {
+            return Ok(Program.api_face.getListHistoryForPerson(person));
+
+        }
     }
 }
