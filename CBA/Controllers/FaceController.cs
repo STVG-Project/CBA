@@ -22,7 +22,7 @@ namespace CBA.Controllers
             public int age { get; set; } = 0;
             public string device { get; set; } = "";
             public string codeSystem { get; set; } = "";
-            public IFormFile? image { get; set; }
+            public IFormFile image { get; set; } 
         }
 
         [HttpPost]
@@ -35,18 +35,11 @@ namespace CBA.Controllers
             {
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    if (face.image != null)
+                    face.image.CopyTo(ms);
+                    bool flag = await Program.api_face.createFace(face.age, face.gender, ms.ToArray(), face.device, face.codeSystem);
+                    if (flag)
                     {
-                        face.image.CopyTo(ms);
-                        bool flag = await Program.api_face.createFace(face.age, face.gender, ms.ToArray(), face.device, face.codeSystem);
-                        if (flag)
-                        {
-                            return Ok();
-                        }
-                        else
-                        {
-                            return BadRequest();
-                        }
+                        return Ok();
                     }
                     else
                     {

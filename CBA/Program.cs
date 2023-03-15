@@ -80,7 +80,6 @@ public class Program
             app.MapGet("/", () => string.Format("CBA of STVG - {0}", DateTime.Now));
             await api_role.initAsync();
             await api_user.initAsync();
-            await api_device.initAsync();
             await api_group.initAsync();
 
             app.Run();

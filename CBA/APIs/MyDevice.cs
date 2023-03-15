@@ -5,7 +5,40 @@ namespace CBA.APIs
     public class MyDevice
     {
         public MyDevice() { }
-        public async Task initAsync()
+       
+        public class ItemDevice
+        {
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+
+        }
+
+
+        public List<ItemDevice> getListDevice()
+        {
+            using (DataContext context = new DataContext())
+            {
+                List<ItemDevice> list = new List<ItemDevice>();
+                List<SqlDevice> devices = context.devices!.Where(s => s.isdeleted == false).ToList();
+                if (devices.Count > 0)
+                {
+                    foreach (SqlDevice device in devices)
+                    {
+                        ItemDevice item = new ItemDevice();
+                        item.code = device.code;
+                        item.name = device.name;
+                        item.des = device.des;
+
+                        list.Add(item);
+                    }
+                }
+                return list;
+            }
+        }
+
+        /*
+         *  public async Task initAsync()
         {
             using (DataContext context = new DataContext())
             {
@@ -32,22 +65,22 @@ namespace CBA.APIs
                     item.isdeleted = false;
                     context.devices!.Add(item);
                 }
-              
+
                 int rows = await context.SaveChangesAsync();
             }
         }
-        public async Task<bool> createDevice(string code, string name, string des)
+        public async Task<long> createDevice(string code, string name, string des)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(des))
             {
-                return false;
+                return -1;
             }
             using (DataContext context = new DataContext())
             {
                 SqlDevice? device = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(code) == 0).FirstOrDefault();
                 if (device != null)
                 {
-                    return false;
+                    return -1;
                 }
               
                 device = new SqlDevice();
@@ -62,16 +95,15 @@ namespace CBA.APIs
                 int rows = await context.SaveChangesAsync();
                 if (rows > 0)
                 {
-                    return true;
+                    return device.ID;
                 }
                 else
                 {
-                    return false;
+                    return -1;
                 }
             }
         }
-
-        public async Task<bool> editDevice(string code, string name, string des)
+         * public async Task<bool> editDevice(string code, string name, string des)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(des))
             {
@@ -123,35 +155,6 @@ namespace CBA.APIs
                 }
             }
         }
-
-        public class ItemDevice
-        {
-            public string code { get; set; } = "";
-            public string name { get; set; } = "";
-            public string des { get; set; } = "";
-           
-        }
-
-        public List<ItemDevice> getListDevice()
-        {
-            using (DataContext context = new DataContext())
-            {
-                List<ItemDevice> list = new List<ItemDevice>();
-                List<SqlDevice> devices = context.devices!.Where(s => s.isdeleted == false).ToList();
-                if (devices.Count > 0)
-                {
-                    foreach (SqlDevice device in devices)
-                    {
-                        ItemDevice item = new ItemDevice();
-                        item.code = device.code;
-                        item.name = device.name;
-                        item.des = device.des;
-
-                        list.Add(item);
-                    }
-                }
-                return list;
-            }
-        }
+        */
     }
 }

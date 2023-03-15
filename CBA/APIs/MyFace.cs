@@ -60,6 +60,19 @@ namespace CBA.APIs
                 face.image = codefile;
                 
                 face.device = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
+                if (face.device == null)
+                {
+                    SqlDevice tmp_device = new SqlDevice();
+                    tmp_device.ID = DateTime.Now.Ticks;
+                    tmp_device.code = device;
+                    tmp_device.name = "tb_" + device;
+                    tmp_device.des = "tb_" + device;
+                    tmp_device.isdeleted = false;
+
+                    face.device = tmp_device;
+                    context.devices!.Add(tmp_device);
+
+                }    
                 face.isdeleted = false;
 
 
