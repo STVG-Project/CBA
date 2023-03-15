@@ -59,7 +59,7 @@ namespace CBA.APIs
             public string name { get; set; } = "";
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
-            public ItemGroupForPerson group { get; set; } = new ItemGroupForPerson();
+            public ItemGroupForPerson? group { get; set; } = null;
             public List<ItemFaceForPerson> faces { get; set; } = new List<ItemFaceForPerson>();
             public string createdTime { get; set; } = "";
             public string lastestTime { get; set; } = "";

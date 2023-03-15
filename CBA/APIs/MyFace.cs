@@ -37,7 +37,7 @@ namespace CBA.APIs
                     SqlPerson tmp = new SqlPerson();
                     tmp.ID = DateTime.Now.Ticks;
                     tmp.codeSystem = codeSystem;
-                    tmp.code = "person " + codeSystem;
+                    tmp.code = "identify_" + codeSystem;
                     tmp.gender = gender;
                     tmp.age = face.age;
                     tmp.createdTime = DateTime.Now.ToUniversalTime();
@@ -45,7 +45,7 @@ namespace CBA.APIs
                     tmp.isdeleted = false;
 
                     face.person = tmp;
-                    note = string.Format("New person created : ", tmp.code);
+                    note = string.Format("New person created :{0} ", tmp.code);
                     context.persons!.Add(tmp);
 
                     
@@ -59,7 +59,7 @@ namespace CBA.APIs
                     face.person.age = (totalAge + age) / (face.person.faces.Count + 1);
                     face.person.lastestTime = DateTime.Now.ToUniversalTime();
 
-                    note = string.Format("Person arrived : ", string.IsNullOrEmpty(face.person.name) ? face.person.code : face.person.name);
+                    note = string.Format("Person arrived : {0}", face.person.code );
                 }
 
                 face.createdTime = DateTime.Now.ToUniversalTime();
@@ -91,6 +91,8 @@ namespace CBA.APIs
                 log.image = face.image;
                 log.note = note;
                 log.time = DateTime.Now.ToUniversalTime();
+
+                context.logs!.Add(log);
 
                 int rows = await context.SaveChangesAsync();
                 if (rows > 0)
@@ -186,7 +188,7 @@ namespace CBA.APIs
                     return new List<ItemLog>();
                 }
 
-                List<SqlLogPerson>? logs = context.logs!.Include(s => s.person).Where(s => s.person!.ID == m_person.ID).OrderByDescending(s => s.time).ToList();
+                List<SqlLogPerson>? logs = context.logs!.Include(s => s.person).Where(s => s.person!.ID == m_person.ID).Include(s => s.person).Include(s => s.device).OrderByDescending(s => s.time).ToList();
                 if(logs.Count > 0)
                 {
                     foreach(SqlLogPerson log in logs)
