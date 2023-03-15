@@ -230,7 +230,7 @@ namespace GIS.Controllers
 
         public class HttpItemFace
         {
-           
+
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
             public string device { get; set; } = "";
@@ -242,11 +242,11 @@ namespace GIS.Controllers
         public async Task<IActionResult> CreateFaceAsync([FromHeader] string token,  HttpItemFace face)
         {
 
-            long id = Program.api_user.checkUser(token);
+            long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
                 byte [] array = System.Text.Encoding.UTF8.GetBytes(face.image);
-                Console.WriteLine(array.ToString());
+                //Console.WriteLine(array.ToString());
                 bool flag = await Program.api_face.createFace(face.age, face.gender, array,face.device, face.codeSystem);
                 if (flag)
                 {

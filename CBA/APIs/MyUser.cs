@@ -118,6 +118,23 @@ namespace CBA.APIs
             }
         }
 
+        public long checkSys(string token)
+        {
+            using (DataContext context = new DataContext())
+            {
+                SqlUser? user = context.users!.Where(s => s.isdeleted == false && s.token.CompareTo(token) == 0).Include(s => s.role).FirstOrDefault();
+                if (user == null)
+                {
+                    return -1;
+                }
+                if (user.role!.code.CompareTo("system") != 0)
+                {
+                    return -1;
+                }
+                return 0;
+            }
+        }
+
 
         public class InfoUserSystem
         {
