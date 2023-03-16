@@ -136,45 +136,45 @@ namespace CBA.APIs
                         {
                             foreach (SqlLogPerson log in logs)
                             {
-                                Console.WriteLine(log);
-
-                                if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
+                               // Console.WriteLine(log.person.ID);
+                               /* if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
                                 {
-                                    log.note = String.Format("Person arrived : {0}", person_S2.code);
+                                    log.note = String.Format("New person created :{0}", person_S2.code);
                                 }
                                 else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
                                 {
                                     log.note = String.Format("Person arrived : {0} :", person_S2.code);
-                                }
+                                }*/
                                 log.person = person_S2;
-                                Console.WriteLine(log);
-                            }
-                            foreach (SqlFace item in person_S1.faces)
-                            {
-                                person_S2.faces.Add(item);
-                            }
-                        }
-                        else
-                        {
-                            foreach (SqlLogPerson log in logs)
-                            {
-
-                                if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
-                                {
-                                    log.note = String.Format("New Person created : {0}", person_S2.code);
-                                }
-                                else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
-                                {
-                                    log.note = String.Format("Person arrived : {0} :", person_S2.code);
-                                }
-                                log.person = person_S2;
+                                //Console.WriteLine(log.person.ID);
                             }
                             foreach (SqlFace item in person_S2.faces)
                             {
                                 person_S1.faces.Add(item);
                             }
-                            person_S2.faces = new List<SqlFace>();
+                            //person_S2.faces = new List<SqlFace>();
                             person_S2.faces = person_S1.faces;
+                        }
+                        else
+                        {
+                            foreach (SqlLogPerson log in logs)
+                            {
+                                Console.WriteLine(log.person.ID);
+                                /* if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
+                                 {
+                                     log.note = String.Format("New Person created : {0}", person_S2.code);
+                                 }
+                                 else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
+                                 {
+                                     log.note = String.Format("Person arrived : {0} :", person_S2.code);
+                                 }*/
+                                log.person = person_S2;
+                                Console.WriteLine(log.person.ID);
+                            }
+                            foreach (SqlFace item in person_S1.faces)
+                            {
+                                person_S2.faces.Add(item);
+                            }
                         }
                         
                     }

@@ -156,7 +156,7 @@ namespace GIS.Controllers
         }
 
         [HttpPut]
-        [Route("{code}/cleanPerson")]
+        [Route("{group}/cleanPerson")]
         public async Task<IActionResult> RemoveUserAsync([FromHeader] string token, string person, string group)
         {
             long id = Program.api_user.checkUser(token);

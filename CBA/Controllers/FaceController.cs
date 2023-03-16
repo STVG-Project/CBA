@@ -61,10 +61,10 @@ namespace CBA.Controllers
             long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {
-                string tmp = await Program.api_face.setConvertFace(sys1, sys2);
-                if (!string.IsNullOrEmpty(tmp))
+                bool flag = await Program.api_face.setConvertFace(sys1, sys2);
+                if (flag)
                 {
-                    return Ok(tmp);
+                    return Ok(flag);
                 }
                 else
                 {
