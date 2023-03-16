@@ -1,5 +1,6 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Text;
 
 namespace CBA.APIs
@@ -107,6 +108,112 @@ namespace CBA.APIs
             }
         }
 
+        public async Task<bool> setConvertFace(string s1, string s2)
+        {
+            if(string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2))
+            {
+                return false;
+            }    
+            using (DataContext context = new DataContext())
+            {
+                SqlPerson? person_S1 = context.persons!.Where(s => s.codeSystem.CompareTo(s1) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
+                if(person_S1 == null)
+                {
+                    return false;
+                }
+
+                SqlPerson? person_S2 = context.persons!.Where(s => s.codeSystem.CompareTo(s2) == 0).Include(s => s.faces).FirstOrDefault();
+                if (person_S2 == null)
+                {
+                    return false;
+                }
+                try
+                {
+                    List<SqlLogPerson> logs = context.logs!.Where(s => s.person!.ID == person_S1.ID).ToList();
+                    if (logs.Count > 0)
+                    {
+                        if (DateTime.Compare(person_S1.faces![0].createdTime, person_S2.faces![0].createdTime) < 0)
+                        {
+                            foreach (SqlLogPerson log in logs)
+                            {
+                                Console.WriteLine(log);
+
+                                if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
+                                {
+                                    log.note = String.Format("Person arrived : {0}", person_S2.code);
+                                }
+                                else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
+                                {
+                                    log.note = String.Format("Person arrived : {0} :", person_S2.code);
+                                }
+                                log.person = person_S2;
+                                Console.WriteLine(log);
+                            }
+                            foreach (SqlFace item in person_S1.faces)
+                            {
+                                person_S2.faces.Add(item);
+                            }
+                        }
+                        else
+                        {
+                            foreach (SqlLogPerson log in logs)
+                            {
+
+                                if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
+                                {
+                                    log.note = String.Format("New Person created : {0}", person_S2.code);
+                                }
+                                else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
+                                {
+                                    log.note = String.Format("Person arrived : {0} :", person_S2.code);
+                                }
+                                log.person = person_S2;
+                            }
+                            foreach (SqlFace item in person_S2.faces)
+                            {
+                                person_S1.faces.Add(item);
+                            }
+                            person_S2.faces = new List<SqlFace>();
+                            person_S2.faces = person_S1.faces;
+                        }
+                        
+                    }
+                    
+                    if(person_S1.group != null)
+                    {
+                        bool flag = await Program.api_group.cleanPersonAsync(person_S1.code, person_S1.group.code);
+                        if(flag)
+                        {
+                            context.persons!.Remove(person_S1);
+                        }
+                        else
+                        {
+                            Console.Write("Clean Group Fail");
+                            return false;
+                        }    
+                    }    
+                    else
+                    {
+                        context.persons!.Remove(person_S1);
+                    }
+
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }    
+                catch(Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                    return false;
+                }
+            }    
+        }
        
 
         public class ItemDeviceForFace

@@ -54,6 +54,30 @@ namespace CBA.Controllers
             }
         }
 
+        [HttpPut]
+        [Route("setConvertPerson")]
+        public async Task<IActionResult> setConvertPerson([FromHeader] string token, string sys1, string sys2)
+        {
+            long id = Program.api_user.checkSys(token);
+            if (id >= 0)
+            {
+                string tmp = await Program.api_face.setConvertFace(sys1, sys2);
+                if (!string.IsNullOrEmpty(tmp))
+                {
+                    return Ok(tmp);
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
         [HttpGet]
         [Route("getHistoryFacePerson")]
         public IActionResult ListPerson(string person)

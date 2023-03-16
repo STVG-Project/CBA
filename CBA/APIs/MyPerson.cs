@@ -48,8 +48,7 @@ namespace CBA.APIs
         public class ItemFaceForPerson
         {
             public string image { get; set; } = "";
-            public string createdTime { get; set; } = "";
-           // public ItemDeviceForFace device { get; set; } = new ItemDeviceForFace();
+            public string time { get; set; } = "";
         }
 
         public class ItemPerson
@@ -59,7 +58,8 @@ namespace CBA.APIs
             public string name { get; set; } = "";
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
-            public ItemGroupForPerson? group { get; set; } = null;
+            public string image { get; set; } = "";
+            public ItemGroupForPerson group { get; set; } = new ItemGroupForPerson();
             public List<ItemFaceForPerson> faces { get; set; } = new List<ItemFaceForPerson>();
             public string createdTime { get; set; } = "";
             public string lastestTime { get; set; } = "";
@@ -71,7 +71,7 @@ namespace CBA.APIs
             using (DataContext context = new DataContext())
             {
                 List<ItemPerson> list = new List<ItemPerson>();
-                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false).Include(s => s.faces!).ThenInclude(s => s.device).Include(s => s.group).Include(s => s.faces).ToList();
+                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false).Include(s => s.faces!).ThenInclude(s => s.device).Include(s => s.group).Include(s => s.faces).OrderByDescending(s => s.createdTime).ToList();
                 if (persons.Count > 0)
                 {
                     foreach (SqlPerson person in persons)
@@ -91,21 +91,22 @@ namespace CBA.APIs
 
                         if (person.faces != null)
                         {
-                            foreach (SqlFace tmp in person.faces)
+                            List<SqlFace>? tmpFace = person.faces!.OrderByDescending(s => s.createdTime).ToList();
+                            if(tmpFace.Count > 0)
                             {
-                                ItemFaceForPerson itemFace = new ItemFaceForPerson();
+                                item.image = tmpFace[0].image;
 
-                                itemFace.image = tmp.image;
-                                itemFace.createdTime = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                               /* if (tmp.device != null)
+                                foreach (SqlFace tmp in person.faces)
                                 {
-                                    itemFace.device.code = tmp.device.code;
-                                    itemFace.device.name = tmp.device.name;
-                                    itemFace.device.des = tmp.device.des;
-                                }*/
-                                item.faces.Add(itemFace);
+                                    ItemFaceForPerson itemFace = new ItemFaceForPerson();
 
-                            }
+                                    itemFace.image = tmp.image;
+                                    itemFace.time = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                                    item.faces.Add(itemFace);
+
+                                }
+                            }    
+                            
                         }
 
                         item.createdTime = person.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
