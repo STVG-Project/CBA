@@ -16,6 +16,7 @@ public class Program
     public static MyGroup api_group = new MyGroup();
     public static MyPerson api_person = new MyPerson();
     public static MyFace api_face = new MyFace();
+    public static MyReport api_report = new MyReport();
 
     public static async Task Main(string[] args)
     {

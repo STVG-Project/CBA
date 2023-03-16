@@ -14,7 +14,7 @@ namespace CBA.APIs
             int totalAge = 0;
             //string codefile = Encoding.Unicode.GetString(image);
 
-            if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile)|| string.IsNullOrEmpty(device))
+            if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile) || string.IsNullOrEmpty(device))
             {
                 return false;
             }
@@ -31,7 +31,6 @@ namespace CBA.APIs
                 face.ID = DateTime.Now.Ticks;
                 face.age = age;
                 face.gender = gender;
-                string note = "";
                 face.person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
                 if (face.person == null)
                 {
@@ -46,10 +45,9 @@ namespace CBA.APIs
                     tmp.isdeleted = false;
 
                     face.person = tmp;
-                    note = string.Format("New person created :{0} ", tmp.code);
                     context.persons!.Add(tmp);
 
-                    
+
                 }
                 else
                 {
@@ -60,12 +58,11 @@ namespace CBA.APIs
                     face.person.age = (totalAge + age) / (face.person.faces.Count + 1);
                     face.person.lastestTime = DateTime.Now.ToUniversalTime();
 
-                    note = string.Format("Person arrived : {0}", face.person.code );
                 }
 
                 face.createdTime = DateTime.Now.ToUniversalTime();
                 face.image = codefile;
-                
+
                 face.device = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
                 if (face.device == null)
                 {
@@ -79,7 +76,7 @@ namespace CBA.APIs
                     face.device = tmp_device;
                     context.devices!.Add(tmp_device);
 
-                }    
+                }
                 face.isdeleted = false;
 
 
@@ -90,7 +87,7 @@ namespace CBA.APIs
                 log.person = face.person;
                 log.device = face.device;
                 log.image = face.image;
-                log.note = note;
+                log.note = string.Format("Person arrived : {0}", face.person.code);
                 log.time = DateTime.Now.ToUniversalTime();
 
                 context.logs!.Add(log);
@@ -110,92 +107,78 @@ namespace CBA.APIs
 
         public async Task<bool> setConvertFace(string s1, string s2)
         {
-            if(string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2))
+            if (string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2))
             {
                 return false;
-            }    
+            }
             using (DataContext context = new DataContext())
             {
-                SqlPerson? person_S1 = context.persons!.Where(s => s.codeSystem.CompareTo(s1) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
-                if(person_S1 == null)
-                {
-                    return false;
-                }
-
-                SqlPerson? person_S2 = context.persons!.Where(s => s.codeSystem.CompareTo(s2) == 0).Include(s => s.faces).FirstOrDefault();
-                if (person_S2 == null)
-                {
-                    return false;
-                }
                 try
                 {
+                    SqlPerson? person_S1 = context.persons!.Where(s => s.codeSystem.CompareTo(s1) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
+                    if (person_S1 == null)
+                    {
+                        return false;
+                    }
+
+                    SqlPerson? person_S2 = context.persons!.Where(s => s.codeSystem.CompareTo(s2) == 0).Include(s => s.faces).FirstOrDefault();
+                    if (person_S2 == null)
+                    {
+                        return false;
+                    }
+
+
+                    if (DateTime.Compare(person_S1.faces![0].createdTime, person_S2.faces![0].createdTime) < 0)
+                    {
+
+                        foreach (SqlFace item in person_S2.faces)
+                        {
+                            person_S1.faces.Add(item);
+                        }
+                        person_S2.faces = new List<SqlFace>();
+                        person_S2.faces = person_S1.faces;
+                    }
+                    else
+                    {
+
+                        foreach (SqlFace item in person_S1.faces)
+                        {
+                            person_S2.faces.Add(item);
+                        }
+                    }
+
+
                     List<SqlLogPerson> logs = context.logs!.Where(s => s.person!.ID == person_S1.ID).ToList();
                     if (logs.Count > 0)
                     {
-                        if (DateTime.Compare(person_S1.faces![0].createdTime, person_S2.faces![0].createdTime) < 0)
+                        foreach (SqlLogPerson log in logs)
                         {
-                            foreach (SqlLogPerson log in logs)
+                            if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
                             {
-                               // Console.WriteLine(log.person.ID);
-                               /* if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
-                                {
-                                    log.note = String.Format("New person created :{0}", person_S2.code);
-                                }
-                                else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
-                                {
-                                    log.note = String.Format("Person arrived : {0} :", person_S2.code);
-                                }*/
-                                log.person = person_S2;
-                                //Console.WriteLine(log.person.ID);
+                                log.note = String.Format("Person arrived : {0} :", person_S2.code);
                             }
-                            foreach (SqlFace item in person_S2.faces)
-                            {
-                                person_S1.faces.Add(item);
-                            }
-                            //person_S2.faces = new List<SqlFace>();
-                            person_S2.faces = person_S1.faces;
+                            log.person = person_S2;
                         }
-                        else
-                        {
-                            foreach (SqlLogPerson log in logs)
-                            {
-                                Console.WriteLine(log.person.ID);
-                                /* if (log.note.CompareTo(String.Format("New person created :{0}", person_S1.code)) == 0)
-                                 {
-                                     log.note = String.Format("New Person created : {0}", person_S2.code);
-                                 }
-                                 else if (log.note.CompareTo(String.Format("Person arrived : {0}", person_S1.code)) == 0)
-                                 {
-                                     log.note = String.Format("Person arrived : {0} :", person_S2.code);
-                                 }*/
-                                log.person = person_S2;
-                                Console.WriteLine(log.person.ID);
-                            }
-                            foreach (SqlFace item in person_S1.faces)
-                            {
-                                person_S2.faces.Add(item);
-                            }
-                        }
-                        
                     }
-                    
-                    if(person_S1.group != null)
+
+                    if (person_S1.group != null)
                     {
-                        bool flag = await Program.api_group.cleanPersonAsync(person_S1.code, person_S1.group.code);
-                        if(flag)
+                        if (person_S2.group == null)
                         {
-                            context.persons!.Remove(person_S1);
+                            bool flag = await Program.api_group.SetPersonAsync(person_S2.code, person_S1.group.code);
+                            if (flag)
+                            {
+                                Console.WriteLine("Done !!!");
+                            }
+                            else
+                            {
+                                Console.Write("Clean Group Fail");
+                                return false;
+                            }
                         }
-                        else
-                        {
-                            Console.Write("Clean Group Fail");
-                            return false;
-                        }    
-                    }    
-                    else
-                    {
-                        context.persons!.Remove(person_S1);
+                       
                     }
+                    person_S1.isdeleted = true;                    
 
                     int rows = await context.SaveChangesAsync();
                     if (rows > 0)
@@ -206,68 +189,15 @@ namespace CBA.APIs
                     {
                         return false;
                     }
-                }    
-                catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Log.Error(ex.ToString());
                     return false;
                 }
-            }    
-        }
-       
-
-        public class ItemDeviceForFace
-        {
-            public string code { get; set; } = "";
-            public string name { get; set; } = "";
-            public string des { get; set; } = "";
-        }
-
-        /* public class ItemPersonForFace
-         {
-             public string code { get; set; } = "";
-             public string name { get; set; } = "";
-             public string des { get; set; } = "";
-         }*/
-
-        public class ItemFace
-        {
-            public string ID { get; set; } = "";
-            public int age { get; set; } = 0;
-            public string gender { get; set; } = "";
-            public string image { get; set; } = "";
-            public ItemDeviceForFace device { get; set; } = new ItemDeviceForFace();
-        }
-
-        public List<ItemFace> getListFace()
-        {
-            using (DataContext context = new DataContext())
-            {
-                List<ItemFace> list = new List<ItemFace>();
-                List<SqlFace> faces = context.faces!.Where(s => s.isdeleted == false).Include(s => s.device).ToList();
-                if (faces.Count > 0)
-                {
-                    foreach (SqlFace face in faces)
-                    {
-                        ItemFace item = new ItemFace();
-                        item.ID = face.ID.ToString();
-                        item.age = face.age;
-                        item.gender = face.gender;
-                        item.image = face.image;
-
-                        if (face.device != null)
-                        {
-                            item.device.code = face.device.code;
-                            item.device.name = face.device.name;
-                            item.device.des = face.device.des;
-                        }
-
-                        list.Add(item);
-                    }
-                }
-                return list;
             }
         }
+
 
         public class ItemLog
         {
@@ -278,9 +208,9 @@ namespace CBA.APIs
             public string time { get; set; } = "";
         }
 
-        public List<ItemLog> getListHistoryForPerson (string code)
+        public List<ItemLog> getListHistoryForPerson(string code)
         {
-            if(string.IsNullOrEmpty(code))
+            if (string.IsNullOrEmpty(code))
             {
                 return new List<ItemLog>();
             }
@@ -290,15 +220,15 @@ namespace CBA.APIs
             using (DataContext context = new DataContext())
             {
                 SqlPerson? m_person = context.persons!.Where(s => s.code.CompareTo(code) == 0).FirstOrDefault();
-                if(m_person == null)
+                if (m_person == null)
                 {
                     return new List<ItemLog>();
                 }
 
                 List<SqlLogPerson>? logs = context.logs!.Include(s => s.person).Where(s => s.person!.ID == m_person.ID).Include(s => s.person).Include(s => s.device).OrderByDescending(s => s.time).ToList();
-                if(logs.Count > 0)
+                if (logs.Count > 0)
                 {
-                    foreach(SqlLogPerson log in logs)
+                    foreach (SqlLogPerson log in logs)
                     {
                         ItemLog tmp = new ItemLog();
                         tmp.person = log.person!.code;
@@ -308,7 +238,7 @@ namespace CBA.APIs
                         tmp.time = log.time.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
 
                         list.Add(tmp);
-                    }    
+                    }
                 }
                 return list;
             }

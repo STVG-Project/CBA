@@ -72,7 +72,7 @@ namespace CBA.APIs
                     item.username = "backend";
                     item.password = "123456";
                     item.role = context.roles!.Where(s => s.isdeleted == false && s.code.CompareTo("system") == 0).FirstOrDefault();
-                    item.token = createToken();
+                    item.token = "0h6EkiIG6bqZvJmmOK4W5Lf7MufOWmPO3pimH2vsaIcZMod4RLxZF9Kxy9bMO33H";
                     item.displayName = "stvg";
                     item.des = "stvg";
                     item.phoneNumber = "123456789";
@@ -232,70 +232,47 @@ namespace CBA.APIs
             }
             using (DataContext context = new DataContext())
             {
-                SqlUser? own_user = context.users!.Where(s => s.isdeleted == false && s.token.CompareTo(token) == 0).Include(s => s.role).FirstOrDefault();
-                if (own_user == null)
+                SqlUser? m_user = context.users!.Where(s => s.user.CompareTo(user) == 0 && s.isdeleted == false).Include(s => s.role).FirstOrDefault();
+                if (m_user == null)
                 {
                     return false;
                 }
-                if (own_user.role == null)
+
+                if (!string.IsNullOrEmpty(password))
                 {
-                    return false;
+                    m_user.password = password;
+                    if(m_user.role!.code.CompareTo("system") == 0)
+                    {
+                        m_user.token = "0h6EkiIG6bqZvJmmOK4W5Lf7MufOWmPO3pimH2vsaIcZMod4RLxZF9Kxy9bMO33H";
+                    }
+                    else
+                    {
+                        m_user.token = createToken();
+                    }
+                    
                 }
-                if (own_user.role!.code.CompareTo("admin") != 0)
+
+
+                if (!string.IsNullOrEmpty(displayName))
                 {
-                    if (user.CompareTo(own_user.user) != 0)
-                    {
-                        return false;
-                    }
-                    own_user.des = des;
-
-                    if (!string.IsNullOrEmpty(password))
-                    {
-                        own_user.password = password;
-                        own_user.token = createToken();
-                    }
-                    if (!string.IsNullOrEmpty(displayName))
-                    {
-                        own_user.displayName = displayName;
-                    }
-                    if (!string.IsNullOrEmpty(phoneNumber))
-                    {
-                        own_user.phoneNumber = phoneNumber;
-                    }
-
+                    m_user.displayName = displayName;
                 }
-                else
+                if (!string.IsNullOrEmpty(phoneNumber))
                 {
-                    SqlUser? tmp = context.users!.Where(s => s.user.CompareTo(user) == 0 && s.isdeleted == false).FirstOrDefault();
-                    if (tmp == null)
-                    {
-                        return false;
-                    }
-                    tmp.des = des;
+                    m_user.phoneNumber = phoneNumber;
+                }
 
+                if (!string.IsNullOrEmpty(des))
+                {
+                    m_user.des = des;
+                }
 
+                if (!string.IsNullOrEmpty(role))
+                {
                     SqlRole? m_role = context.roles!.Where(s => s.isdeleted == false && s.code.CompareTo(role) == 0).FirstOrDefault();
                     if (m_role != null)
                     {
-                        tmp.role = m_role;
-                    }
-                    if (!string.IsNullOrEmpty(password))
-                    {
-                        tmp.password = password;
-                        tmp.token = createToken();
-                    }
-                    if (!string.IsNullOrEmpty(password))
-                    {
-                        own_user.password = password;
-                        own_user.token = createToken();
-                    }
-                    if (!string.IsNullOrEmpty(displayName))
-                    {
-                        own_user.displayName = displayName;
-                    }
-                    if (!string.IsNullOrEmpty(phoneNumber))
-                    {
-                        own_user.phoneNumber = phoneNumber;
+                        m_user.role = m_role;
                     }
                 }
 

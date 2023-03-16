@@ -44,17 +44,25 @@ namespace CBA.APIs
             public string name { get; set; } = "";
             public string des { get; set; } = "";
         }
-
+        public class ItemDeviceForFace
+        {
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+        }
         public class ItemFaceForPerson
         {
             public string image { get; set; } = "";
             public string time { get; set; } = "";
+            public string device { get; set; } = "";
+           
+
         }
 
         public class ItemPerson
         {
             public string code { get; set; } = "";
-            public string codeSytem { get; set; } = "";
+            public string codeSystem { get; set; } = "";
             public string name { get; set; } = "";
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
@@ -71,14 +79,14 @@ namespace CBA.APIs
             using (DataContext context = new DataContext())
             {
                 List<ItemPerson> list = new List<ItemPerson>();
-                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false).Include(s => s.faces!).ThenInclude(s => s.device).Include(s => s.group).Include(s => s.faces).OrderByDescending(s => s.createdTime).ToList();
+                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false).Include(s => s.faces!).ThenInclude(s => s.device).Include(s => s.group).Include(s => s.faces!).ThenInclude(s => s.device).OrderByDescending(s => s.createdTime).ToList();
                 if (persons.Count > 0)
                 {
                     foreach (SqlPerson person in persons)
                     {
                         ItemPerson item = new ItemPerson();
                         item.code = person.code;
-                        item.codeSytem = person.codeSystem;
+                        item.codeSystem = person.codeSystem;
                         item.name = person.name;
                         item.gender = person.gender;
                         item.age = person.age;
@@ -91,17 +99,23 @@ namespace CBA.APIs
 
                         if (person.faces != null)
                         {
-                            List<SqlFace>? tmpFace = person.faces!.OrderByDescending(s => s.createdTime).ToList();
+                            List<SqlFace>? tmpFace = person.faces!.OrderBy(s => s.createdTime).ToList();
                             if(tmpFace.Count > 0)
                             {
                                 item.image = tmpFace[0].image;
 
-                                foreach (SqlFace tmp in person.faces)
+                                foreach (SqlFace tmp in tmpFace)
                                 {
                                     ItemFaceForPerson itemFace = new ItemFaceForPerson();
 
                                     itemFace.image = tmp.image;
                                     itemFace.time = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+
+                                    if(tmp.device != null)
+                                    {
+                                        itemFace.device = tmp.device.code;
+                                    }
+
                                     item.faces.Add(itemFace);
 
                                 }

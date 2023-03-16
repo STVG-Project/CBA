@@ -149,7 +149,7 @@ namespace CBA.APIs
                     return false;
                 }
 
-                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(person) == 0).FirstOrDefault();
+                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.code.CompareTo(person) == 0).FirstOrDefault();
 
                 if (m_person == null)
                 {
@@ -186,7 +186,7 @@ namespace CBA.APIs
                     return false;
                 }
 
-                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(person) == 0).FirstOrDefault();
+                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.code.CompareTo(person) == 0).FirstOrDefault();
 
                 if (m_person == null)
                 {
@@ -248,12 +248,18 @@ namespace CBA.APIs
                 return list;
             }
         }
-
+        public class ItemDeviceForFace
+        {
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+        }
 
         public class ItemFaceForPerson
         {
             public string image { get; set; } = "";
-            public string createdTime { get; set; } = "";
+            public string time { get; set; } = "";
+            public string device { get; set; } = "";
            
         }
 
@@ -263,6 +269,7 @@ namespace CBA.APIs
             public string name { get; set; } = "";
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
+            public string image { get; set; } = "";
             public List<ItemFaceForPerson> faces { get; set; } = new List<ItemFaceForPerson>();
         }
 
@@ -271,7 +278,7 @@ namespace CBA.APIs
             using (DataContext context = new DataContext())
             {
                 List<ItemPersonForGroup> list = new List<ItemPersonForGroup>();
-                List<SqlGroup> groups = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(code) == 0).Include(s => s.persons!).ThenInclude(s => s.faces).ToList();
+                List<SqlGroup> groups = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(code) == 0).Include(s => s.persons!).ThenInclude(s => s.faces!).ThenInclude(s => s.device).ToList();
                 if (groups.Count > 0)
                 {
                     foreach (SqlGroup group in groups)
@@ -288,12 +295,19 @@ namespace CBA.APIs
                                 tmp.age = item.age;
                                 if (item.faces != null)
                                 {
-                                    foreach (SqlFace face in item.faces)
+                                    List<SqlFace>? tmpFace = item.faces!.OrderBy(s => s.createdTime).ToList();
+                                    tmp.image = tmpFace[0].image;
+                                    foreach (SqlFace face in tmpFace)
                                     {
                                         ItemFaceForPerson itemFace = new ItemFaceForPerson();
 
-                                        itemFace.createdTime = face.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                                        itemFace.time = face.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
                                         itemFace.image = face.image;
+
+                                        if (face.device != null)
+                                        {
+                                            itemFace.device = face.device.code;
+                                        }
 
                                         tmp.faces.Add(itemFace);
                                     }

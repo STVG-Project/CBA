@@ -225,13 +225,13 @@ namespace GIS.Controllers
 
         }
 
-        [HttpGet]
+       /* [HttpGet]
         [Route("getListFace")]
         public IActionResult ListFace()
         {
             return Ok(Program.api_face.getListFace());
 
-        }
+        }*/
 
     }
 }

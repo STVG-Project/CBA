@@ -12,5 +12,21 @@ namespace CBA.Controllers
         {
             _logger = logger;
         }
+
+        [HttpGet]
+        [Route("showPlotCount")]
+        public IActionResult ListDevice([FromHeader] string token, string begin, string end)
+        {
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
+            {
+                return Ok(Program.api_report.showPlotCount(begin, end));
+            }
+            else
+            {
+                return Unauthorized();
+            }
+
+        }
     }
 }
