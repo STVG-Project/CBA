@@ -209,5 +209,18 @@ namespace CBA.APIs
                 return itemCounts;
             }
         }
+
+        public class ItemPlotPerson
+        {
+            public string date { get; set; } = "";
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+
+        /*public class ItemCountPerson
+        {
+            public List<string> groups { get; set; } = new List<string>();
+            public List<ItemPlotPerson>
+
+        }*/
     }
 }
