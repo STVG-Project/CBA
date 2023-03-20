@@ -94,7 +94,7 @@ namespace CBA.APIs
                 log.note = string.Format("Person arrived : {0}", face.person.code);
                 log.time = DateTime.Now.ToUniversalTime();
 
-                context.logs!.Add(log);
+                    context.logs!.Add(log);
 
                 await context.SaveChangesAsync();
 
