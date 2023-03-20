@@ -19,11 +19,6 @@ namespace CBA.APIs
             }
             using (DataContext context = new DataContext())
             {
-                /*SqlFace? face = context.faces!.Where(s => s.isdeleted == false).Include(s => s.person).FirstOrDefault();
-                if (face != null)
-                {
-                    return false;
-                }*/
 
                 SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
                 if(sqlPerson == null)
@@ -99,18 +94,6 @@ namespace CBA.APIs
                 await context.SaveChangesAsync();
 
                 return true;
-                /*
-                int rows = await context.SaveChangesAsync();
-                if (rows > 0)
-                {
-                    return true;
-
-                }
-                else
-                {
-                    return false;
-                }
-                */
             }
         }
 

@@ -59,5 +59,53 @@ namespace CBA.Controllers
 
             return Ok(Program.api_report.getCountDate(time_begin, time_end));
         }
+
+
+        [HttpGet]
+        [Route("showPlotPerson")]
+        public IActionResult showPlotPerson(string time)
+        {
+
+            DateTime time_input = DateTime.MinValue;
+            try
+            {
+                time_input = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_input = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getPersonsHours(time_input));
+
+        }
+
+        [HttpGet]
+        [Route("showPlotCountPersonsForDate")]
+        public IActionResult showPlotCountPersonsForDate(string begin, string end)
+        {
+
+            DateTime time_begin = DateTime.MinValue;
+            try
+            {
+                time_begin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_begin = DateTime.MinValue;
+            }
+
+            DateTime time_end = DateTime.MaxValue;
+            try
+            {
+                time_end = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_end = DateTime.MaxValue;
+            }
+
+            return Ok(Program.api_report.getCountDate(time_begin, time_end));
+        }
     }
 }
