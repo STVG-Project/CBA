@@ -81,7 +81,7 @@ namespace CBA.APIs
                             DateTime hourBegin = start.AddHours(i).ToUniversalTime();
                             DateTime hourEnd = hourBegin.AddHours(1);
                             time = hourEnd;
-                            Console.WriteLine(string.Format("Time start : {0} ---- Time End : {1}",hourBegin, hourEnd));
+                           // Console.WriteLine(string.Format("Time start : {0} ---- Time End : {1}",hourBegin, hourEnd));
                             
                             foreach (string group in code_groups)
                             {
@@ -95,9 +95,9 @@ namespace CBA.APIs
                                         {
                                             if (DateTime.Compare(hourBegin, m_log.time) <= 0 && DateTime.Compare(hourEnd, m_log.time) > 0)
                                             {
-                                                //Console.WriteLine(m_log.person!.code);
-                                                //Console.WriteLine(string.Format(" hour : {0} - person : {1} - time : {2} - Group : {3}", item.hour, index, m_log.time, group));
-                                                //Thread.Sleep(1);
+                                               /* Console.WriteLine(m_log.person!.code);
+                                                Console.WriteLine(string.Format(" hour : {0} - person : {1} - time : {2} - Group : {3}", item.hour, index, m_log.time, group));
+                                                Thread.Sleep(1);*/
                                                 index++;
                                             }
                                         }
@@ -118,9 +118,9 @@ namespace CBA.APIs
                                             {
                                                 if (DateTime.Compare(hourBegin, m_log.time) <= 0 && DateTime.Compare(hourEnd, m_log.time) > 0)
                                                 {
-                                                    //Console.WriteLine(m_log.person!.code);
-                                                    //Console.WriteLine(string.Format(" hour : {0} - person : {1} - time : {2} - Group : {3}", item.hour, index, m_log.time, group));
-                                                    //Thread.Sleep(1);
+                                                   /* Console.WriteLine(m_log.person!.code);
+                                                    Console.WriteLine(string.Format(" hour : {0} - person : {1} - time : {2} - Group : {3}", item.hour, index, m_log.time, group));
+                                                    Thread.Sleep(1);*/
                                                     index++;
                                                 }
                                             }
@@ -132,9 +132,7 @@ namespace CBA.APIs
                             }
                             itemCount.data.Add(item);
                             
-                            //Console.WriteLine(i);
-                            //Console.WriteLine("Time up : " + time);
-                            //Thread.Sleep(1);
+                           
                             
                         }
                         for (int i = 0; i < code_groups.Count; i++)
@@ -169,20 +167,43 @@ namespace CBA.APIs
 
             using (DataContext context = new DataContext())
             {
-                List<SqlLogPerson>? logs = context.logs!.Where(s => DateTime.Compare(begin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(end.ToUniversalTime(), s.time) > 0).ToList();
+                DateTime timeEnd = end.AddDays(1);
+                List<SqlLogPerson>? logs = context.logs!.Where(s => DateTime.Compare(begin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(timeEnd.ToUniversalTime(), s.time) >= 0).ToList();
                 //.Where(s => DateTime.Compare(time_begin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(time_end.ToUniversalTime(), s.time) >= 0)
                 if (logs.Count > 0)
                 {
+                    //Console.WriteLine(string.Format("Note: {0} --- Time: {1}", logs[logs.Count - 1].ID, logs[logs.Count - 1].time));
+
+                    //Console.WriteLine(string.Format("Note: {0} --- Time: {1}", logs[logs.Count - 1].ID, logs[logs.Count - 1].time.ToLocalTime()));
+                    List<string> dates = new List<string>();
                     foreach (SqlLogPerson log in logs)
                     {
                         DateTime time = log.time.ToLocalTime();
-                        Console.WriteLine(time.Date);
-                        ItemCountsPlot? tmp = itemCounts.Where(s => s.date.CompareTo(time.Date.ToString("dd-MM-yyyy")) == 0).FirstOrDefault();
+
+                        string? tmp = dates.Where(s => s.CompareTo(time.Date.ToString("dd-MM-yyyy")) == 0).FirstOrDefault();
                         if (tmp == null)
                         {
-                            ItemCountsPlot item = getCountHour(time.Date);
-                            itemCounts.Add(item);
-                        }    
+                            //Console.WriteLine(time.Date.ToString("dd-MM-yyyy"));
+                            dates.Add(time.Date.ToString("dd-MM-yyyy"));
+                            
+                        }
+
+                       
+                    }
+                    foreach (string temp in dates)
+                    {
+                        DateTime time_input = DateTime.MinValue;
+                        try
+                        {
+                            time_input = DateTime.ParseExact(temp, "dd-MM-yyyy", null);
+                        }
+                        catch (Exception e)
+                        {
+                            time_input = DateTime.MinValue;
+                        }
+                       // Console.WriteLine(string.Format("Time test : {0}", time_input));
+                        ItemCountsPlot item = getCountHour(time_input);
+                        itemCounts.Add(item);
                     }
                 }
                 return itemCounts;
