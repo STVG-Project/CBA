@@ -219,9 +219,9 @@ namespace GIS.Controllers
 
         [HttpGet]
         [Route("getListPerson")]
-        public IActionResult ListAllPerson()
+        public IActionResult ListAllPerson(int page, int numPerson)
         {
-            return Ok(Program.api_person.getListPerson());
+            return Ok(Program.api_person.getListPerson(page, numPerson));
 
         }
 

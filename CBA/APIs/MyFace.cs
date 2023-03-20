@@ -27,79 +27,88 @@ namespace CBA.APIs
                 }*/
 
 
-                SqlFace? face = new SqlFace();
-                face.ID = DateTime.Now.Ticks;
-                face.age = age;
-                face.gender = gender;
-                face.person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
-                if (face.person == null)
+               try
                 {
-                    SqlPerson tmp = new SqlPerson();
-                    tmp.ID = DateTime.Now.Ticks;
-                    tmp.codeSystem = codeSystem;
-                    tmp.code = "identify_" + codeSystem;
-                    tmp.gender = gender;
-                    tmp.age = face.age;
-                    tmp.createdTime = DateTime.Now.ToUniversalTime();
-                    tmp.lastestTime = DateTime.Now.ToUniversalTime();
-                    tmp.isdeleted = false;
-
-                    face.person = tmp;
-                    context.persons!.Add(tmp);
-
-
-                }
-                else
-                {
-                    foreach (SqlFace item in face.person.faces!)
+                    SqlFace? face = new SqlFace();
+                    face.ID = DateTime.Now.Ticks;
+                    face.age = age;
+                    face.gender = gender;
+                    face.person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
+                    if (face.person == null)
                     {
-                        totalAge += item.age;
+                        SqlPerson tmp = new SqlPerson();
+                        tmp.ID = DateTime.Now.Ticks;
+                        tmp.codeSystem = codeSystem;
+                        tmp.code = "identify_" + codeSystem;
+                        tmp.gender = gender;
+                        tmp.age = face.age;
+                        tmp.createdTime = DateTime.Now.ToUniversalTime();
+                        tmp.lastestTime = DateTime.Now.ToUniversalTime();
+                        tmp.isdeleted = false;
+
+                        face.person = tmp;
+                        context.persons!.Add(tmp);
+
+
                     }
-                    face.person.age = (totalAge + age) / (face.person.faces.Count + 1);
-                    face.person.lastestTime = DateTime.Now.ToUniversalTime();
+                    else
+                    {
+                        foreach (SqlFace item in face.person.faces!)
+                        {
+                            totalAge += item.age;
+                        }
+                        face.person.age = (totalAge + age) / (face.person.faces.Count + 1);
+                        face.person.lastestTime = DateTime.Now.ToUniversalTime();
 
-                }
+                    }
 
-                face.createdTime = DateTime.Now.ToUniversalTime();
-                face.image = codefile;
+                    face.createdTime = DateTime.Now.ToUniversalTime();
+                    face.image = codefile;
 
-                face.device = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
-                if (face.device == null)
+                    face.device = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
+                    if (face.device == null)
+                    {
+                        SqlDevice tmp_device = new SqlDevice();
+                        tmp_device.ID = DateTime.Now.Ticks;
+                        tmp_device.code = device;
+                        tmp_device.name = "tb_" + device;
+                        tmp_device.des = "tb_" + device;
+                        tmp_device.isdeleted = false;
+
+                        face.device = tmp_device;
+                        context.devices!.Add(tmp_device);
+
+                    }
+                    face.isdeleted = false;
+
+
+                    context.faces!.Add(face);
+
+                    SqlLogPerson log = new SqlLogPerson();
+                    log.ID = DateTime.Now.Ticks;
+                    log.person = face.person;
+                    log.device = face.device;
+                    log.image = face.image;
+                    log.note = string.Format("Person arrived : {0}", face.person.code);
+                    log.time = DateTime.Now.ToUniversalTime();
+
+                    context.logs!.Add(log);
+
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        return true;
+
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                } 
+                
+                catch(Exception ex)
                 {
-                    SqlDevice tmp_device = new SqlDevice();
-                    tmp_device.ID = DateTime.Now.Ticks;
-                    tmp_device.code = device;
-                    tmp_device.name = "tb_" + device;
-                    tmp_device.des = "tb_" + device;
-                    tmp_device.isdeleted = false;
-
-                    face.device = tmp_device;
-                    context.devices!.Add(tmp_device);
-
-                }
-                face.isdeleted = false;
-
-
-                context.faces!.Add(face);
-
-                SqlLogPerson log = new SqlLogPerson();
-                log.ID = DateTime.Now.Ticks;
-                log.person = face.person;
-                log.device = face.device;
-                log.image = face.image;
-                log.note = string.Format("Person arrived : {0}", face.person.code);
-                log.time = DateTime.Now.ToUniversalTime();
-
-                context.logs!.Add(log);
-
-                int rows = await context.SaveChangesAsync();
-                if (rows > 0)
-                {
-                    return true;
-
-                }
-                else
-                {
+                    Log.Error(ex.ToString());
                     return false;
                 }
             }

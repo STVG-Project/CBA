@@ -3,6 +3,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using Serilog;
 using CBA.Models;
 using CBA.APIs;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CBA;
 
@@ -17,7 +18,7 @@ public class Program
     public static MyPerson api_person = new MyPerson();
     public static MyFace api_face = new MyFace();
     public static MyReport api_report = new MyReport();
-
+   
     public static async Task Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
@@ -40,6 +41,7 @@ public class Program
                 option.Limits.MaxRequestBufferSize = null;
             });
             // Add services to the container.
+            //builder.Logging.AddSerilog();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("HTTPSystem", builder =>
@@ -53,16 +55,13 @@ public class Program
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             app.UseSwagger();
             app.UseSwaggerUI();
-
             app.UseDeveloperExceptionPage();
             app.UseMigrationsEndPoint();
-
             using (var scope = app.Services.CreateScope())
             {
                 IServiceProvider services = scope.ServiceProvider;
@@ -83,7 +82,9 @@ public class Program
             await api_user.initAsync();
             await api_group.initAsync();
 
+           
             app.Run();
+            
         }
         catch (Exception ex)
         {
