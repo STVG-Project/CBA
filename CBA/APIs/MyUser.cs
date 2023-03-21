@@ -70,9 +70,9 @@ namespace CBA.APIs
                     item.ID = DateTime.Now.Ticks;
                     item.user = "stvg";
                     item.username = "backend";
-                    item.password = "123456";
+                    item.password = "1234";
                     item.role = context.roles!.Where(s => s.isdeleted == false && s.code.CompareTo("system") == 0).FirstOrDefault();
-                    item.token = "0h6EkiIG6bqZvJmmOK4W5Lf7MufOWmPO3pimH2vsaIcZMod4RLxZF9Kxy9bMO33H";
+                    item.token = "00001111";
                     item.displayName = "stvg";
                     item.des = "stvg";
                     item.phoneNumber = "123456789";

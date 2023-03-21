@@ -57,7 +57,7 @@ namespace CBA.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_report.getCountDate(time_begin, time_end));
+            return Ok(Program.api_report.getCountDates(time_begin, time_end));
         }
 
 
@@ -105,7 +105,7 @@ namespace CBA.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_report.getCountDate(time_begin, time_end));
+            return Ok(Program.api_report.getCountPersonForDate(time_begin, time_end));
         }
     }
 }
