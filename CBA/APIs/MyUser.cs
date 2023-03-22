@@ -238,18 +238,16 @@ namespace CBA.APIs
                     return false;
                 }
 
+                if(m_user.role!.code.CompareTo("system") == 0)
+                {
+                    return false;
+                }
+
                 if (!string.IsNullOrEmpty(password))
                 {
                     m_user.password = password;
-                    if(m_user.role!.code.CompareTo("system") == 0)
-                    {
-                        m_user.token = "0h6EkiIG6bqZvJmmOK4W5Lf7MufOWmPO3pimH2vsaIcZMod4RLxZF9Kxy9bMO33H";
-                    }
-                    else
-                    {
-                        m_user.token = createToken();
-                    }
-                    
+                    m_user.token = createToken();
+
                 }
 
 
@@ -408,20 +406,23 @@ namespace CBA.APIs
                 List<ItemUser> items = new List<ItemUser>();
                 foreach (SqlUser user in users)
                 {
-                    ItemUser item = new ItemUser();
-                    item.user = user.user;
-                    item.username = user.username;
-                    item.des = user.des;
-                    item.displayName = user.displayName;
-                    item.numberPhone = user.phoneNumber;
-                    item.avatar = user.avatar;
-                    if (user.role != null)
+                    if(user.role!.code.CompareTo("system") != 0)
                     {
-                        item.role = user.role.name;
-                    }
+                        ItemUser item = new ItemUser();
+                        item.user = user.user;
+                        item.username = user.username;
+                        item.des = user.des;
+                        item.displayName = user.displayName;
+                        item.numberPhone = user.phoneNumber;
+                        item.avatar = user.avatar;
+                        if (user.role != null)
+                        {
+                            item.role = user.role.name;
+                        }
 
-                   
-                    items.Add(item);
+
+                        items.Add(item);
+                    }
                 }
                 return items;
             }

@@ -62,22 +62,23 @@ namespace CBA.APIs
 
                     //Console.WriteLine(string.Format("Time start : {0} ---- Time Stop : {1}", hourStart.ToLocalTime(), hourStop.ToLocalTime()));
 
-                    List<ItemFaceOfPerson> m_list = new List<ItemFaceOfPerson>();
                     foreach (string group in groups)
                     {
                         int index = 0;
-                        foreach (ItemFaceOfPerson m_log in logs)
+                        List<ItemFaceOfPerson>? gLogs = logs.Where(s => s.group.CompareTo(group) == 0).ToList();
+                        if(gLogs.Count > 0)
                         {
-                            if (m_log.group.CompareTo(group) == 0 && DateTime.Compare(hourStart, m_log.time) <= 0 && DateTime.Compare(hourStop, m_log.time) > 0)
+                            foreach(ItemFaceOfPerson person in gLogs)
                             {
-                                index++;
-                                //Console.WriteLine(m_log.person.code);
-                                //Console.WriteLine(string.Format(" time : {0} - person : {1} - Count : {2} - Group : {3}", m_log.time.ToLocalTime(), m_log.person.code, index, group));
-                                //Thread.Sleep(1);
-
-                            }
+                                if (DateTime.Compare(hourStart, person.time) <= 0 && DateTime.Compare(hourStop, person.time) > 0)
+                                {
+                                    index++;
+                                }
+                            }    
+                            
                         }
                         m_item.number.Add(index);
+                        //Console.WriteLine(string.Format(" timeEnd : {0} - Count : {1} - Group : {2}", hourStop.ToLocalTime(), index, group));
                     }
                     item.data.Add(m_item);
                 }
@@ -352,52 +353,48 @@ namespace CBA.APIs
                         DateTime hourBegin = begin.AddHours(i);
                         DateTime hourEnd = hourBegin.AddHours(1);
                         timeCheck = hourEnd;
-                        Console.WriteLine(string.Format("Time start : {0} ---- Time End : {1}", hourBegin.ToLocalTime(), hourEnd.ToLocalTime()));
 
                         foreach (string group in groups)
                         {
                             int index = 0;
                             List<ItemFaceOfPerson> mylist = new List<ItemFaceOfPerson>();
 
-                            List<ItemFaceOfPerson> myLogs = logs.Where(s => s.group.CompareTo(group) == 0).ToList();// Filter following group....
-                            if(myLogs.Count > 0)
+                            List<ItemFaceOfPerson> gLogs = logs.Where(s => s.group.CompareTo(group) == 0).ToList();// Filter following group....
+                            if(gLogs.Count > 0)
                             {
-                                foreach (ItemFaceOfPerson m_log in myLogs )
+                                foreach (ItemFaceOfPerson m_log in gLogs)
                                 {
                                     if (DateTime.Compare(hourBegin, m_log.time) <= 0 && DateTime.Compare(hourEnd, m_log.time) > 0)
                                     {
-                                        Console.WriteLine(group);
-                                        Thread.Sleep(1);
                                         mylist.Add(m_log);
                                     }
                                 }
                             }    
-                            List<string> m_codes = new List<string>();
                             if (mylist.Count > 0)
                             {
+                                List<string> count_persons = new List<string>();
+
                                 foreach (ItemFaceOfPerson m_person in mylist)
                                 {
-                                    //Console.WriteLine(m_person.group);
-                                    ItemPersonForPlot? count_person = list_persons.Where(s => s.code.CompareTo(m_person.person.code) == 0).FirstOrDefault();
-                                    if (count_person != null)
+                                    ItemPersonForPlot? person = list_persons.Where(s => s.code.CompareTo(m_person.person.code) == 0).FirstOrDefault();
+                                    if (person != null)
                                     {
-                                        string? tempCode = m_codes.Where(s => s.CompareTo(count_person.code) == 0).FirstOrDefault();
-                                        if(tempCode == null)
-                                        {
-                                            m_codes.Add(count_person.code);
-                                            index++;
-                                            Console.WriteLine(string.Format(" time : {0} - person : {1} - Count : {2} - Group : {3}", m_person.time.ToLocalTime(), count_person.code, index, group));
+                                        index++;
 
-                                        }
-                                        //Console.WriteLine(count_person.code);
-                                        //Console.WriteLine(string.Format(" time : {0} - person : {1} - Count : {2} - Group : {3}", m_person.time.ToLocalTime(), count_person.code, index, group));
-                                        //Thread.Sleep(1);
+                                        //string? tempCode = count_persons.Where(s => s.CompareTo(person.code) == 0).FirstOrDefault();
+                                        //if(tempCode == null)
+                                        //{
+                                        //    count_persons.Add(person.code);
+                                        //}
+                                        
                                     }
                                 }
-                                if (m_codes.Count > 0)
-                                {
-                                    Console.WriteLine(string.Format(" timeStart : {0} - Count : {1} - Group : {2}", hourBegin.ToLocalTime(), m_codes.Count, group));
-                                }
+                                //if (count_persons.Count > 0)
+                                //{
+                                //    Console.WriteLine(string.Format("Time start : {0} ---- Time End : {1} |||||||||||| Group : {2}", hourBegin.ToLocalTime(), hourEnd.ToLocalTime(), group));
+                                //    Console.WriteLine(string.Format("Count : {0} <----> Num_Index : {1}", count_persons.Count, index));
+                                //}
+
                             }
                             item.number.Add(index);
                         }
