@@ -9,6 +9,7 @@ namespace CBA.Models
         public DbSet<SqlUser>? users { get; set; }
         public DbSet<SqlRole>? roles { get; set; }
         public DbSet<SqlPerson>? persons { get; set; }
+        public DbSet<SqlAgeLevel>? ages { get; set; }
         public DbSet<SqlDevice>? devices { get; set; }
         public DbSet<SqlGroup>? groups { get; set; }
         public DbSet<SqlFace>? faces { get; set; }

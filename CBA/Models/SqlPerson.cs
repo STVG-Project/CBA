@@ -10,10 +10,13 @@ namespace CBA.Models
         public string code { get; set; } = "";
         public string codeSystem { get; set; } = "";
         public string name { get; set; } = "";
+
+        public string des { get; set; } = "";
         public string gender { get; set; } = "";
         public int age { get; set; } = 0;
         public SqlGroup? group { get; set; }
         public List<SqlFace>? faces { get; set; }
+        public SqlAgeLevel? level { get; set; }
         public bool isdeleted { get; set; } = false;
         public DateTime lastestTime { get; set; }
         public DateTime createdTime { get; set; }

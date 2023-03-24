@@ -1,6 +1,7 @@
 ﻿using CBA;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace GIS.Controllers
 {
@@ -73,7 +74,7 @@ namespace GIS.Controllers
             long id = Program.api_user.checkUser(token);
             if (id >= 0)
             {
-                if (string.IsNullOrEmpty(group.code) || string.IsNullOrEmpty(group.name))
+                if (string.IsNullOrEmpty(group.code))
                 {
                     return BadRequest();
                 }
@@ -122,7 +123,107 @@ namespace GIS.Controllers
             }
         }
 
+        public class HttpItemAgeLevel
+        {
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+            public int low { get; set; } = 0;
+            public int high { get; set; } = 0;
+        }
 
+        [HttpGet]
+        [Route("getListAgeLevel")]
+        public IActionResult ListAgeLevel()
+        {
+            return Ok(Program.api_age.getListAgeLevel());
+
+        }
+
+        [HttpPost]
+        [Route("createAgeLevel")]
+        public async Task<IActionResult> CreateAgeLevelAsync([FromHeader] string token, HttpItemAgeLevel level)
+        {
+
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
+            {
+                if (string.IsNullOrEmpty(level.code) || string.IsNullOrEmpty(level.name))
+                {
+                    return BadRequest();
+                }
+                bool flag = await Program.api_age.createAgeLevel(level.code, level.name, level.des, level.low, level.high);
+                if (flag)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
+        [HttpPost]
+        [Route("editAgeLevel")]
+        public async Task<IActionResult> EditAgeLevelAsync([FromHeader] string token, HttpItemAgeLevel level)
+        {
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
+            {
+                if (string.IsNullOrEmpty(level.code))
+                {
+                    return BadRequest();
+                }
+                bool flag = await Program.api_age.editAgeLevel(level.code, level.name, level.des, level.low, level.high);
+                if (flag)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
+        [HttpDelete]
+        [Route("{code}/deleteAgeLevel")]
+        public async Task<IActionResult> DeleteAgeLevelAsync([FromHeader] string token, string code)
+        {
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
+            {
+                if (string.IsNullOrEmpty(code))
+                {
+                    return BadRequest();
+                }
+                bool flag = await Program.api_age.deleteAgeLevel(code);
+                if (flag)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
 
         [HttpPut]
         [Route("{group}/setPerson")]
@@ -225,13 +326,33 @@ namespace GIS.Controllers
 
         }
 
-       /* [HttpGet]
-        [Route("getListFace")]
-        public IActionResult ListFace()
+        [HttpGet]
+        [Route("getListPersonHistory")]
+        public IActionResult getListPersonHistory(string begin, string end)
         {
-            return Ok(Program.api_face.getListFace());
 
-        }*/
+            DateTime time_begin = DateTime.MinValue;
+            try
+            {
+                time_begin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_begin = DateTime.MinValue;
+            }
+
+            DateTime time_end = DateTime.MaxValue;
+            try
+            {
+                time_end = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_end = DateTime.MaxValue;
+            }
+
+            return Ok(Program.api_person.getListPersonHistory(time_begin, time_end));
+        }
 
     }
 }

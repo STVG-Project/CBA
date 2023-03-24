@@ -18,6 +18,7 @@ public class Program
     public static MyPerson api_person = new MyPerson();
     public static MyFace api_face = new MyFace();
     public static MyReport api_report = new MyReport();
+    public static MyAgeLevel api_age = new MyAgeLevel();
    
     public static async Task Main(string[] args)
     {
@@ -81,7 +82,7 @@ public class Program
             await api_role.initAsync();
             await api_user.initAsync();
             await api_group.initAsync();
-
+            await api_age.initAsync();
            
             app.Run();
             

@@ -17,8 +17,12 @@ namespace CBA.APIs
             {
                 return false;
             }
+
+
+
             using (DataContext context = new DataContext())
             {
+                List<SqlAgeLevel>? levels = context.ages!.Where(s => s.isdeleted == false).OrderByDescending(s => s.high).ToList();
 
                 SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
                 if(sqlPerson == null)
@@ -32,11 +36,13 @@ namespace CBA.APIs
                     sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.isdeleted = false;
-
+                    sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
+                    
                     context.persons!.Add(sqlPerson);
 
                     await context.SaveChangesAsync();
                 }
+                
 
                 SqlDevice? sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
                 if(sqlDevice == null)
@@ -55,31 +61,32 @@ namespace CBA.APIs
 
                 SqlFace? face = new SqlFace();
                 face.ID = DateTime.Now.Ticks;
-                face.age = age;
                 face.gender = gender;
                 face.person = sqlPerson;
-                if(sqlPerson.faces != null)
-                {
-                    foreach (SqlFace item in sqlPerson.faces!)
-                    {
-                        totalAge += item.age;
-                    }
-                    face.person.age = (totalAge + age) / (sqlPerson.faces!.Count + 1);
-                } else
-                {
-                    face.person.age = age;
-                }
-                
-                face.person.lastestTime = DateTime.Now.ToUniversalTime();
-
-                face.createdTime = DateTime.Now.ToUniversalTime();
-                face.image = codefile;
-
+                face.age = age;
                 face.device = sqlDevice;
+                face.image = codefile;
+                face.createdTime = DateTime.Now.ToUniversalTime();
                 face.isdeleted = false;
 
                 context.faces!.Add(face);
                 await context.SaveChangesAsync();
+
+                if (sqlPerson.faces != null)
+                {
+                    foreach (SqlFace item in sqlPerson.faces!)
+                    {
+                        totalAge += item.age;
+
+                    }
+                    sqlPerson.age = totalAge / sqlPerson.faces.Count;
+//                    Console.WriteLine(sqlPerson.age);
+                    sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
+                    
+                    sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                    await context.SaveChangesAsync();
+                }
+
 
                 SqlLogPerson log = new SqlLogPerson();
                 log.ID = DateTime.Now.Ticks;
@@ -89,7 +96,7 @@ namespace CBA.APIs
                 log.note = string.Format("Person arrived : {0}", face.person.code);
                 log.time = DateTime.Now.ToUniversalTime();
 
-                    context.logs!.Add(log);
+                context.logs!.Add(log);
 
                 await context.SaveChangesAsync();
 
