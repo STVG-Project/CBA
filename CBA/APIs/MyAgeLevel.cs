@@ -126,14 +126,14 @@ namespace CBA.APIs
         }
         public async Task<bool> createAgeLevel(string code, string name, string des, int low, int high)
         {
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(des))
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(code))
             {
                 return false;
             }
             using (DataContext context = new DataContext())
             {
                 SqlAgeLevel? m_age = context.ages!.Where(s => s.isdeleted == false && s.code.CompareTo(code) == 0).FirstOrDefault();
-                if (m_age == null)
+                if (m_age != null)
                 {
                     return false;
                 }

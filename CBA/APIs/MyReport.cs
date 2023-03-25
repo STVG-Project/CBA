@@ -336,7 +336,7 @@ namespace CBA.APIs
 
                 List<ItemFaceOfPerson> face_persons = new List<ItemFaceOfPerson>();
 
-                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(start.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.createdTime) > 0).Include(s => s.person!).ThenInclude(s => s.group).ToList();
+                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(start.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.createdTime) > 0 && s.isdeleted == false).Include(s => s.person!).ThenInclude(s => s.group).ToList();
                 foreach (SqlFace m_face in faces)
                 {
                     ItemFaceOfPerson item = new ItemFaceOfPerson();
@@ -353,14 +353,14 @@ namespace CBA.APIs
                         {
                             item.group = m_face.person.group.name;
                             item.time = m_face.createdTime;
-                            face_persons.Add(item);
                         }
                         else
                         {
                             item.group = "";
                             item.time = m_face.createdTime;
-                            face_persons.Add(item);
                         }
+
+                        face_persons.Add(item);
 
                     }
 
@@ -375,7 +375,7 @@ namespace CBA.APIs
                         foreach (string temp in tmp.groups)
                         {
                             List<string> codePesons = new List<string>();
-                            List<ItemFaceOfPerson> gPersons = face_persons.Where(s => s.group.CompareTo(temp) == 0 && DateTime.Compare(start.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.time) > 0).ToList();
+                            List<ItemFaceOfPerson> gPersons = face_persons.Where(s => s.group.CompareTo(temp) == 0).ToList();
                             foreach (ItemFaceOfPerson mPerson in gPersons)
                             {
                                 string? mCount = codePesons.Where(s => s.CompareTo(mPerson.person.code) == 0).FirstOrDefault();
@@ -384,6 +384,13 @@ namespace CBA.APIs
                                     codePesons.Add(mPerson.person.code);
                                 }
                             }
+                            //if(temp.CompareTo("") == 0)
+                            //{
+                            //    foreach(string view in codePesons)
+                            //    {
+                            //        Console.WriteLine(view);
+                            //    }
+                            //}
                             item.totalCount.Add(codePesons.Count);
                         }
                         tmp.item = item;
@@ -463,5 +470,232 @@ namespace CBA.APIs
                 }
             }
         }
+
+        /// <summary>
+        /// Plot persons with Devices
+        /// </summary>
+
+        public class ItemPersonForDevice
+        {
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+        }
+
+        public class ItemFaceForDevice
+        {
+            public ItemPersonForDevice person { get; set; } = new ItemPersonForDevice();
+
+            public string device { get; set; } = "";
+
+            public DateTime time { get; set; }
+        }
+
+        public class ItemCountWithDevice
+        {
+            public string hour { get; set; } = "";
+            public List<int> number { get; set; } = new List<int>();
+        }
+        public class ItemCountPersonsWithDevice
+        {
+            public string date { get; set; } = "";
+            public List<ItemCountWithDevice> data { get; set; } = new List<ItemCountWithDevice>();
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+
+        public ItemCountPersonsWithDevice getDataPersonsWithDevice(DateTime timeCheck, DateTime begin, DateTime end, List<string> devices, List<ItemFaceForDevice> logs)
+        {
+            using (DataContext context = new DataContext())
+            {
+                List<ItemPersonForPlot> list_persons = new List<ItemPersonForPlot>();
+
+
+                ItemCountPersonsWithDevice m_item = new ItemCountPersonsWithDevice();
+                m_item.date = begin.ToLocalTime().ToString("dd-MM-yyyy");
+                do
+                {
+                    for (int i = 0; i < 24; i++)
+                    {
+                        //Console.WriteLine(i);
+                        ItemCountWithDevice item = new ItemCountWithDevice();
+                        item.hour = i.ToString();
+                        DateTime hourBegin = begin.AddHours(i);
+                        DateTime hourEnd = hourBegin.AddHours(1);
+                        timeCheck = hourEnd;
+                        foreach (string device in devices)
+                        {
+                            List<string> count_hour = new List<string>();
+                            List<ItemFaceForDevice> m_logs = logs.Where(s => s.device.CompareTo(device) == 0).ToList();
+                            foreach (ItemFaceForDevice m_log in m_logs)
+                            {
+                                if (DateTime.Compare(hourBegin, m_log.time) <= 0 && DateTime.Compare(hourEnd, m_log.time) > 0)
+                                {
+                                    string? tempHours = count_hour.Where(s => s.CompareTo(m_log.person.code) == 0).FirstOrDefault(); // Count person In Day
+                                    if (tempHours == null)
+                                    {
+                                        count_hour.Add(m_log.person.code);
+                                    }
+                                }
+                            }
+                            item.number.Add(count_hour.Count);
+                            //Console.WriteLine(string.Format("{0} Hour, Count  : {1} --- Group : {2} ",item.hour, index, group));
+
+                        }
+                        m_item.data.Add(item);
+                    }
+                }
+                while (DateTime.Compare(timeCheck, end) < 0);
+                return m_item;
+
+            }
+        }
+
+
+        public class ItemInfoPlot
+        {
+            public List<string> devices { get; set; } = new List<string>();
+            public ItemCountPersonsWithDevice item { get; set; } = new ItemCountPersonsWithDevice();
+        }
+
+        public ItemInfoPlot getCountWithDevice(DateTime time)
+        {
+            using (DataContext context = new DataContext())
+            {
+                DateTime start = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+                DateTime stop = start.AddDays(1);
+                time = start.ToUniversalTime();
+
+                ItemInfoPlot tmp = new ItemInfoPlot();
+
+                List<SqlDevice> devices = context.devices!.Where(s => s.isdeleted == false).ToList();
+                if (devices.Count > 0)
+                {
+                    foreach (SqlDevice m_device in devices)
+                    {
+                        string item = m_device.name;
+                        tmp.devices.Add(item);
+                    }
+                }
+
+                List<ItemFaceForDevice> myfaces = new List<ItemFaceForDevice>();
+
+                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(start.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.createdTime) > 0).Include(s => s.person!).ThenInclude(s => s.group).ToList();
+                foreach (SqlFace m_face in faces)
+                {
+                    ItemFaceForDevice item = new ItemFaceForDevice();
+                    if (m_face.person != null)
+                    {
+
+                        ItemPersonForDevice person = new ItemPersonForDevice();
+                        person.code = m_face.person.code;
+                        person.name = m_face.person.name;
+
+                        item.person = person;
+
+                        if (m_face.device != null)
+                        {
+                            item.device = m_face.device.name;
+                            item.time = m_face.createdTime;
+                            myfaces.Add(item);
+                        }
+                    }
+                }
+
+                if (myfaces.Count > 0)
+                {
+                    if (tmp.devices.Count > 0)
+                    {
+                        ItemCountPersonsWithDevice item = getDataPersonsWithDevice(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.devices, myfaces);
+                        foreach (string temp in tmp.devices)
+                        {
+                            List<string> codePesons = new List<string>();
+                            List<ItemFaceForDevice> myPersons = myfaces.Where(s => s.device.CompareTo(temp) == 0).ToList();
+                            foreach (ItemFaceForDevice mPerson in myPersons)
+                            {
+                                string? mCount = codePesons.Where(s => s.CompareTo(mPerson.person.code) == 0).FirstOrDefault();
+                                if (mCount == null)
+                                {
+                                    codePesons.Add(mPerson.person.code);
+                                }
+                            }
+                            item.totalCount.Add(codePesons.Count);
+                        }
+                        tmp.item = item;
+                    }
+                }
+                return tmp;
+
+
+
+                //try
+                //{
+
+
+
+                //}
+                //catch(Exception ex)
+                //{
+                //    Console.WriteLine(ex);
+                //    return new ItemPersonsPlot();
+                //}
+            }
+        }
+
+        public class ItemTotalCountsWithDevice
+        {
+            public string date { get; set; } = "";
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+
+        public class ItemInfoPlotForDates
+        {
+            public List<string> devices { get; set; } = new List<string>();
+            public List<ItemTotalCountsWithDevice> items { get; set; } = new List<ItemTotalCountsWithDevice>();
+        }
+
+        public ItemInfoPlotForDates getCountWithDeviceForDates(DateTime begin, DateTime end)
+        {
+            using (DataContext context = new DataContext())
+            {
+                DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
+                DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
+                dateEnd = dateEnd.AddDays(1);
+
+                List<string> m_times = new List<string>();
+
+                ItemInfoPlotForDates tmp = new ItemInfoPlotForDates();
+
+                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.createdTime) > 0).Include(s => s.person!).ThenInclude(s => s.group).ToList();
+                foreach (SqlFace m_face in faces)
+                {
+                    string? tmpTime = m_times.Where(s => s.CompareTo(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy")) == 0).FirstOrDefault();
+                    if (tmpTime == null)
+                    {
+                        m_times.Add(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy"));
+                    }
+                }
+                try
+                {
+                    foreach (string m_time in m_times)
+                    {
+                        DateTime time = DateTime.ParseExact(m_time, "dd-MM-yyyy", null);
+                        ItemTotalCountsWithDevice temp = new ItemTotalCountsWithDevice();
+
+                        ItemInfoPlot countHours = getCountWithDevice(time);
+                        temp.date = m_time;
+                        temp.totalCount = countHours.item.totalCount;
+                        tmp.items.Add(temp);
+                        tmp.devices = countHours.devices;
+
+                    }
+                    return tmp;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                    return new ItemInfoPlotForDates();
+                }
+            }
+        }
+
     }
 }

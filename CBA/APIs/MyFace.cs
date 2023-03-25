@@ -42,6 +42,15 @@ namespace CBA.APIs
 
                     await context.SaveChangesAsync();
                 }
+                //else
+                //{
+                //    if(sqlPerson.level == null)
+                //    {
+                //        sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
+                //        sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                //        await context.SaveChangesAsync();
+                //    }
+                //}
                 
 
                 SqlDevice? sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
@@ -80,12 +89,14 @@ namespace CBA.APIs
 
                     }
                     sqlPerson.age = totalAge / sqlPerson.faces.Count;
-//                    Console.WriteLine(sqlPerson.age);
+                    //                    Console.WriteLine(sqlPerson.age);
                     sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
-                    
+
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     await context.SaveChangesAsync();
                 }
+
+                
 
 
                 SqlLogPerson log = new SqlLogPerson();

@@ -266,6 +266,7 @@ namespace CBA.APIs
         public class ItemPersonForGroup
         {
             public string code { get; set; } = "";
+            public string codeSystem { get; set; } = "";
             public string name { get; set; } = "";
             public string gender { get; set; } = "";
             public int age { get; set; } = 0;
@@ -290,26 +291,30 @@ namespace CBA.APIs
                                 ItemPersonForGroup tmp = new ItemPersonForGroup();
 
                                 tmp.code = item.code;
+                                tmp.codeSystem = item.codeSystem;
                                 tmp.name = item.name;
                                 tmp.gender = item.gender;
                                 tmp.age = item.age;
                                 if (item.faces != null)
                                 {
-                                    List<SqlFace>? tmpFace = item.faces!.OrderBy(s => s.createdTime).ToList();
-                                    tmp.image = tmpFace[0].image;
-                                    foreach (SqlFace face in tmpFace)
+                                    List<SqlFace>? tmpFace = item.faces!.OrderByDescending(s => s.createdTime).ToList();
+                                    if(tmpFace.Count > 0)
                                     {
-                                        ItemFaceForPerson itemFace = new ItemFaceForPerson();
-
-                                        itemFace.time = face.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                                        itemFace.image = face.image;
-
-                                        if (face.device != null)
+                                        tmp.image = tmpFace[tmpFace.Count - 1].image;
+                                        foreach (SqlFace face in tmpFace)
                                         {
-                                            itemFace.device = face.device.code;
-                                        }
+                                            ItemFaceForPerson itemFace = new ItemFaceForPerson();
 
-                                        tmp.faces.Add(itemFace);
+                                            itemFace.time = face.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                                            itemFace.image = face.image;
+
+                                            if (face.device != null)
+                                            {
+                                                itemFace.device = face.device.code;
+                                            }
+
+                                            tmp.faces.Add(itemFace);
+                                        }
                                     }
                                 }
 

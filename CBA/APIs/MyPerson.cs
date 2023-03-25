@@ -10,7 +10,7 @@ namespace CBA.APIs
     public class MyPerson
     {
 
-        public async Task<bool> editPerson(string code, string name, string codeSystem)
+        public async Task<bool> editPerson(string code, string name, string des, string codeSystem)
         {
             if (string.IsNullOrEmpty(codeSystem))
             {
@@ -27,14 +27,16 @@ namespace CBA.APIs
 
                 if (!string.IsNullOrEmpty(code))
                 {
-                    m_person.code = code;
+                    if(m_person.code.CompareTo(code) != 0)
+                    {
+                        m_person.code = code;
+                    }
                 }
                 if (!string.IsNullOrEmpty(name))
                 {
                     m_person.name = name;
                 }
-
-
+                m_person.des = des;
 
                 int rows = await context.SaveChangesAsync();
                 return true;
@@ -193,13 +195,7 @@ namespace CBA.APIs
             }
         }
 
-        public class ItemPersonsHistory
-        {
-            public string device { get; set; } = "";
-            public string data { get; set; } = "";
-        }
-
-        public string getListPersonHistory(DateTime begin, DateTime end)
+        public List<ItemPerson> getListPersonHistory(DateTime begin, DateTime end)
         {
             using (DataContext context = new DataContext())
             {
@@ -209,15 +205,21 @@ namespace CBA.APIs
 
                 List<ItemPerson> items = new List<ItemPerson>();
 
-                List<SqlPerson> persons = context.persons!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.createdTime) > 0 && s.isdeleted == false)
+                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false)
                                                           .Include(s => s.group)
                                                           .Include(s => s.faces!).ThenInclude(s => s.device)
                                                           .Include(s => s.level)
                                                           .OrderByDescending(s => s.createdTime)
                                                           .ToList();
-                if (persons.Count > 0)
+                if(persons.Count < 1)
                 {
-                    foreach (SqlPerson m_person in persons)
+                    return new List<ItemPerson>();
+                }
+
+                List<SqlPerson> list = persons.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.lastestTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.lastestTime) > 0).ToList();
+                if (list.Count > 0)
+                {
+                    foreach (SqlPerson m_person in list)
                     {
                         ItemPerson item = new ItemPerson();
                         item.code = m_person.code;
@@ -282,8 +284,7 @@ namespace CBA.APIs
                         items.Add(item);
                     }
                 }
-                string temp = JsonConvert.SerializeObject(items);
-                return temp;
+                return items;
 
             }
         }

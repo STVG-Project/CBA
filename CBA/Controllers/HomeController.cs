@@ -290,6 +290,7 @@ namespace GIS.Controllers
         {
             public string code { get; set; } = "";
             public string name { get; set; } = "";
+            public string des { get; set; } = "";
             public string codeSystem { get; set; } = "";
         }
         [HttpPost]
@@ -301,7 +302,7 @@ namespace GIS.Controllers
             if (id >= 0)
             {
                
-                bool flag = await Program.api_person.editPerson(person.code, person.name, person.codeSystem);
+                bool flag = await Program.api_person.editPerson(person.code, person.name, person.des, person.codeSystem);
                 if (flag)
                 {
                     return Ok();
@@ -351,7 +352,7 @@ namespace GIS.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_person.getListPersonHistory(time_begin, time_end));
+            return Ok(JsonConvert.SerializeObject(Program.api_person.getListPersonHistory(time_begin, time_end)));
         }
 
     }

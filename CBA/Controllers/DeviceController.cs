@@ -37,8 +37,8 @@ namespace CBA.Controllers
         }
 
         [HttpPost]
-        [Route("{code}/edit")]
-        public async Task<IActionResult> DeleteDeviceAsync([FromHeader] string token, HttpItemDevice item)
+        [Route("editDevice")]
+        public async Task<IActionResult> EditDeviceAsync([FromHeader] string token, HttpItemDevice item)
         {
             long id = Program.api_user.checkUser(token);
             if (id >= 0)
