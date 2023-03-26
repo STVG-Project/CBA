@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
+using Serilog;
 using System;
 using static CBA.APIs.MyFace;
 
@@ -195,99 +196,176 @@ namespace CBA.APIs
             }
         }
 
-        public List<ItemPerson> getListPersonHistory(DateTime begin, DateTime end)
+        public class ItemInfoLogs
+        {
+            public string date { get; set; } = "";
+           public string data { get; set; } = "";
+        }
+
+
+        public List<ItemInfoLogs> getListPersonHistory(DateTime begin, DateTime end)
         {
             using (DataContext context = new DataContext())
             {
+
                 DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
                 DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
                 dateEnd = dateEnd.AddDays(1);
+                List<ItemInfoLogs> items = new List<ItemInfoLogs>();
+                List<string> times = new List<string>();
 
-                List<ItemPerson> items = new List<ItemPerson>();
-
-                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false)
-                                                          .Include(s => s.group)
-                                                          .Include(s => s.faces!).ThenInclude(s => s.device)
-                                                          .Include(s => s.level)
-                                                          .OrderByDescending(s => s.createdTime)
-                                                          .ToList();
-                if(persons.Count < 1)
+                List<SqlLogPerson> logs = context.logs!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.time) > 0)
+                                                      .Include(s => s.person)
+                                                      .Include(s => s.device)
+                                                      .OrderByDescending(s => s.time)
+                                                      .ToList();
+                if(logs.Count < 1)
                 {
-                    return new List<ItemPerson>();
-                }
+                    return new List<ItemInfoLogs>();
+                }    
 
-                List<SqlPerson> list = persons.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.lastestTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.lastestTime) > 0).ToList();
-                if (list.Count > 0)
+                do
                 {
-                    foreach (SqlPerson m_person in list)
+                    times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                    dateBegin = dateBegin.AddDays(1);
+                        
+                } while (DateTime.Compare(dateBegin, dateEnd) < 0);
+                foreach(string tmpTime in times)
+                {
+                    ItemInfoLogs m_item = new ItemInfoLogs();
+                    m_item.date = tmpTime;
+
+                    DateTime time_input = DateTime.MinValue;
+                    try
                     {
-                        ItemPerson item = new ItemPerson();
-                        item.code = m_person.code;
-                        item.codeSystem = m_person.codeSystem;
-                        item.name = m_person.name;
-                        item.gender = m_person.gender;
-                        item.age = m_person.age;
-                        if (m_person.group != null)
-                        {
-                            item.group.code = m_person.group!.code;
-                            item.group.name = m_person.group!.name;
-                            item.group.des = m_person.group!.des;
-                        }
-
-                        if (m_person.faces != null)
-                        {
-                            List<SqlFace>? tmpFace = m_person.faces!.OrderByDescending(s => s.createdTime).ToList();
-                            if (tmpFace.Count > 0)
-                            {
-                                item.image = tmpFace[tmpFace.Count - 1].image;
-
-                                foreach (SqlFace tmp in tmpFace)
-                                {
-                                    ItemFaceForPerson itemFace = new ItemFaceForPerson();
-
-                                    itemFace.image = tmp.image;
-                                    itemFace.time = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-
-                                    if (tmp.device != null)
-                                    {
-                                        itemFace.device = tmp.device.code;
-                                    }
-
-                                    item.faces.Add(itemFace);
-                                }
-                            }
-                        }
-
-                        if (m_person.level != null)
-                        {
-                            item.level.code = m_person.level!.code;
-                            item.level.name = m_person.level!.name;
-                        }
-                        else
-                        {
-                            string timeStart = "24-03-2023 11:00:00";
-                            DateTime time = DateTime.ParseExact(timeStart, "dd-MM-yyyy HH:mm:ss", null);
-                            if (DateTime.Compare(m_person.createdTime.ToLocalTime(), time) < 0)
-                            {
-                                item.level.code = "NA";
-                                item.level.name = "Not yet Update Range Ages";
-                            }
-                            else
-                            {
-                                item.level.code = "NA";
-                                item.level.name = "Out Range Ages";
-                            }    
-                        }
-
-                        item.createdTime = m_person.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                        item.lastestTime = m_person.lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                        items.Add(item);
+                        time_input = DateTime.ParseExact(tmpTime, "dd-MM-yyyy", null);
                     }
-                }
+                    catch (Exception e)
+                    {
+                        time_input = DateTime.MinValue;
+                    }
+
+                    DateTime startTime = time_input;
+                    DateTime stopTime = startTime.AddDays(1);
+                    List<ItemPerson> myList = new List<ItemPerson>();
+                    List<SqlLogPerson> mLogs = logs.Where(s => DateTime.Compare(startTime.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(stopTime.ToUniversalTime(), s.time) > 0).ToList();
+                    foreach (SqlLogPerson m_log in mLogs)
+                    {
+                        if (m_log.person != null)
+                        {
+                            ItemPerson? tmpPerson = myList.Where(s => s.code.CompareTo(m_log.person.code) == 0).FirstOrDefault();
+                            if (tmpPerson == null)
+                            {
+                                ItemPerson item = new ItemPerson();
+                                item.code = m_log.person.code;
+                                item.codeSystem = m_log.person.codeSystem;
+                                item.name = m_log.person.name;
+                                item.gender = m_log.person.gender;
+                                item.age = m_log.person.age;
+                                if (m_log.person.group != null)
+                                {
+                                    item.group.code = m_log.person.group.code;
+                                    item.group.name = m_log.person.group.name;
+                                    item.group.des = m_log.person.group.des;
+                                }
+
+                                if (m_log.person.faces != null)
+                                {
+                                    List<SqlFace>? tmpFace = m_log.person.faces!.OrderByDescending(s => s.createdTime).ToList();
+                                    if (tmpFace.Count > 0)
+                                    {
+                                        item.image = tmpFace[tmpFace.Count - 1].image;
+
+                                        foreach (SqlFace tmp in tmpFace)
+                                        {
+                                            ItemFaceForPerson itemFace = new ItemFaceForPerson();
+
+                                            itemFace.image = tmp.image;
+                                            itemFace.time = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+
+                                            if (tmp.device != null)
+                                            {
+                                                itemFace.device = tmp.device.code;
+                                            }
+
+                                            item.faces.Add(itemFace);
+                                        }
+                                    }
+                                }
+
+                                if (m_log.person.level != null)
+                                {
+                                    item.level.code = m_log.person.level!.code;
+                                    item.level.name = m_log.person.level!.name;
+                                }
+                                else
+                                {
+                                    string timeStart = "24-03-2023 11:00:00";
+                                    DateTime time = DateTime.ParseExact(timeStart, "dd-MM-yyyy HH:mm:ss", null);
+                                    if (DateTime.Compare(m_log.person.createdTime.ToLocalTime(), time) < 0)
+                                    {
+                                        item.level.code = "NA";
+                                        item.level.name = "Not yet Update Range Ages";
+                                    }
+                                    else
+                                    {
+                                        item.level.code = "NA";
+                                        item.level.name = "Out Range Ages";
+                                    }
+                                }
+
+                                item.createdTime = m_log.person.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                                item.lastestTime = m_log.person.lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                                myList.Add(item);
+                            }
+                        }
+                    }
+
+                    m_item.data = JsonConvert.SerializeObject(myList);
+                    items.Add(m_item);
+                }    
                 return items;
 
             }
         }
 
+        public async Task<bool> updateLastestTime(DateTime time)
+        {
+            using (DataContext context = new DataContext())
+            {
+                List<SqlPerson> persons = context.persons!.Where(s => DateTime.Compare(time.ToUniversalTime(), s.createdTime) > 0 && s.isdeleted == false).Include(s => s.faces).ToList();
+                if(persons.Count > 0)
+                {
+                    foreach(SqlPerson m_person in persons)
+                    {
+                        if(m_person.faces != null)
+                        {
+                            List<SqlFace> tmp = m_person.faces.Where(s => s.isdeleted == false).OrderByDescending(s => s.createdTime).ToList();
+                            if(tmp.Count > 1)
+                            {
+                                if(DateTime.Compare(m_person.lastestTime, tmp[0].createdTime) == 0)
+                                {
+                                    Console.WriteLine("Updated Time");
+                                    Console.WriteLine(String.Format(" Updated for code : {0} *** LastestTime : {1}", m_person.code, m_person.lastestTime));
+
+                                }
+                                else
+                                {
+                                    m_person.lastestTime = tmp[0].createdTime;
+                                    await context.SaveChangesAsync();
+
+                                    Console.WriteLine(String.Format(" Update for code : {0} --- Time : {1} ", m_person.code, m_person.lastestTime));
+
+                                }
+                                //Console.WriteLine(String.Format(" Update for code : {0} *** OriTime : {1}", m_person.code, m_person.lastestTime));
+
+
+                            }    
+                        }    
+                    }    
+                }
+                return true;
+            }    
+        }    
     }
 }

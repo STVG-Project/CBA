@@ -85,5 +85,30 @@ namespace CBA.Controllers
             return Ok(Program.api_face.getListHistoryForPerson(person));
 
         }
+
+        [HttpPut]
+        [Route("updateTimePerson")]
+        public async Task<IActionResult> updateTimePerson(string time)
+        {
+            DateTime time_input = DateTime.MinValue;
+            try
+            {
+                time_input = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_input = DateTime.MinValue;
+            }
+
+            bool flag = await Program.api_person.updateLastestTime(time_input);
+            if (flag)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest();
+            }    
+        }
     }
 }

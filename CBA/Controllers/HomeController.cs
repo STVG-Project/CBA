@@ -352,7 +352,7 @@ namespace GIS.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(JsonConvert.SerializeObject(Program.api_person.getListPersonHistory(time_begin, time_end)));
+            return Ok(Program.api_person.getListPersonHistory(time_begin, time_end));
         }
 
     }

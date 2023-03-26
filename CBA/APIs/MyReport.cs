@@ -323,6 +323,8 @@ namespace CBA.APIs
 
                 ItemPersonsHoursPlot tmp = new ItemPersonsHoursPlot();
 
+                List<SqlPerson> sqlPersons = context.persons!.Where(s => DateTime.Compare(start.ToUniversalTime(), s.lastestTime) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.lastestTime) > 0 && s.isdeleted == false).ToList();
+                
                 List<SqlGroup> groups = context.groups!.Where(s => s.isdeleted == false).ToList();
                 if (groups.Count > 0)
                 {
@@ -393,6 +395,7 @@ namespace CBA.APIs
                             //}
                             item.totalCount.Add(codePesons.Count);
                         }
+                       
                         tmp.item = item;
                     }    
                 }    
