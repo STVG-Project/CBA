@@ -355,7 +355,7 @@ namespace GIS.Controllers
             {
                 time_end = DateTime.MaxValue;
             }
-            string data = JsonConvert.SerializeObject(Program.api_person.getListPagePersonHistory(time_begin, time_end, page, numPerson));
+            ListInfoLogsPage data = Program.api_person.getListPersonHistory(time_begin, time_end, page, numPerson);
             //stopWatch.Stop();
             //TimeSpan ts = stopWatch.Elapsed;
             //string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);

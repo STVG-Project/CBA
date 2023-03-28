@@ -95,7 +95,7 @@ namespace CBA.APIs
         {
             public int total { get; set; } = 0;
             public int page { get; set; } = 0;
-            public List<ItemPerson> items { get; set; } = new List<ItemPerson>();
+            public List<ItemPerson> persons { get; set; } = new List<ItemPerson>();
         }
 
         public ListPersonPage getListPerson(int index, int count)
@@ -188,7 +188,7 @@ namespace CBA.APIs
 
                         item.createdTime = persons[number - 1].createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
                         item.lastestTime = persons[number - 1].lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                        list.items.Add(item);
+                        list.persons.Add(item);
 
                     }
                 }
@@ -196,21 +196,22 @@ namespace CBA.APIs
 
             }
         }
-        //public class ItemDateData
-        //{
-        //    public List<ItemPerson> items { get; set; } = new List<ItemPerson>();
+        public class ItemDateData
+        {
+            public string date { get; set; } = "";
+            public string data { get; set; } = "";
+        }
 
-        //}
-        
         public class ListInfoLogsPage
         {
             public int total { get; set; } = 0;
             public int page { get; set; } = 0;
-            public List<ItemPerson> items { get; set; } = new List<ItemPerson>();
+            public string data { get; set; } = "";
+
         }
 
 
-        public List<ItemPerson> getListPersonHistory(DateTime begin, DateTime end, int count)
+        public ListInfoLogsPage getListPersonHistory(DateTime begin, DateTime end, int index, int total)
         {
             using (DataContext context = new DataContext())
             {
@@ -221,7 +222,7 @@ namespace CBA.APIs
                 DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
                 dateEnd = dateEnd.AddDays(1);
                 List<string> times = new List<string>();
-                List<ItemPerson> persons = new List<ItemPerson>();
+                ListInfoLogsPage info = new ListInfoLogsPage();
 
                 List<SqlLogPerson> logs = context.logs!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.time) > 0)
                                                       .Include(s => s.person!).ThenInclude(s => s.level)
@@ -234,23 +235,38 @@ namespace CBA.APIs
 
                 if (logs.Count < 1)
                 {
-                    return new List<ItemPerson>();
-                }
-                if(count > 1000)
-                {
-                    return new List<ItemPerson>();
+                    return new ListInfoLogsPage();
                 }
 
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-                Console.WriteLine(string.Format("getlogs : {0}", elapsedTime));
-
-                foreach (SqlLogPerson m_log in logs)
+                
+                do
                 {
-                    if (m_log.person != null)
+                    times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                    dateBegin = dateBegin.AddDays(1);
+                }while(DateTime.Compare(dateBegin, dateEnd) < 0);
+                int count = 0;
+                foreach (string m_time in times)
+                {
+                    List<ItemPerson> persons = new List<ItemPerson>();
+
+                    ItemDateData m_data = new ItemDateData();
+                    m_data.date = m_time;
+
+                    DateTime time_input = DateTime.MinValue;
+                    try
                     {
-                        if(persons.Count < count)
+                        time_input = DateTime.ParseExact(m_time, "dd-MM-yyyy", null);
+                    }
+                    catch (Exception e)
+                    {
+                        time_input = DateTime.MinValue;
+                    }
+                    DateTime start = time_input;
+                    DateTime stop = time_input.AddDays(1);
+                    List<SqlLogPerson> mLogs = logs.Where(s => DateTime.Compare(start.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.time) > 0).ToList();
+                    foreach (SqlLogPerson m_log in mLogs)
+                    {
+                        if (m_log.person != null)
                         {
                             ItemPerson? tmpPerson = persons.Where(s => s.code.CompareTo(m_log.person.code) == 0).FirstOrDefault();
                             if (tmpPerson == null)
@@ -274,7 +290,8 @@ namespace CBA.APIs
                                     {
                                         if (m_person.faces != null)
                                         {
-                                            item.image = m_person.faces[m_person.faces.Count - 1].image;
+                                            List<SqlFace> list = m_person.faces!.OrderByDescending(s => s.createdTime).ToList();
+                                            item.image = list[list.Count - 1].image;
                                         }
                                     }
                                     // item.image = m_log.person.faces[m_log.person.faces.Count - 1].image;
@@ -314,7 +331,6 @@ namespace CBA.APIs
                                 item.createdTime = m_log.person.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
                                 item.lastestTime = m_log.person.lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
                                 persons.Add(item);
-
                             }
                             else
                             {
@@ -330,59 +346,21 @@ namespace CBA.APIs
                                 tmpPerson.faces.Add(itemFace);
                             }
                         }
-                        else
-                        {
-                            break;
-                        }
-                       
                     }
+                    count += persons.Count();
+                    info.data += JsonConvert.SerializeObject(persons);
                 }
+                List<ItemPerson>? m_totalData = JsonConvert.DeserializeObject<List<ItemPerson>>(info.data);
 
-                
+                /*stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                Console.WriteLine(string.Format("getlogs : {0}", elapsedTime));*/
 
-                return persons;
+                return info;
             }
         }
 
-
-        public ListInfoLogsPage getListPagePersonHistory(DateTime begin, DateTime end, int index, int count)
-        {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-
-            List<ItemPerson> persons = getListPersonHistory(begin, end, count);
-            ListInfoLogsPage list = new ListInfoLogsPage();
-            if (persons.Count > 0)
-            {
-                list.total = persons.Count();
-                list.page = index;
-
-                for (int i = 0; i < count; i++)
-                {
-                    int number = index + i;
-                    if (number > persons.Count)
-                    {
-                        break;
-                    }
-
-                    ItemPerson item = new ItemPerson();
-
-                    item = persons[number - 1];
-                    
-                    list.items.Add(item);
-
-                }
-                
-            }
-
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-            string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            Console.WriteLine(string.Format("getListPagePersonHistory : {0}", elapsedTime));
-
-            return list;
-
-        }
         
         public async Task<bool> updateLastestTime(DateTime time)
         {
