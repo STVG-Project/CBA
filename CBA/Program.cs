@@ -37,7 +37,7 @@ public class Program
                 {
 
                 });
-                option.Limits.MaxConcurrentConnections = 1000;
+                option.Limits.MaxConcurrentConnections = null;
                 option.Limits.MaxRequestBodySize = null;
                 option.Limits.MaxRequestBufferSize = null;
             });

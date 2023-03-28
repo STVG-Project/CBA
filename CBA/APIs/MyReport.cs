@@ -49,7 +49,7 @@ namespace CBA.APIs
         }
 
         public ItemCounts getData(DateTime timeCheck, DateTime begin, DateTime end, List<string> groups, List<ItemFaceOfPerson> logs)
-        { 
+        {
             ItemCounts item = new ItemCounts();
             item.date = begin.ToLocalTime().ToString("dd-MM-yyyy");
             do
@@ -70,16 +70,16 @@ namespace CBA.APIs
                     {
                         int index = 0;
                         List<ItemFaceOfPerson>? gLogs = logs.Where(s => s.group.CompareTo(group) == 0).ToList();
-                        if(gLogs.Count > 0)
+                        if (gLogs.Count > 0)
                         {
-                            foreach(ItemFaceOfPerson person in gLogs)
+                            foreach (ItemFaceOfPerson person in gLogs)
                             {
                                 if (DateTime.Compare(hourStart, person.time) <= 0 && DateTime.Compare(hourStop, person.time) > 0)
                                 {
                                     index++;
                                 }
-                            }    
-                            
+                            }
+
                         }
                         m_item.number.Add(index);
                         //Console.WriteLine(string.Format(" timeEnd : {0} - Count : {1} - Group : {2}", hourStop.ToLocalTime(), index, group));
@@ -153,23 +153,17 @@ namespace CBA.APIs
                 }
 
 
-                if (face_persons.Count > 0)
+                ItemCounts itemCount = getData(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.groups, face_persons);
+                for (int i = 0; i < tmp.groups.Count; i++)
                 {
-                    if(tmp.groups.Count > 0)
+                    int totalcount = 0;
+                    foreach (ItemCountHours tmp_count in itemCount.data)
                     {
-                        ItemCounts item = getData(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.groups, face_persons);
-                        for (int i = 0; i < tmp.groups.Count; i++)
-                        {
-                            int totalcount = 0;
-                            foreach (ItemCountHours tmp_count in item.data)
-                            {
-                                totalcount += tmp_count.number[i];
-                            }
-                            item.totalCount.Add(totalcount);
-                        }
-                        tmp.item = item;
+                        totalcount += tmp_count.number[i];
                     }
-                }    
+                    itemCount.totalCount.Add(totalcount);
+                }
+                tmp.item = itemCount;
 
                 return tmp;
             }
@@ -194,31 +188,23 @@ namespace CBA.APIs
             using (DataContext context = new DataContext())
             {
                 DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
-                DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00); 
+                DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
                 dateEnd = dateEnd.AddDays(1);
 
                 ItemCountsPlotByDay tmp = new ItemCountsPlotByDay();
 
                 List<string> m_times = new List<string>();
                 List<ItemFaceOfPerson> face_persons = new List<ItemFaceOfPerson>();
-
-                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.createdTime) > 0).Include(s => s.person!).ThenInclude(s => s.group).ToList();
-                if (faces.Count > 0)
+                do
                 {
-                    
-                    foreach (SqlFace m_face in faces)
-                    {
-                        string? tmpTime = m_times.Where(s => s.CompareTo(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy")) == 0).FirstOrDefault();
-                        if(tmpTime == null)
-                        {
-                            m_times.Add(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy"));
-                        }    
-                        
-                    }
-                }
+                    m_times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                    dateBegin = dateBegin.AddDays(1);
+
+                } while (DateTime.Compare(dateBegin, dateEnd) < 0);
+
                 try
                 {
-                    foreach(string m_time in m_times)
+                    foreach (string m_time in m_times)
                     {
 
                         ItemCountsByDay item = new ItemCountsByDay();
@@ -263,7 +249,7 @@ namespace CBA.APIs
             {
                 List<ItemPersonForPlot> list_persons = new List<ItemPersonForPlot>();
 
-                
+
                 ItemCountPersons m_item = new ItemCountPersons();
                 m_item.date = begin.ToLocalTime().ToString("dd-MM-yyyy");
                 do
@@ -315,7 +301,7 @@ namespace CBA.APIs
 
         public ItemPersonsHoursPlot getPersonsHours(DateTime time)
         {
-            using(DataContext context = new DataContext())
+            using (DataContext context = new DataContext())
             {
                 DateTime start = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
                 DateTime stop = start.AddDays(1);
@@ -324,14 +310,14 @@ namespace CBA.APIs
                 ItemPersonsHoursPlot tmp = new ItemPersonsHoursPlot();
 
                 List<SqlPerson> sqlPersons = context.persons!.Where(s => DateTime.Compare(start.ToUniversalTime(), s.lastestTime) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.lastestTime) > 0 && s.isdeleted == false).ToList();
-                
+
                 List<SqlGroup> groups = context.groups!.Where(s => s.isdeleted == false).ToList();
                 if (groups.Count > 0)
                 {
                     foreach (SqlGroup m_group in groups)
                     {
-                        string item = m_group.name;
-                        tmp.groups.Add(item);
+                        string name = m_group.name;
+                        tmp.groups.Add(name);
                     }
                 }
                 tmp.groups.Add("");
@@ -341,7 +327,7 @@ namespace CBA.APIs
                 List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(start.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(stop.ToUniversalTime(), s.createdTime) > 0 && s.isdeleted == false).Include(s => s.person!).ThenInclude(s => s.group).ToList();
                 foreach (SqlFace m_face in faces)
                 {
-                    ItemFaceOfPerson item = new ItemFaceOfPerson();
+                    ItemFaceOfPerson itemFace = new ItemFaceOfPerson();
                     if (m_face.person != null)
                     {
 
@@ -349,65 +335,59 @@ namespace CBA.APIs
                         person.code = m_face.person.code;
                         person.name = m_face.person.name;
 
-                        item.person = person;
+                        itemFace.person = person;
 
                         if (m_face.person.group != null)
                         {
-                            item.group = m_face.person.group.name;
-                            item.time = m_face.createdTime;
+                            itemFace.group = m_face.person.group.name;
+                            itemFace.time = m_face.createdTime;
                         }
                         else
                         {
-                            item.group = "";
-                            item.time = m_face.createdTime;
+                            itemFace.group = "";
+                            itemFace.time = m_face.createdTime;
                         }
 
-                        face_persons.Add(item);
+                        face_persons.Add(itemFace);
 
                     }
 
 
                 }
 
-                if (face_persons.Count > 0)
+                ItemCountPersons item = getDataPersons(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.groups, face_persons);
+                foreach (string temp in tmp.groups)
                 {
-                    if(tmp.groups.Count > 0)
+                    List<string> codePesons = new List<string>();
+                    List<ItemFaceOfPerson> gPersons = face_persons.Where(s => s.group.CompareTo(temp) == 0).ToList();
+                    foreach (ItemFaceOfPerson mPerson in gPersons)
                     {
-                        ItemCountPersons item = getDataPersons(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.groups, face_persons);
-                        foreach (string temp in tmp.groups)
+                        string? mCount = codePesons.Where(s => s.CompareTo(mPerson.person.code) == 0).FirstOrDefault();
+                        if (mCount == null)
                         {
-                            List<string> codePesons = new List<string>();
-                            List<ItemFaceOfPerson> gPersons = face_persons.Where(s => s.group.CompareTo(temp) == 0).ToList();
-                            foreach (ItemFaceOfPerson mPerson in gPersons)
-                            {
-                                string? mCount = codePesons.Where(s => s.CompareTo(mPerson.person.code) == 0).FirstOrDefault();
-                                if (mCount == null)
-                                {
-                                    codePesons.Add(mPerson.person.code);
-                                }
-                            }
-                            //if(temp.CompareTo("") == 0)
-                            //{
-                            //    foreach(string view in codePesons)
-                            //    {
-                            //        Console.WriteLine(view);
-                            //    }
-                            //}
-                            item.totalCount.Add(codePesons.Count);
+                            codePesons.Add(mPerson.person.code);
                         }
-                       
-                        tmp.item = item;
-                    }    
-                }    
+                    }
+                    //if(temp.CompareTo("") == 0)
+                    //{
+                    //    foreach(string view in codePesons)
+                    //    {
+                    //        Console.WriteLine(view);
+                    //    }
+                    //}
+                    item.totalCount.Add(codePesons.Count);
+                }
+
+                tmp.item = item;
                 return tmp;
 
 
-                
+
                 //try
                 //{
-                    
 
-                    
+
+
                 //}
                 //catch(Exception ex)
                 //{
@@ -439,17 +419,13 @@ namespace CBA.APIs
 
                 List<string> m_times = new List<string>();
 
-                ItemPersonsPlotForDates tmp = new ItemPersonsPlotForDates();
-
-                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.createdTime) > 0).Include(s => s.person!).ThenInclude(s => s.group).ToList();
-                foreach (SqlFace m_face in faces)
+                do
                 {
-                    string? tmpTime = m_times.Where(s => s.CompareTo(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy")) == 0).FirstOrDefault();
-                    if (tmpTime == null)
-                    {
-                        m_times.Add(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy"));
-                    }
-                }
+                    m_times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                    dateBegin = dateBegin.AddDays(1);
+
+                } while (DateTime.Compare(dateBegin, dateEnd) < 0);
+                ItemPersonsPlotForDates tmp = new ItemPersonsPlotForDates();
                 try
                 {
                     foreach (string m_time in m_times)
@@ -466,7 +442,7 @@ namespace CBA.APIs
                     }
                     return tmp;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.Error(ex.ToString());
                     return new ItemPersonsPlotForDates();
@@ -603,43 +579,28 @@ namespace CBA.APIs
                     }
                 }
 
-                if (myfaces.Count > 0)
+
+                if (tmp.devices.Count > 0)
                 {
-                    if (tmp.devices.Count > 0)
+                    ItemCountPersonsWithDevice item = getDataPersonsWithDevice(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.devices, myfaces);
+                    foreach (string temp in tmp.devices)
                     {
-                        ItemCountPersonsWithDevice item = getDataPersonsWithDevice(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.devices, myfaces);
-                        foreach (string temp in tmp.devices)
+                        List<string> codePesons = new List<string>();
+                        List<ItemFaceForDevice> myPersons = myfaces.Where(s => s.device.CompareTo(temp) == 0).ToList();
+                        foreach (ItemFaceForDevice mPerson in myPersons)
                         {
-                            List<string> codePesons = new List<string>();
-                            List<ItemFaceForDevice> myPersons = myfaces.Where(s => s.device.CompareTo(temp) == 0).ToList();
-                            foreach (ItemFaceForDevice mPerson in myPersons)
+                            string? mCount = codePesons.Where(s => s.CompareTo(mPerson.person.code) == 0).FirstOrDefault();
+                            if (mCount == null)
                             {
-                                string? mCount = codePesons.Where(s => s.CompareTo(mPerson.person.code) == 0).FirstOrDefault();
-                                if (mCount == null)
-                                {
-                                    codePesons.Add(mPerson.person.code);
-                                }
+                                codePesons.Add(mPerson.person.code);
                             }
-                            item.totalCount.Add(codePesons.Count);
                         }
-                        tmp.item = item;
+                        item.totalCount.Add(codePesons.Count);
                     }
+                    tmp.item = item;
                 }
+
                 return tmp;
-
-
-
-                //try
-                //{
-
-
-
-                //}
-                //catch(Exception ex)
-                //{
-                //    Console.WriteLine(ex);
-                //    return new ItemPersonsPlot();
-                //}
             }
         }
 
@@ -667,15 +628,12 @@ namespace CBA.APIs
 
                 ItemInfoPlotForDates tmp = new ItemInfoPlotForDates();
 
-                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.createdTime) > 0).Include(s => s.person!).ThenInclude(s => s.group).ToList();
-                foreach (SqlFace m_face in faces)
+                do
                 {
-                    string? tmpTime = m_times.Where(s => s.CompareTo(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy")) == 0).FirstOrDefault();
-                    if (tmpTime == null)
-                    {
-                        m_times.Add(m_face.createdTime.ToLocalTime().ToString("dd-MM-yyyy"));
-                    }
-                }
+                    m_times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                    dateBegin = dateBegin.AddDays(1);
+
+                } while (DateTime.Compare(dateBegin, dateEnd) < 0);
                 try
                 {
                     foreach (string m_time in m_times)

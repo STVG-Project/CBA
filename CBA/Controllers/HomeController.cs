@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Serilog;
+using System.Diagnostics;
+using static CBA.APIs.MyPerson;
 
 namespace GIS.Controllers
 {
@@ -329,9 +332,10 @@ namespace GIS.Controllers
 
         [HttpGet]
         [Route("getListPersonHistory")]
-        public IActionResult getListPersonHistory(string begin, string end)
+        public IActionResult getListPersonHistory(string begin, string end, int page, int numPerson)
         {
-
+            //Stopwatch stopWatch = new Stopwatch();
+            //stopWatch.Start();
             DateTime time_begin = DateTime.MinValue;
             try
             {
@@ -351,8 +355,14 @@ namespace GIS.Controllers
             {
                 time_end = DateTime.MaxValue;
             }
-
-            return Ok(Program.api_person.getListPersonHistory(time_begin, time_end));
+            string data = JsonConvert.SerializeObject(Program.api_person.getListPagePersonHistory(time_begin, time_end, page, numPerson));
+            //stopWatch.Stop();
+            //TimeSpan ts = stopWatch.Elapsed;
+            //string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+            //Console.WriteLine(string.Format("getReportPerson : {0}", elapsedTime));
+            //Log.Information(string.Format("getReportPerson : {0}", elapsedTime));
+            return Ok(data);
+           
         }
 
     }
