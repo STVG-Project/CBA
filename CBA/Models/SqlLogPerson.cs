@@ -11,7 +11,6 @@ namespace CBA.Models
         public SqlPerson? person { get; set; }
         public SqlDevice? device { get; set; }
         public string image { get; set; } = "";
-
         public string note { get; set; } = "";
         public DateTime time { get; set; }
         
