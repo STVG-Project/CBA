@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Serilog;
 using System.Diagnostics;
+using System.Globalization;
 using static CBA.APIs.MyPerson;
 
 namespace GIS.Controllers
@@ -326,15 +327,7 @@ namespace GIS.Controllers
         [Route("getListPerson")]
         public IActionResult ListAllPerson(int page, int numPerson)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-
             ListPersonPage data = Program.api_person.getListPerson(page, numPerson);
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-            string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            Console.WriteLine(string.Format("getReportPerson : {0}", elapsedTime));
-           
             return Ok(data);
 
         }
@@ -365,13 +358,38 @@ namespace GIS.Controllers
                 time_end = DateTime.MaxValue;
             }
             ListInfoLogsPage data = Program.api_person.getListPersonHistory(time_begin, time_end, page, numPerson);
-            //stopWatch.Stop();
-            //TimeSpan ts = stopWatch.Elapsed;
-            //string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
-            //Console.WriteLine(string.Format("getReportPerson : {0}", elapsedTime));
-            //Log.Information(string.Format("getReportPerson : {0}", elapsedTime));
+           
             return Ok(data);
            
+        }
+
+        [HttpGet]
+        [Route("reportExcel")]
+        public IActionResult ReportExcel(string begin, string end, int numPerson)
+        {
+            DateTime mBegin = DateTime.MinValue;
+            try
+            {
+                mBegin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception ex)
+            {
+                mBegin = DateTime.MinValue;
+            }
+
+            DateTime mEnd = DateTime.MaxValue;
+            try
+            {
+                mEnd = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception ex)
+            {
+                mEnd = DateTime.MaxValue;
+            }
+            MemoryStream ms = new MemoryStream(); 
+              ms = Program.api_person.exportExcel(mBegin, mEnd, numPerson);
+            return File(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Report_GIGAMALL.xlsx");
+            //return Ok(JsonConvert.SerializeObject(Program.api_person.exportExcel(mBegin, mEnd, numPerson)));
         }
 
     }

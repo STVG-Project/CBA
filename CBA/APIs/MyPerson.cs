@@ -9,6 +9,7 @@ using OfficeOpenXml;
 using System.Xml.Linq;
 using static CBA.APIs.MyFace;
 using System.Drawing;
+using static CBA.APIs.MyPerson;
 
 namespace CBA.APIs
 {
@@ -33,6 +34,21 @@ namespace CBA.APIs
             public DateTime create { get; set; }
         }
         List<CacheListAllPerson> cacheListAllPersons = new List<CacheListAllPerson>();
+
+        public class ItemDataExcel
+        {
+            public string date { get; set; } = "";
+            public List<ItemLogPersons> data { get; set; } = new List<ItemLogPersons>();
+        }
+        public class CacheExcel
+        {
+            public long id { get; set; } = 0;
+            public DateTime begin { get; set; }
+            public DateTime end { get; set; }
+            public List<ItemDataExcel> items { get; set; } = new List<ItemDataExcel>();
+            public DateTime create { get; set; }
+        }
+        List<CacheExcel> cacheExcels = new List<CacheExcel>();
         ///////////////////////////////////////////////////////////////////////////////////////////
         public MyPerson()
         {
@@ -57,6 +73,17 @@ namespace CBA.APIs
                         if (time.Minutes > 5.0)
                         {
                             cacheListAllPersons.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
+                    Thread.Sleep(1000);
+                    for (int i = 0; i < cacheExcels.Count; i++)
+                    {
+                        TimeSpan time = DateTime.Now.Subtract(cacheExcels[i].create);
+                        if (time.Minutes > 5.0)
+                        {
+                            cacheExcels.RemoveAt(i);
                             i--;
                         }
                     }
@@ -148,7 +175,7 @@ namespace CBA.APIs
         {
             public int total { get; set; } = 0;
             public int page { get; set; } = 0;
-            public List<ItemPerson> persons { get; set; } = new List<ItemPerson>();
+            public List<ItemPerson> items { get; set; } = new List<ItemPerson>();
         }
 
         public ListPersonPage getListPerson(int index, int total)
@@ -350,7 +377,7 @@ namespace CBA.APIs
         }
 
 
-        public ListInfoLogsPage getListPersonHistory(DateTime begin, DateTime end, int index, int total)
+        public ListInfoLogsPage getListPersonHistory(DateTime begin, DateTime end, int index, int number)
         {
             CacheHistoryPerson? cache = cacheHistoryPersons.Where(s => s.begin.CompareTo(begin) == 0 && s.end.CompareTo(end) == 0).FirstOrDefault();
             if (cache != null)
@@ -360,10 +387,10 @@ namespace CBA.APIs
                 ListInfoLogsPage info = new ListInfoLogsPage();
                 info.page = index;
                 info.total = items.Count;
-                if (index + total < items.Count)
+                if (index + number < items.Count)
                 {
                     items.RemoveRange(0, index);
-                    items.RemoveRange(total, items.Count - total);
+                    items.RemoveRange(number, items.Count - number);
                 }
                 else
                 {
@@ -376,15 +403,14 @@ namespace CBA.APIs
             {
                 using (DataContext context = new DataContext())
                 {
-                    Stopwatch sw = new Stopwatch();
-                    
+                    //Stopwatch sw = new Stopwatch();
+                    //sw.Start();
 
                     DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
                     DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
                     dateEnd = dateEnd.AddDays(1);
 
                     ListInfoLogsPage info = new ListInfoLogsPage();
-                    info.page = index;
                     List<ItemLogPersons> items = new List<ItemLogPersons>();
 
 
@@ -397,9 +423,7 @@ namespace CBA.APIs
                     List<SqlLogPerson> logs = totallogs.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.time) > 0)
                                                            .OrderByDescending(s => s.time)
                                                            .ToList();
-                   
-
-                  
+                    
                     List<ItemBuffer> m_buffer = new List<ItemBuffer>();
                     foreach (SqlLogPerson m_log in logs)
                     {
@@ -444,6 +468,9 @@ namespace CBA.APIs
 
                         m_buffer.Add(itemBuffer);
                     }
+
+                   
+                    //sw.Restart();
 
                     m_buffer = m_buffer.OrderBy(s => s.idPerson).ThenByDescending(s => s.lastestTime).ToList();
                     DateTime start = DateTime.Now;
@@ -557,7 +584,14 @@ namespace CBA.APIs
                         }
                     }
 
+                    //foreach(ItemLogPersons mItem in myItems)
+                    //{
+                    //    Console.WriteLine(string.Format("code {0} - Time : {1}", mItem.code, mItem.lastestTime));
+                    //}    
+                    //CacheHistoryPerson
                     //
+                    items = items.OrderByDescending(s => s.lastestTime).ToList();
+
                     CacheHistoryPerson t_item = new CacheHistoryPerson();
                     t_item.id = DateTime.Now.Ticks;
                     t_item.begin = begin;
@@ -568,12 +602,39 @@ namespace CBA.APIs
                     cacheHistoryPersons.Add(t_item);
                     //
 
+                    //CacheExcel
+                    //
+
+                    CacheExcel? cachExcel = cacheExcels.Where(s => s.begin.CompareTo(begin) == 0 && s.end.CompareTo(end) == 0).FirstOrDefault();
+                    if(cachExcel == null)
+                    {
+                        CacheExcel ex_item = new CacheExcel();
+                        ex_item.id = DateTime.Now.Ticks;
+                        ex_item.begin = begin;
+                        ex_item.end = end;
+                        ex_item.items = new List<ItemDataExcel>();
+                        do
+                        {
+                            ItemDataExcel m_excel = new ItemDataExcel();
+                            m_excel.date = begin.ToLocalTime().ToString("dd-MM-yyyy");
+                            m_excel.data = items.Where(s => s.date.CompareTo(begin.ToLocalTime().ToString("dd-MM-yyyy")) == 0).ToList();
+                            ex_item.items.Add(m_excel);
+                            begin = begin.AddDays(1);
+                        }while(DateTime.Compare(begin, dateEnd) < 0);
+
+                        ex_item.create = DateTime.Now;
+                        cacheExcels.Add(ex_item);
+                    }
+                   
+
+                    ///
+
                     info.page = index;
                     info.total = items.Count;
-                    if (index + total < items.Count)
+                    if (index + number < items.Count)
                     {
                         items.RemoveRange(0, index);
-                        items.RemoveRange(total, items.Count - total);
+                        items.RemoveRange(number, items.Count - number);
                     }
                     else
                     {
@@ -581,10 +642,6 @@ namespace CBA.APIs
                     }
                     info.items = items;
 
-                  
-
-                    /* sw.Stop();
-                     Log.Information(string.Format("getReport : step4 : {0} ms", sw.ElapsedMilliseconds));*/
                     return info;
                 }
             }
@@ -629,183 +686,112 @@ namespace CBA.APIs
                 return true;
             }
         }
-        //public MemoryStream exportExcel(string token, string group, DateTime begin, DateTime end, int type)
-        //{
-        //    MemoryStream stream = new MemoryStream();
-        //    using (var xlPackage = new ExcelPackage(stream))
-        //    {
-        //        ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets.Add("Report");
-        //        var customStyle = xlPackage.Workbook.Styles.CreateNamedStyle("CustomStyle");
-        //        customStyle.Style.Font.UnderLine = true;
-        //        customStyle.Style.Font.Color.SetColor(Color.Red);
+        public MemoryStream exportExcel(DateTime begin, DateTime end, int total)
+        {
+            MemoryStream stream = new MemoryStream();
+            using (var xlPackage = new ExcelPackage(stream))
+            {
+                ExcelWorksheet worksheet = xlPackage.Workbook.Worksheets.Add("Report");
+                var customStyle = xlPackage.Workbook.Styles.CreateNamedStyle("CustomStyle");
+                customStyle.Style.Font.UnderLine = true;
+                customStyle.Style.Font.Color.SetColor(Color.Red);
 
-        //        if (type == 0)
-        //        {
-        //            int startRow = 1;
-        //            int row = startRow;
+                
 
-        //            worksheet.Cells[row, 1].Value = "Export";
-        //            using (ExcelRange r = worksheet.Cells[row, 1, row, 6])
-        //            {
-        //                r.Merge = true;
-        //                r.Style.Font.Color.SetColor(Color.Green);
-        //                r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(23, 55, 93));
-        //            }
-        //            row++;
+                int startRow = 1;
+                int row = startRow;
+                if(begin.CompareTo(end) == 0)
+                {
+                    end = end.AddDays(1);
+                    worksheet.Cells[row, 1].Value = string.Format("BÁO CÁO NGÀY {0} ", begin.ToString("dd-MM-yyyy"));
+                }  
+                else
+                {
+                    worksheet.Cells[row, 1].Value = string.Format("BÁO CÁO NGÀY {0} -  {1} ", begin.ToString("dd-MM-yyyy"), end.ToString("dd-MM-yyyy"));
+                }    
+                using (ExcelRange r = worksheet.Cells[row, 1, row, 6])
+                {
+                    r.Merge = true;
+                    r.Style.Font.Color.SetColor(Color.Yellow);
+                    r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(23, 55, 93));
+                }
+                row++;
 
-        //            worksheet.Cells[row, 1].Value = "Tên người";
-        //            worksheet.Cells[row, 2].Value = "Giới tính";
-        //            worksheet.Cells[row, 3].Value = "Nhóm";
-        //            worksheet.Cells[row, 4].Value = "Số lần phát hiện";
-        //            worksheet.Cells[row, 5].Value = "Thời gian tạo";
-        //            worksheet.Cells[row, 6].Value = "Thời gian cập nhật";
-        //            worksheet.Cells[row, 1, row, 6].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //            worksheet.Cells[row, 1, row, 6].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
-        //            row++;
+                worksheet.Cells[row, 1].Value = "Tên người";
+                worksheet.Cells[row, 2].Value = "Giới tính";
+                worksheet.Cells[row, 3].Value = "Nhóm";
+                worksheet.Cells[row, 4].Value = "Số lần phát hiện";
+                worksheet.Cells[row, 5].Value = "Thời gian tạo";
+                worksheet.Cells[row, 6].Value = "Thời gian cập nhật";
+                worksheet.Cells[row, 1, row, 6].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                worksheet.Cells[row, 1, row, 6].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
+                row++;
 
-        //            //List<ItemAttention> items = getReportAttention(token, group, begin, end);
-        //            List<ItemLogPersons> items = new List<ItemLogPersons>();
-        //            CacheHistoryPerson? cache = cacheHistoryPersons.Where(s => s.begin.CompareTo(begin) == 0 && s.end.CompareTo(end) == 0).FirstOrDefault();
-        //            if(cache != null)
-        //            {
-        //                items = cache.data;
-        //            }
+                List<ItemDataExcel> items = new List<ItemDataExcel>();
+                CacheExcel? cache = cacheExcels.Where(s => s.begin.CompareTo(begin) == 0 && s.end.CompareTo(end) == 0).FirstOrDefault();
+                if (cache != null)
+                {
+                    items = cache.items;
+                }
+                else
+                {
+                    ListInfoLogsPage tmp = getListPersonHistory(begin, end, 1, total);
 
-        //            foreach (ItemLogPersons item in items)
-        //            {
-        //                worksheet.Cells[row, 1].Value = item.date;
-        //                using (ExcelRange r = worksheet.Cells[row, 1, row, 6])
-        //                {
-        //                    r.Merge = true;
-        //                    r.Style.Font.Color.SetColor(Color.White);
-        //                    r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                    r.Style.Fill.BackgroundColor.SetColor(Color.Green);
-        //                }
-        //                row++;
-        //                foreach (ItemAttentionPerson tmp_item in item.items)
-        //                {
-        //                    worksheet.Cells[row, 1].Value = tmp_item.codePerson;
-        //                    worksheet.Cells[row, 2].Value = tmp_item.namePerson;
-        //                    worksheet.Cells[row, 3].Value = tmp_item.earliest;
-        //                    worksheet.Cells[row, 4].Value = tmp_item.lastest;
-        //                    worksheet.Cells[row, 5].Value = tmp_item.hours;
-        //                    worksheet.Cells[row, 6].Value = tmp_item.codeGroup;
-        //                    worksheet.Cells[row, 7].Value = tmp_item.nameGroup;
-        //                    row++;
-        //                }
-        //                using (ExcelRange r = worksheet.Cells[row, 1, row, 7])
-        //                {
-        //                    r.Merge = true;
-        //                    r.Style.Font.Color.SetColor(Color.Green);
-        //                    r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                    r.Style.Fill.BackgroundColor.SetColor(Color.Black);
-        //                }
-        //                row++;
-        //            }
-        //            row--;
-        //            using (ExcelRange r = worksheet.Cells[1, 1, row, 7])
-        //            {
-        //                //r.Style.ShrinkToFit = true;
+                    items = cacheExcels.Where(s => s.begin.CompareTo(begin) == 0 && s.end.CompareTo(end) == 0).FirstOrDefault()!.items;
+                }
 
-        //                r.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-        //                r.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-        //                r.Style.WrapText = false;
-        //                r.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //                r.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //                r.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //                r.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //            }
-        //        }
-        //        else if (type == 1)
-        //        {
-        //            List<ItemAttention> items = getReportAttention(token, group, begin, end);
-        //            int startRow = 1;
-        //            int row = startRow;
-        //            int limit_col = items.Count * 3 + 2;
+                foreach (ItemDataExcel item in items)
+                {
+                    worksheet.Cells[row, 1].Value = item.date;
+                    using (ExcelRange r = worksheet.Cells[row, 1, row, 6])
+                    {
+                        r.Merge = true;
+                        r.Style.Font.Color.SetColor(Color.White);
+                        r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        r.Style.Fill.BackgroundColor.SetColor(Color.Green);
+                    }
+                    row++;
+                    foreach(ItemLogPersons m_data in item.data)
+                    {
+                        worksheet.Cells[row, 1].Value = string.IsNullOrEmpty(m_data.name) ? "unknown" : m_data.name;
+                        worksheet.Cells[row, 2].Value = m_data.gender;
+                        worksheet.Cells[row, 3].Value = m_data.group.name;
+                        worksheet.Cells[row, 4].Value = m_data.faces.Count;
+                        worksheet.Cells[row, 5].Value = m_data.createdTime;
+                        worksheet.Cells[row, 6].Value = m_data.lastestTime;
+                        row++;
+                    }
+                    using (ExcelRange r = worksheet.Cells[row, 1, row, 6])
+                    {
+                        r.Merge = true;
+                        r.Style.Font.Color.SetColor(Color.Green);
+                        r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        r.Style.Fill.BackgroundColor.SetColor(Color.Black);
+                    }
+                    row++;
+                }
+                row--;
+                using (ExcelRange r = worksheet.Cells[1, 1, row, 6])
+                {
+                    //r.Style.ShrinkToFit = true;
 
-        //            worksheet.Cells[row, 1].Value = "Export";
-        //            using (ExcelRange r = worksheet.Cells[row, 1, row, limit_col])
-        //            {
-        //                r.Merge = true;
-        //                r.Style.Font.Color.SetColor(Color.Green);
-        //                r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                r.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(23, 55, 93));
+                    r.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
+                    r.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
+                    r.Style.WrapText = false;
+                    r.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    r.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    r.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    r.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                }
 
-        //            }
-        //            row++;
+                xlPackage.Workbook.Properties.Title = "GIGAMALL Report";
+                xlPackage.Workbook.Properties.Author = "GIGAMALL";
 
-        //            worksheet.Cells[row, 1].Value = "Code Person";
-        //            using (ExcelRange r = worksheet.Cells[row, 1, row + 1, 1])
-        //            {
-        //                r.Merge = true;
-        //                r.Style.Font.Color.SetColor(Color.Black);
-        //                r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                r.Style.Fill.BackgroundColor.SetColor(Color.White);
-        //            }
-        //            worksheet.Cells[row, 2].Value = "Name Person";
-        //            using (ExcelRange r = worksheet.Cells[row, 2, row + 1, 2])
-        //            {
-        //                r.Merge = true;
-        //                r.Style.Font.Color.SetColor(Color.Black);
-        //                r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                r.Style.Fill.BackgroundColor.SetColor(Color.White);
-        //            }
-        //            if (items.Count > 0)
-        //            {
-        //                for (int i = 0; i < items.Count; i++)
-        //                {
-        //                    worksheet.Cells[row, i * 3 + 3].Value = items[i].date;
-        //                    using (ExcelRange r = worksheet.Cells[row, i * 3 + 3, row, (i + 1) * 3 + 2])
-        //                    {
-        //                        r.Merge = true;
-        //                        r.Style.Font.Color.SetColor(Color.Black);
-        //                        r.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-        //                        r.Style.Fill.BackgroundColor.SetColor(Color.Green);
-        //                    }
-        //                    worksheet.Cells[row + 1, i * 3 + 3].Value = "Begin";
-        //                    worksheet.Cells[row + 1, i * 3 + 4].Value = "End";
-        //                    worksheet.Cells[row + 1, i * 3 + 5].Value = "Working Time";
-        //                }
-        //                row++;
-        //                row++;
-
-        //                for (int i = 0; i < items[0].items.Count; i++)
-        //                {
-        //                    worksheet.Cells[row, 1].Value = items[0].items[i].codePerson;
-        //                    worksheet.Cells[row, 2].Value = items[0].items[i].namePerson;
-        //                    for (int j = 0; j < items.Count; j++)
-        //                    {
-        //                        worksheet.Cells[row, j * 3 + 3].Value = items[j].items[i].earliest;
-        //                        worksheet.Cells[row, j * 3 + 4].Value = items[j].items[i].lastest;
-        //                        worksheet.Cells[row, j * 3 + 5].Value = items[j].items[i].hours;
-        //                    }
-        //                    row++;
-        //                }
-        //            }
-        //            row--;
-        //            using (ExcelRange r = worksheet.Cells[1, 1, row, limit_col])
-        //            {
-        //                //r.Style.ShrinkToFit = true;
-
-        //                r.Style.HorizontalAlignment = OfficeOpenXml.Style.ExcelHorizontalAlignment.Center;
-        //                r.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Center;
-        //                r.Style.WrapText = false;
-        //                r.Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //                r.Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //                r.Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //                r.Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-        //            }
-
-        //        }
-
-        //        xlPackage.Workbook.Properties.Title = "STVG Report";
-        //        xlPackage.Workbook.Properties.Author = "STVG";
-
-        //        xlPackage.Save();
-        //    }
-        //    stream.Position = 0;
-        //    return stream;
-        //}
+                xlPackage.Save();
+            }
+            stream.Position = 0;
+            return stream;
+        }
     }
 }
