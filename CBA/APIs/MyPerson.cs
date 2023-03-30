@@ -67,6 +67,7 @@ namespace CBA.APIs
                         }
                     }
 
+                    Thread.Sleep(1000);
                     for (int i = 0; i < cacheListAllPersons.Count; i++)
                     {
                         TimeSpan time = DateTime.Now.Subtract(cacheListAllPersons[i].create);
@@ -76,7 +77,6 @@ namespace CBA.APIs
                             i--;
                         }
                     }
-                }
                     Thread.Sleep(1000);
                     for (int i = 0; i < cacheExcels.Count; i++)
                     {
@@ -90,7 +90,7 @@ namespace CBA.APIs
                 }
             });
             t.Start();
-        }
+        }                    
         ///////////////////////////////////////////////////////////////////////////////////////////
         public async Task<bool> editPerson(string code, string name, string des, string codeSystem)
         {
@@ -197,7 +197,7 @@ namespace CBA.APIs
                 {
                     items.RemoveRange(0, index);
                 }
-                info.persons = items;
+                info.items = items;
                 return info;
             }
             else
@@ -317,7 +317,7 @@ namespace CBA.APIs
                             items.RemoveRange(0, index);
                         }
 
-                        info.persons = items;
+                        info.items = items;
 
 
                     }
