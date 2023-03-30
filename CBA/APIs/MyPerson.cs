@@ -24,6 +24,15 @@ namespace CBA.APIs
             public DateTime create { get; set; }
         }
         List<CacheHistoryPerson> cacheHistoryPersons = new List<CacheHistoryPerson>();
+
+
+        public class CacheListAllPerson
+        {
+            public long id { get; set; } = 0;
+            public List<ItemPerson> data { get; set; } = new List<ItemPerson>();
+            public DateTime create { get; set; }
+        }
+        List<CacheListAllPerson> cacheListAllPersons = new List<CacheListAllPerson>();
         ///////////////////////////////////////////////////////////////////////////////////////////
         public MyPerson()
         {
@@ -38,6 +47,16 @@ namespace CBA.APIs
                         if (time.Minutes > 5.0)
                         {
                             cacheHistoryPersons.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
+                    for (int i = 0; i < cacheListAllPersons.Count; i++)
+                    {
+                        TimeSpan time = DateTime.Now.Subtract(cacheListAllPersons[i].create);
+                        if (time.Minutes > 5.0)
+                        {
+                            cacheListAllPersons.RemoveAt(i);
                             i--;
                         }
                     }
@@ -132,107 +151,155 @@ namespace CBA.APIs
             public List<ItemPerson> persons { get; set; } = new List<ItemPerson>();
         }
 
-        public ListPersonPage getListPerson(int index, int count)
+        public ListPersonPage getListPerson(int index, int total)
         {
-            using (DataContext context = new DataContext())
+            CacheListAllPerson? cache = cacheListAllPersons.FirstOrDefault();
+            if (cache != null)
             {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                ListPersonPage list = new ListPersonPage();
-
-
-                List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false)
-                                                          .Include(s => s.faces!).ThenInclude(s => s.device)
-                                                          .Include(s => s.level)
-                                                          .Include(s => s.group).Include(s => s.faces!).ThenInclude(s => s.device)
-                                                          .OrderByDescending(s => s.lastestTime)
-                                                          .ToList();
-                if (persons.Count > 0)
+                List<ItemPerson> items = new List<ItemPerson>();
+                items.AddRange(cache.data);
+                ListPersonPage info = new ListPersonPage();
+                info.page = index;
+                info.total = items.Count;
+                if (index + total < items.Count)
                 {
-                    if (index > persons.Count)
-                    {
-                        return new ListPersonPage();
-                    }
-                    list.total = persons.Count();
-                    list.page = index;
-                    for (int i = 0; i < count; i++)
-                    {
-                        int number = index + i;
-                        if (number > persons.Count)
-                        {
-                            break;
-                        }
+                    items.RemoveRange(0, index);
+                    items.RemoveRange(total, items.Count - total);
+                }
+                else
+                {
+                    items.RemoveRange(0, index);
+                }
+                info.persons = items;
+                return info;
+            }
+            else
+            {
+                using (DataContext context = new DataContext())
+                {
 
-                        ItemPerson item = new ItemPerson();
-                        item.code = persons[number - 1].code;
-                        item.codeSystem = persons[number - 1].codeSystem;
-                        item.name = persons[number - 1].name;
-                        item.gender = persons[number - 1].gender;
-                        item.age = persons[number - 1].age;
-                        if (persons[number - 1].group != null)
-                        {
-                            item.group.code = persons[number - 1].group!.code;
-                            item.group.name = persons[number - 1].group!.name;
-                            item.group.des = persons[number - 1].group!.des;
-                        }
+                    ListPersonPage info = new ListPersonPage();
+                    info.page = index;
+                    List<ItemPerson> items = new List<ItemPerson>();
 
-                        if (persons[number - 1].faces != null)
+                    List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false)
+                                                              .Include(s => s.faces!).ThenInclude(s => s.device)
+                                                              .Include(s => s.level)
+                                                              .Include(s => s.group).Include(s => s.faces!).ThenInclude(s => s.device)
+                                                              .OrderByDescending(s => s.lastestTime)
+                                                              .ToList();
+
+                   
+                    if (persons.Count > 0)
+                    {
+                        foreach (SqlPerson itemPerson in persons)
                         {
-                            List<SqlFace>? tmpFace = persons[number - 1].faces!.OrderByDescending(s => s.createdTime).ToList();
-                            if (tmpFace.Count > 0)
+                            ItemPerson item = new ItemPerson();
+                            item.code = itemPerson.code;
+                            item.codeSystem = itemPerson.codeSystem;
+                            item.name = itemPerson.name;
+                            item.gender = itemPerson.gender;
+                            item.age = itemPerson.age;
+                            if (itemPerson.group != null)
                             {
-                                item.image = tmpFace[tmpFace.Count - 1].image;
+                                item.group.code = itemPerson.group!.code;
+                                item.group.name = itemPerson.group!.name;
+                                item.group.des = itemPerson.group!.des;
+                            }
 
-                                foreach (SqlFace tmp in tmpFace)
+                            if (itemPerson.faces != null)
+                            {
+                                List<SqlFace>? tmpFace = itemPerson.faces!.OrderByDescending(s => s.createdTime).ToList();
+                                if (tmpFace.Count > 0)
                                 {
-                                    ItemFaceForPerson itemFace = new ItemFaceForPerson();
+                                    item.image = tmpFace[tmpFace.Count - 1].image;
 
-                                    itemFace.image = tmp.image;
-                                    itemFace.time = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-
-                                    if (tmp.device != null)
+                                    foreach (SqlFace tmp in tmpFace)
                                     {
-                                        itemFace.device = tmp.device.code;
+                                        ItemFaceForPerson itemFace = new ItemFaceForPerson();
+
+                                        itemFace.image = tmp.image;
+                                        itemFace.time = tmp.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+
+                                        if (tmp.device != null)
+                                        {
+                                            itemFace.device = tmp.device.code;
+                                        }
+
+                                        item.faces.Add(itemFace);
+
                                     }
-
-                                    item.faces.Add(itemFace);
-
                                 }
                             }
-                        }
 
-                        if (persons[number - 1].level != null)
-                        {
-                            item.level.code = persons[number - 1].level!.code;
-                            item.level.name = persons[number - 1].level!.name;
-                        }
-                        else
-                        {
-                            string timeStart = "24-03-2023 11:00:00";
-                            DateTime time = DateTime.ParseExact(timeStart, "dd-MM-yyyy HH:mm:ss", null);
-                            if (DateTime.Compare(persons[number - 1].createdTime.ToLocalTime(), time) < 0)
+                            if (itemPerson.level != null)
                             {
-                                item.level.code = "NA";
-                                item.level.name = "Not yet Update Range Ages";
+                                item.level.code = itemPerson.level!.code;
+                                item.level.name = itemPerson.level!.name;
                             }
                             else
                             {
-                                item.level.code = "NA";
-                                item.level.name = "Out Range Ages";
+                                string timeStart = "24-03-2023 11:00:00";
+                                DateTime time = DateTime.ParseExact(timeStart, "dd-MM-yyyy HH:mm:ss", null);
+                                if (DateTime.Compare(itemPerson.createdTime.ToLocalTime(), time) < 0)
+                                {
+                                    item.level.code = "NA";
+                                    item.level.name = "Not yet Update Range Ages";
+                                }
+                                else
+                                {
+                                    item.level.code = "NA";
+                                    item.level.name = "Out Range Ages";
+                                }
                             }
+
+                            item.createdTime = itemPerson.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                            item.lastestTime = itemPerson.lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                            //list.persons.Add(item);
+                            items.Add(item);
+                        }
+                        //for (int i = 0; i < total; i++)
+                       /* {
+                            int number = index + i;
+                            if (number > persons.Count)
+                            {
+                                break;
+                            }
+
+                            
+
+                        }*/
+
+                        //
+                        CacheListAllPerson t_item = new CacheListAllPerson();
+                        t_item.id = DateTime.Now.Ticks;
+                        t_item.data = new List<ItemPerson>();
+                        t_item.data.AddRange(items);
+                        t_item.create = DateTime.Now;
+                        cacheListAllPersons.Add(t_item);
+                        //
+                        info.page = index;
+                        info.total = items.Count;
+                        if (index + total < persons.Count)
+                        {
+                            items.RemoveRange(0, index);
+                            items.RemoveRange(total, items.Count - total);
+                        }
+                        else
+                        {
+                            items.RemoveRange(0, index);
                         }
 
-                        item.createdTime = persons[number - 1].createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                        item.lastestTime = persons[number - 1].lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                        list.persons.Add(item);
+                        info.persons = items;
+
 
                     }
-                }
-                sw.Stop();
-                Log.Information(string.Format("getReport : {0} ms", sw.ElapsedMilliseconds));
-                return list;
+                    
+                    return info;
 
+                }
             }
+            
         }
         public class ItemBufferPerSon
         {
@@ -310,7 +377,7 @@ namespace CBA.APIs
                 using (DataContext context = new DataContext())
                 {
                     Stopwatch sw = new Stopwatch();
-                    sw.Start();
+                    
 
                     DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
                     DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
@@ -330,10 +397,9 @@ namespace CBA.APIs
                     List<SqlLogPerson> logs = totallogs.Where(s => DateTime.Compare(dateBegin.ToUniversalTime(), s.time) <= 0 && DateTime.Compare(dateEnd.ToUniversalTime(), s.time) > 0)
                                                            .OrderByDescending(s => s.time)
                                                            .ToList();
-                    sw.Stop();
-                    Console.WriteLine(string.Format("getReport : step1: {0} ms", sw.ElapsedMilliseconds));
+                   
 
-                    sw.Start();
+                  
                     List<ItemBuffer> m_buffer = new List<ItemBuffer>();
                     foreach (SqlLogPerson m_log in logs)
                     {
@@ -378,11 +444,6 @@ namespace CBA.APIs
 
                         m_buffer.Add(itemBuffer);
                     }
-
-                    sw.Stop();
-                    Console.WriteLine(string.Format("getReport : step2: {0} ms", sw.ElapsedMilliseconds));
-
-                    sw.Restart();
 
                     m_buffer = m_buffer.OrderBy(s => s.idPerson).ThenByDescending(s => s.lastestTime).ToList();
                     DateTime start = DateTime.Now;
@@ -520,20 +581,7 @@ namespace CBA.APIs
                     }
                     info.items = items;
 
-                    //info.total = items.Count;
-                    //for (int i = 0; i < total; i++)
-                    //{
-                    //    int number = index + i;
-                    //    if (number > items.Count)
-                    //    {
-                    //        break;
-                    //    }
-
-                    //    ItemLogPersons m_person = new ItemLogPersons();
-                    //    m_person = items[number - 1];
-                    //    info.items.Add(m_person);
-
-                    //}
+                  
 
                     /* sw.Stop();
                      Log.Information(string.Format("getReport : step4 : {0} ms", sw.ElapsedMilliseconds));*/
