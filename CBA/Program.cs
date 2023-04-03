@@ -4,6 +4,7 @@ using Serilog;
 using CBA.Models;
 using CBA.APIs;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using static CBA.APIs.MyPerson;
 
 namespace CBA;
 
@@ -82,9 +83,6 @@ public class Program
             await api_role.initAsync();
             await api_user.initAsync();
             await api_group.initAsync();
-            await api_age.initAsync();
-           
-            
             app.Run();
             
         }

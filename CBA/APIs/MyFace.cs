@@ -36,7 +36,7 @@ namespace CBA.APIs
                     sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.isdeleted = false;
-                    sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
+                    sqlPerson.level = levels.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
                     
                     context.persons!.Add(sqlPerson);
 
@@ -90,7 +90,7 @@ namespace CBA.APIs
                     }
                     sqlPerson.age = totalAge / sqlPerson.faces.Count;
                     //                    Console.WriteLine(sqlPerson.age);
-                    sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
+                    sqlPerson.level = levels.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
 
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     await context.SaveChangesAsync();

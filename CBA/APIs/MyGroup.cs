@@ -1,5 +1,7 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using static CBA.APIs.MyPerson;
 
 namespace CBA.APIs
 {
@@ -49,6 +51,8 @@ namespace CBA.APIs
                 int rows = await context.SaveChangesAsync();
             }
         }
+
+        
         public async Task<bool> createGroup(string code, string name, string des)
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(code) || string.IsNullOrEmpty(des))
@@ -73,9 +77,10 @@ namespace CBA.APIs
                 context.groups!.Add(group);
 
                 int rows = await context.SaveChangesAsync();
+                bool flag = false;
                 if (rows > 0)
                 {
-                    return true;
+                    return flag;
                 }
                 else
                 {
@@ -102,14 +107,15 @@ namespace CBA.APIs
                 group.des = des;
 
                 int rows = await context.SaveChangesAsync();
-                if (rows > 0)
+                try
                 {
-                    return true;
+                    bool flag = Program.api_age.clearCache();
                 }
-                else
+                catch (Exception ex)
                 {
-                    return false;
+                    Log.Error(ex.ToString());
                 }
+                return true;
             }
         }
 
@@ -122,13 +128,39 @@ namespace CBA.APIs
                 {
                     return false;
                 }
+                bool flag = false;
+
+                if (group.persons != null)
+                {
+                    List<SqlPerson> tmp = group.persons.Where(s => s.isdeleted == false).ToList();
+                    foreach(SqlPerson person in tmp)
+                    {
+                        flag = await cleanPersonAsync(person.code, code);
+                        if(flag)
+                        {
+                            continue;
+                        }    
+                        else
+                        {
+                            return false;
+                        }    
+                    }    
+                }    
 
                 group.isdeleted = true;
 
                 int rows = await context.SaveChangesAsync();
                 if (rows > 0)
                 {
-                    return true;
+                    try
+                    {
+                        flag = Program.api_age.clearCache();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.ToString());
+                    }
+                    return flag;
                 }
                 else
                 {
@@ -155,23 +187,42 @@ namespace CBA.APIs
                 {
                     return false;
                 }
-                if (m_group.persons == null)
+
+                if(m_group.persons == null)
                 {
                     m_group.persons = new List<SqlPerson>();
-                }
+                }    
 
-
-                m_group.persons.Add(m_person);
-
-                int rows = await context.SaveChangesAsync();
-                if (rows > 0)
+                SqlPerson? tmp = m_group.persons!.Where(s => s.ID == m_person.ID).FirstOrDefault();
+                if(tmp == null)
                 {
-                    return true;
+                    m_group.persons.Add(m_person);
                 }
+                bool flag = false;
+                try
+                {
+                    flag = Program.api_age.clearCache();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+                if(flag)
+                {
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        return flag;
+                    }
+                    else
+                    {
+                        return false;
+                    }    
+                }    
                 else
                 {
                     return false;
-                }
+                }    
             }
         }
 
@@ -196,7 +247,7 @@ namespace CBA.APIs
 
                 if (m_group.persons != null)
                 {
-                    SqlPerson? tmp = m_group.persons!.Where(s => s.code.CompareTo(person) == 0).FirstOrDefault();
+                    SqlPerson? tmp = m_group.persons!.Where(s => s.ID == m_person.ID).FirstOrDefault();
 
                     if (tmp != null)
                     {
@@ -205,11 +256,26 @@ namespace CBA.APIs
 
                 }
 
-
-                int rows = await context.SaveChangesAsync();
-                if (rows > 0)
+                bool flag = false;
+                try
                 {
-                    return true;
+                    flag = Program.api_age.clearCache();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex.ToString());
+                }
+                if (flag)
+                {
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        return flag;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
