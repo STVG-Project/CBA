@@ -154,5 +154,99 @@ namespace CBA.Controllers
 
             return Ok(Program.api_report.getCountWithDeviceForDates(time_begin, time_end));
         }
+
+        [HttpGet]
+        [Route("showPlotLevel")]
+        public IActionResult showPlotPersonWithLevel(string time)
+        {
+
+            DateTime time_input = DateTime.MinValue;
+            try
+            {
+                time_input = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_input = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.showPlotLevel(time_input));
+
+        }
+
+        [HttpGet]
+        [Route("showPlotLevelForDates")]
+        public IActionResult showPlotLevelForDates(string begin, string end)
+        {
+
+            DateTime time_begin = DateTime.MinValue;
+            try
+            {
+                time_begin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_begin = DateTime.MinValue;
+            }
+
+            DateTime time_end = DateTime.MaxValue;
+            try
+            {
+                time_end = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_end = DateTime.MaxValue;
+            }
+
+            return Ok(Program.api_report.showPlotLevelForDates(time_begin, time_end));
+        }
+
+        [HttpGet]
+        [Route("showPlotGender")]
+        public IActionResult showPlotPersonWithGender(string time)
+        {
+
+            DateTime time_input = DateTime.MinValue;
+            try
+            {
+                time_input = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_input = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.showPlotGender(time_input));
+
+        }
+
+        [HttpGet]
+        [Route("showPlotGenderForDates")]
+        public IActionResult showPlotGenderForDates(string begin, string end)
+        {
+
+            DateTime time_begin = DateTime.MinValue;
+            try
+            {
+                time_begin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_begin = DateTime.MinValue;
+            }
+
+            DateTime time_end = DateTime.MaxValue;
+            try
+            {
+                time_end = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                time_end = DateTime.MaxValue;
+            }
+
+            return Ok(Program.api_report.showPlotGenderForDates(time_begin, time_end));
+        }
     }
 }

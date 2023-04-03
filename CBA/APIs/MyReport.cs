@@ -336,7 +336,7 @@ namespace CBA.APIs
                             codes.Add(mPerson.person);
                         }
                     }
-                    
+
                     m_item.totalCount.Add(codes.Count);
                 }
 
@@ -564,7 +564,6 @@ namespace CBA.APIs
                 DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
                 DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
                 dateEnd = dateEnd.AddDays(1);
-
                 List<string> m_times = new List<string>();
                 do
                 {
@@ -598,5 +597,371 @@ namespace CBA.APIs
             }
         }
 
+
+        public class ItemBufferForAge
+        {
+            public string person { get; set; } = "";
+            public string level { get; set; } = "";
+            public DateTime time { get; set; }
+
+        }
+
+        public class ItemHours
+        {
+            public string hour { get; set; } = "";
+            public List<int> numbers { get; set; } = new List<int>();
+        }
+
+        public class ItemData
+        {
+            public string date { get; set; } = "";
+            public List<ItemHours> data { get; set; } = new List<ItemHours>();
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+        public class ItemCountWithAge
+        {
+            public List<string> levels { get; set; } = new List<string>();
+            public ItemData item { get; set; } = new ItemData();
+
+        }
+
+        public ItemCountWithAge showPlotLevel(DateTime time)
+        {
+            DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+            DateTime end = begin.AddDays(1);
+            using (DataContext context = new DataContext())
+            {
+                ItemCountWithAge tmp = new ItemCountWithAge();
+
+                List<SqlAgeLevel>? levels = context.ages!.Where(s => s.isdeleted == false).OrderByDescending(s => s.high).ToList();
+                if (levels.Count > 0)
+                {
+                    foreach (SqlAgeLevel m_level in levels)
+                    {
+                        tmp.levels.Add(m_level.name);
+                    }
+                }
+                tmp.levels.Add("");
+
+                List<ItemBufferForAge> buffers = new List<ItemBufferForAge>();
+
+
+                List<SqlFace> faces = context.faces!.Where(s => s.isdeleted == false && (DateTime.Compare(begin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(end.ToUniversalTime(), s.createdTime) > 0)).Include(s => s.person!).ThenInclude(s => s.level).ToList();
+                if (faces.Count > 0)
+                {
+
+                    foreach (SqlFace itemFace in faces)
+                    {
+                        ItemBufferForAge itemBuffer = new ItemBufferForAge();
+
+                        if (itemFace.person != null)
+                        {
+                            itemBuffer.person = itemFace.person.code;
+                            if (itemFace.person.level != null)
+                            {
+                                itemBuffer.level = itemFace.person.level.name;
+                            }
+                            else
+                            {
+                                itemBuffer.level = "";
+                            }
+                        }
+
+                        itemBuffer.time = itemFace.createdTime;
+
+                        buffers.Add(itemBuffer);
+                    }
+                    
+                }
+                DateTime hourTime = begin;
+                ItemData data = new ItemData();
+
+                data.date = time.ToString("dd-MM-yyyy");
+                do
+                {
+                    for (int i = 0; i < 24; i++)
+                    {
+                        ItemHours hour = new ItemHours();
+
+                        hour.hour = i.ToString();
+
+                        DateTime hourStart = begin.AddHours(i);
+                        DateTime hourStop = hourStart.AddHours(1);
+                        hourTime = hourStop;
+                        foreach (string item in tmp.levels)
+                        {
+                            List<string> persons = new List<string>();
+
+                            List<ItemBufferForAge>? mPersons = buffers.Where(s => s.level.CompareTo(item) == 0).OrderBy(s => s.time).ToList();
+                            if (mPersons.Count > 0)
+                            {
+
+                                foreach (ItemBufferForAge m_person in mPersons)
+                                {
+                                    if (DateTime.Compare(hourStart.ToUniversalTime(), m_person.time) <= 0 && DateTime.Compare(hourStop.ToUniversalTime(), m_person.time) > 0)
+                                    {
+                                        string? tmpPerson = persons.Where(s => s.CompareTo(m_person.person) == 0).FirstOrDefault();
+                                        if (tmpPerson == null)
+                                        {
+                                            persons.Add(m_person.person);
+                                        }
+
+                                    }
+                                }
+                            }
+                            hour.numbers.Add(persons.Count);
+
+                        }
+                        data.data.Add(hour);
+                    }
+
+                } while (DateTime.Compare(hourTime, end) < 0);
+
+                foreach (string m_item in tmp.levels)
+                {
+                    List<string> mCounts = new List<string>();
+
+                    List<ItemBufferForAge>? mBuffers = buffers.Where(s => s.level.CompareTo(m_item) == 0).ToList();
+                    if (mBuffers.Count > 0)
+                    {
+                        foreach (ItemBufferForAge m_buffer in mBuffers)
+                        {
+                            string? tempCode = mCounts.Where(s => s.CompareTo(m_buffer.person) == 0).FirstOrDefault();
+                            if (tempCode == null)
+                            {
+                                mCounts.Add(m_buffer.person);
+                            }
+
+                        }
+                    }
+                    data.totalCount.Add(mCounts.Count);
+                }
+                tmp.item = data;
+
+                return tmp;
+            }
+        }
+
+        public class ItemTotalCountsWithAge
+        {
+            public string date { get; set; } = "";
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+        public class ItemInfoPlotForAge
+        {
+            public List<string> levels { get; set; } = new List<string>();
+            public List<ItemTotalCountsWithAge> items { get; set; } = new List<ItemTotalCountsWithAge>();
+        }
+
+        public ItemInfoPlotForAge showPlotLevelForDates(DateTime begin, DateTime end)
+        {
+            DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
+            DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
+            dateEnd = dateEnd.AddDays(1);
+
+            List<string> times = new List<string>();
+
+            do
+            {
+                times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                dateBegin = dateBegin.AddDays(1);
+            } while (DateTime.Compare(dateBegin, dateEnd) < 0);
+
+            using (DataContext context = new DataContext())
+            {
+                ItemInfoPlotForAge tmp = new ItemInfoPlotForAge();
+
+                foreach (string m_time in times)
+                {
+                    DateTime time_input = DateTime.MinValue;
+                    try
+                    {
+                        time_input = DateTime.ParseExact(m_time, "dd-MM-yyyy", null);
+                    }
+                    catch (Exception e)
+                    {
+                        time_input = DateTime.MinValue;
+                    }
+                    ItemCountWithAge item = showPlotLevel(time_input);
+                    ItemTotalCountsWithAge data = new ItemTotalCountsWithAge();
+
+                    data.date = m_time;
+                    data.totalCount = item.item.totalCount;
+                    tmp.levels = item.levels;
+
+                    tmp.items.Add(data);
+
+                }
+                return tmp;
+            }
+        }
+
+        public class ItemBufferForGender
+        {
+            public string person { get; set; } = "";
+            public string gender { get; set; } = "";
+            public DateTime time { get; set; }
+
+        }
+        public class ItemDataWithGender
+        {
+            public string date { get; set; } = "";
+            public List<ItemHours> data { get; set; } = new List<ItemHours>();
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+        public class ItemCountWithGender
+        {
+            public List<string> genders { get; set; } = new List<string>();
+            public ItemDataWithGender item { get; set; } = new ItemDataWithGender();
+        }
+
+        public ItemCountWithGender showPlotGender(DateTime time)
+        {
+            DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+            DateTime end = begin.AddDays(1);
+            using (DataContext context = new DataContext())
+            {
+                ItemCountWithGender tmp = new ItemCountWithGender();
+
+                tmp.genders.Add("0");
+                tmp.genders.Add("1");
+                tmp.genders.Add("2");
+
+                List<ItemBufferForGender> mBuffers = new List<ItemBufferForGender>();
+
+                List<SqlFace>? faces = context.faces!.Where(s => s.isdeleted == false && (DateTime.Compare(begin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(end.ToUniversalTime(), s.createdTime) > 0)).Include(s => s.person).ToList();
+                if (faces.Count > 0)
+                {
+                    foreach (SqlFace face in faces)
+                    {
+                        ItemBufferForGender buffer = new ItemBufferForGender();
+
+                        if (face.person != null)
+                        {
+                            buffer.person = face.person.code;
+                        }
+                        buffer.gender = face.gender;
+
+                        buffer.time = face.createdTime;
+
+                        mBuffers.Add(buffer);
+                    }
+
+
+                }
+                DateTime hourTime = begin;
+                ItemDataWithGender data = new ItemDataWithGender();
+
+                data.date = time.ToString("dd-MM-yyyy");
+
+                do
+                {
+                    for (int i = 0; i < 24; i++)
+                    {
+                        ItemHours hour = new ItemHours();
+
+                        hour.hour = i.ToString();
+
+                        DateTime hourStart = begin.AddHours(i);
+                        DateTime hourStop = hourStart.AddHours(1);
+                        hourTime = hourStop;
+
+                        foreach (string gender in tmp.genders)
+                        {
+                            List<string> persons = new List<string>();
+
+                            List<ItemBufferForGender>? mGenders = mBuffers.Where(s => s.gender.CompareTo(gender) == 0).OrderBy(s => s.time).ToList();
+                            foreach (ItemBufferForGender m_gender in mGenders)
+                            {
+                                if (DateTime.Compare(hourStart.ToUniversalTime(), m_gender.time) <= 0 && DateTime.Compare(hourStop.ToUniversalTime(), m_gender.time) > 0)
+                                {
+                                    string? tmpGender = persons.Where(s => s.CompareTo(m_gender.person) == 0).FirstOrDefault();
+                                    if (tmpGender == null)
+                                    {
+                                        persons.Add(m_gender.person);
+                                    }
+
+                                }
+                            }
+                            hour.numbers.Add(persons.Count);
+                        }
+                        data.data.Add(hour);
+                    }
+                } while (DateTime.Compare(hourTime, end) < 0);
+                foreach (string m_item in tmp.genders)
+                {
+                    List<string> mCounts = new List<string>();
+
+                    List<ItemBufferForGender>? tmpBuffers = mBuffers.Where(s => s.gender.CompareTo(m_item) == 0).ToList();
+                    if (tmpBuffers.Count > 0)
+                    {
+                        foreach (ItemBufferForGender m_buffer in tmpBuffers)
+                        {
+                            string? tempCode = mCounts.Where(s => s.CompareTo(m_buffer.person) == 0).FirstOrDefault();
+                            if (tempCode == null)
+                            {
+                                mCounts.Add(m_buffer.person);
+                            }
+
+                        }
+                    }
+                    data.totalCount.Add(mCounts.Count);
+                }
+                tmp.item = data;
+                return tmp;
+            }
+        }
+        public class ItemTotalCountsWithGender
+        {
+            public string date { get; set; } = "";
+            public List<int> totalCount { get; set; } = new List<int>();
+        }
+        public class ItemInfoPlotForGender
+        {
+            public List<string> genders { get; set; } = new List<string>();
+            public List<ItemTotalCountsWithGender> items { get; set; } = new List<ItemTotalCountsWithGender>();
+        }
+        public ItemInfoPlotForGender showPlotGenderForDates(DateTime begin, DateTime end)
+        {
+            DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
+            DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
+            dateEnd = dateEnd.AddDays(1);
+
+            List<string> times = new List<string>();
+
+            do
+            {
+                times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                dateBegin = dateBegin.AddDays(1);
+            } while (DateTime.Compare(dateBegin, dateEnd) < 0);
+
+            using (DataContext context = new DataContext())
+            {
+                ItemInfoPlotForGender tmp = new ItemInfoPlotForGender();
+
+                foreach (string m_time in times)
+                {
+                    DateTime time_input = DateTime.MinValue;
+                    try
+                    {
+                        time_input = DateTime.ParseExact(m_time, "dd-MM-yyyy", null);
+                    }
+                    catch (Exception e)
+                    {
+                        time_input = DateTime.MinValue;
+                    }
+                    ItemCountWithGender item = showPlotGender(time_input);
+                    ItemTotalCountsWithGender data = new ItemTotalCountsWithGender();
+
+                    data.date = m_time;
+                    data.totalCount = item.item.totalCount;
+                    tmp.genders = item.genders;
+
+                    tmp.items.Add(data);
+
+                }
+                return tmp;
+            }
+        }
     }
 }
