@@ -671,7 +671,7 @@ namespace CBA.APIs
 
                         buffers.Add(itemBuffer);
                     }
-                    
+
                 }
                 DateTime hourTime = begin;
                 ItemData data = new ItemData();
@@ -819,6 +819,7 @@ namespace CBA.APIs
         {
             DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
             DateTime end = begin.AddDays(1);
+
             using (DataContext context = new DataContext())
             {
                 ItemCountWithGender tmp = new ItemCountWithGender();
@@ -832,6 +833,7 @@ namespace CBA.APIs
                 List<SqlFace>? faces = context.faces!.Where(s => s.isdeleted == false && (DateTime.Compare(begin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(end.ToUniversalTime(), s.createdTime) > 0)).Include(s => s.person).ToList();
                 if (faces.Count > 0)
                 {
+
                     foreach (SqlFace face in faces)
                     {
                         ItemBufferForGender buffer = new ItemBufferForGender();
@@ -840,14 +842,46 @@ namespace CBA.APIs
                         {
                             buffer.person = face.person.code;
                         }
+
                         buffer.gender = face.gender;
 
                         buffer.time = face.createdTime;
 
                         mBuffers.Add(buffer);
+
+                        int countMale = 0;
+                        int countFemale = 0;
+                        int countUnknown = 0;
+                        foreach (ItemBufferForGender item in mBuffers)
+                        {
+                           
+                            if (item.gender == "0" && item.person.CompareTo(face.person!.code) == 0)
+                            {
+                                countUnknown++;
+                            }
+                            if (item.gender == "1" && item.person.CompareTo(face.person!.code) == 0)
+                            {
+                                countMale++;
+                            }
+                            if (item.gender == "2" && item.person.CompareTo(face.person!.code) == 0)
+                            {
+                                countFemale++;
+                            }
+                            if(countUnknown > countFemale && countUnknown > countMale)
+                            {
+                                item.gender = "0";
+                            }
+                            if (countMale > countFemale && countMale > countUnknown)
+                            {
+                                item.gender = "1";
+                            }
+                            if (countFemale > countMale && countFemale > countUnknown)
+                            {
+                                item.gender = "1";
+                            }
+                        }
+                       
                     }
-
-
                 }
                 DateTime hourTime = begin;
                 ItemDataWithGender data = new ItemDataWithGender();

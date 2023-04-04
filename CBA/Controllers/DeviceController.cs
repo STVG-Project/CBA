@@ -75,7 +75,7 @@ namespace CBA.Controllers
                 {
                     return BadRequest();
                 }
-                bool flag = await Program.api_group.deleteGroup(code);
+                bool flag = await Program.api_device.deleteDevice(code);
                 if (flag)
                 {
                     return Ok();
