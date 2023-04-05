@@ -75,6 +75,15 @@ namespace CBA.APIs
                 {
                     return false;
                 }
+                List<SqlFace> faces = context.faces!.Where(s => s.device!.ID == device.ID).ToList();
+                if(faces.Count > 0)
+                {
+                    foreach(SqlFace m_face in faces)
+                    {
+                        m_face.isdeleted = true;
+                    }
+                    int rowsFace = await context.SaveChangesAsync();
+                }
 
                 device.isdeleted = true;
 

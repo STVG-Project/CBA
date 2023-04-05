@@ -10,7 +10,17 @@ namespace CBA.APIs
 
         public async Task<bool> createFace(int age, string gender, byte[] image, string device, string codeSystem)
         {
-            string codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
+            string codefile = "";
+            try
+            {
+                codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
+                Log.Information(codefile);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+
             int totalAge = 0;
 
             if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile) || string.IsNullOrEmpty(device))
@@ -25,7 +35,7 @@ namespace CBA.APIs
                 List<SqlAgeLevel>? levels = context.ages!.Where(s => s.isdeleted == false).OrderByDescending(s => s.high).ToList();
 
                 SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
-                if(sqlPerson == null)
+                if (sqlPerson == null)
                 {
                     sqlPerson = new SqlPerson();
                     sqlPerson.ID = DateTime.Now.Ticks;
@@ -37,7 +47,7 @@ namespace CBA.APIs
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.isdeleted = false;
                     sqlPerson.level = levels.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
-                    
+
                     context.persons!.Add(sqlPerson);
 
                     await context.SaveChangesAsync();
@@ -51,10 +61,10 @@ namespace CBA.APIs
                 //        await context.SaveChangesAsync();
                 //    }
                 //}
-                
+
 
                 SqlDevice? sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
-                if(sqlDevice == null)
+                if (sqlDevice == null)
                 {
                     sqlDevice = new SqlDevice();
                     sqlDevice.ID = DateTime.Now.Ticks;
@@ -96,7 +106,7 @@ namespace CBA.APIs
                     await context.SaveChangesAsync();
                 }
 
-                
+
 
 
                 SqlLogPerson log = new SqlLogPerson();

@@ -1,6 +1,7 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
 using RestSharp;
+using Serilog;
 
 namespace CBA.APIs
 {
@@ -20,37 +21,49 @@ namespace CBA.APIs
         {
             using (DataContext context = new DataContext())
             {
-                string code = createKey(file);
-                string link_file = "Data/" + code + ".file";
                 try
                 {
-                    await File.WriteAllBytesAsync(link_file, data);
+                    string code = createKey(file);
+                    string link_file = "Data/" + code + ".file";
+                    try
+                    {
+                        await File.WriteAllBytesAsync(link_file, data);
+                    }
+                    catch (Exception ex)
+                    {
+                        code = "";
+                    }
+                    if (string.IsNullOrEmpty(code))
+                    {
+                        return code;
+                    }
+                    SqlFile m_file = new SqlFile();
+                    m_file.ID = DateTime.Now.Ticks;
+                    m_file.key = code;
+                    m_file.link = link_file;
+                    m_file.name = file;
+                    m_file.time = DateTime.Now.ToUniversalTime();
+                    context.files!.Add(m_file);
+
+                    Log.Information(m_file.ID.ToString());
+
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        return code;
+                    }
+                    else
+                    {
+                        return "";
+                    }
                 }
                 catch (Exception ex)
                 {
-                    code = "";
-                }
-                if (string.IsNullOrEmpty(code))
-                {
-                    return code;
-                }
-                SqlFile m_file = new SqlFile();
-                m_file.ID = DateTime.Now.Ticks;
-                m_file.key = code;
-                m_file.link = link_file;
-                m_file.name = file;
-                m_file.time = DateTime.Now.ToUniversalTime();
-                context.files!.Add(m_file);
-                int rows = await context.SaveChangesAsync();
-                if (rows > 0)
-                {
-                    return code;
-                }
-                else
-                {
+                    Log.Error(ex.ToString());
                     return "";
                 }
             }
+            
         }
 
         public byte[]? readFile(string code)
