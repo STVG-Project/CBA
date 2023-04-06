@@ -28,7 +28,7 @@ namespace CBA.Controllers
                 time_input = DateTime.MinValue;
             }
 
-            return Ok(Program.api_report.getCountHour(time_input));
+            return Ok(Program.api_report.getCountHourV2(time_input));
 
         }
 
@@ -57,7 +57,7 @@ namespace CBA.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_report.getCountDates(time_begin, time_end));
+            return Ok(Program.api_report.getCountDatesV2(time_begin, time_end));
         }
 
 

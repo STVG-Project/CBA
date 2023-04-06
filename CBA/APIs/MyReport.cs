@@ -45,6 +45,270 @@ namespace CBA.APIs
             public ItemCounts item { get; set; } = new ItemCounts();
         }
 
+        public class DataRaw
+        {
+            public long ID { get; set; }
+            public int age { get; set; } = 0;
+            public string gender { get; set; } = "";
+            public string image { get; set; } = "";
+            public DataPersonRaw person { get; set; } = new DataPersonRaw();
+            public DataDeviceRaw device { get; set; } = new DataDeviceRaw();
+            public DateTime createdTime { get; set; }
+        }
+
+        public class DataPersonRaw
+        {
+            public long ID { get; set; }
+            public string code { get; set; } = "";
+            public string codeSystem { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+            public string gender { get; set; } = "";
+            public int age { get; set; } = 0;
+            public DataGroupRaw group { get; set; } = new DataGroupRaw();
+            public DateTime lastestTime { get; set; }
+            public DateTime createdTime { get; set; }
+        }
+
+        public class DataGroupRaw
+        {
+            public long ID { get; set; }
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+        }
+
+        public class DataDeviceRaw
+        {
+            public long ID { get; set; }
+            public string code { get; set; } = "";
+            public string name { get; set; } = "";
+            public string des { get; set; } = "";
+        }
+
+        public List<DataRaw> getRawData(DateTime begin, DateTime end)
+        {
+            using (DataContext context = new DataContext())
+            {
+                List<SqlFace>? faces = context.faces!.Where(s => DateTime.Compare(begin.ToUniversalTime(), s.createdTime) <= 0 && DateTime.Compare(end.ToUniversalTime(), s.createdTime) > 0 && s.isdeleted == false)
+                                                    .Include(s => s.person!).ThenInclude(s => s.group)
+                                                    .Include(s => s.device)
+                                                    .ToList();
+                List<DataRaw> datas = new List<DataRaw>();
+                foreach(SqlFace face in faces)
+                {
+                    DataRaw item = new DataRaw();
+                    item.ID = face.ID;
+                    item.age = face.age;
+                    item.gender = face.gender;
+                    item.createdTime = face.createdTime.ToLocalTime();
+                    item.image = face.image;
+                    if(face.person != null)
+                    {
+                        if(face.person.isdeleted == false)
+                        {
+                            item.person.ID = face.person.ID;
+                            item.person.name = face.person.name;
+                            item.person.code = face.person.code;
+                            item.person.codeSystem = face.person.codeSystem;
+                            item.person.des = face.person.des;
+                            item.person.gender = face.person.gender;
+                            item.person.age = face.person.age;
+                            item.person.createdTime = face.person.createdTime.ToLocalTime();
+                            item.person.lastestTime = face.person.lastestTime.ToLocalTime();
+                            if(face.person.group != null)
+                            {
+                                if(face.person.group.isdeleted == false)
+                                {
+                                    item.person.group.ID = face.person.group.ID;
+                                    item.person.group.code = face.person.group.code;
+                                    item.person.group.name = face.person.group.name;
+                                    item.person.group.des = face.person.group.des;
+                                }
+                            }
+                        }
+                    }
+                    if (face.device != null)
+                    {
+                        item.device.ID = face.device.ID;
+                        item.device.code = face.device.code;
+                        item.device.name = face.device.name;
+                        item.device.des = face.device.des;
+                    }
+                    datas.Add(item);
+                }
+                return datas;
+            }
+        }
+
+        public ItemCountsPlotInDay calcGetCountHour(DateTime time, List<DataRaw> datas)
+        {
+            using (DataContext context = new DataContext())
+            {
+                DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+                DateTime end = begin.AddDays(1);
+                DateTime timeHours = begin;
+
+                ItemCountsPlotInDay tmp = new ItemCountsPlotInDay();
+
+                List<ItemBufferForGroups> buffers = new List<ItemBufferForGroups>();
+
+                List<SqlGroup> groups = context.groups!.Where(s => s.isdeleted == false).ToList();
+                if (groups.Count > 0)
+                {
+                    foreach (SqlGroup m_group in groups)
+                    {
+                        tmp.groups.Add(m_group.name);
+                    }
+                }
+
+                tmp.groups.Add("");
+
+                List<DataRaw> faces = datas.Where(s => DateTime.Compare(begin, s.createdTime) <= 0 && DateTime.Compare(end, s.createdTime) > 0).ToList();
+                if (faces.Count > 0)
+                {
+
+                    foreach (DataRaw m_face in faces)
+                    {
+                        ItemBufferForGroups m_buffer = new ItemBufferForGroups();
+
+                        if (m_face.person != null)
+                        {
+
+                            m_buffer.person = m_face.person.code;
+
+                            if (m_face.person.group != null)
+                            {
+                                m_buffer.group = m_face.person.group.name;
+                            }
+                            else
+                            {
+                                m_buffer.group = "";
+                            }
+                        }
+                        m_buffer.time = m_face.createdTime;
+                        buffers.Add(m_buffer);
+
+                    }
+                }
+
+                ItemCounts item = new ItemCounts();
+                item.date = begin.ToLocalTime().ToString("dd-MM-yyyy");
+                do
+                {
+                    for (int i = 0; i < 24; i++)
+                    {
+                        //Console.WriteLine(i);
+                        ItemCountHours m_item = new ItemCountHours();
+                        m_item.hour = i.ToString();
+                        DateTime hourStart = begin.AddHours(i);
+                        DateTime hourStop = hourStart.AddHours(1);
+                        timeHours = hourStop;
+
+                        //Console.WriteLine(string.Format("Time start : {0} ---- Time Stop : {1}", hourStart.ToLocalTime(), hourStop.ToLocalTime()));
+
+                        foreach (string group in tmp.groups)
+                        {
+                            int index = 0;
+                            List<ItemBufferForGroups>? persons = buffers.Where(s => s.group.CompareTo(group) == 0).OrderBy(s => s.time).ToList();
+                            if (persons.Count > 0)
+                            {
+                                foreach (ItemBufferForGroups m_person in persons)
+                                {
+                                    if (DateTime.Compare(hourStart.ToUniversalTime(), m_person.time) <= 0 && DateTime.Compare(hourStop.ToUniversalTime(), m_person.time) > 0)
+                                    {
+                                        index++;
+                                        //Console.WriteLine(string.Format(" timeEnd : {0} - Count : {1} - Group : {2}", hourStop.ToLocalTime(), index, group));
+
+                                    }
+                                }
+
+                            }
+                            m_item.number.Add(index);
+                        }
+                        item.data.Add(m_item);
+                    }
+                }
+                while (DateTime.Compare(timeHours, end) < 0);
+
+                for (int i = 0; i < tmp.groups.Count; i++)
+                {
+                    int totalcount = 0;
+                    foreach (ItemCountHours tmp_count in item.data)
+                    {
+                        totalcount += tmp_count.number[i];
+                    }
+                    item.totalCount.Add(totalcount);
+                }
+                tmp.item = item;
+
+                return tmp;
+            }
+        }
+
+        public ItemCountsPlotInDay getCountHourV2(DateTime time)
+        {
+            DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+            DateTime end = begin.AddDays(1);
+            List<DataRaw> datas = getRawData(begin, end);
+            return calcGetCountHour(time, datas);
+        }
+
+        public ItemCountsPlotByDay getCountDatesV2(DateTime begin, DateTime end)
+        {
+            using (DataContext context = new DataContext())
+            {
+                DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
+                DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
+                dateEnd = dateEnd.AddDays(1);
+                List<DataRaw> datas = getRawData(begin, end);
+
+                ItemCountsPlotByDay tmp = new ItemCountsPlotByDay();
+
+                List<string> m_times = new List<string>();
+                do
+                {
+                    m_times.Add(dateBegin.ToString("dd-MM-yyyy"));
+                    dateBegin = dateBegin.AddDays(1);
+
+                } while (DateTime.Compare(dateBegin, dateEnd) < 0);
+
+                try
+                {
+                    foreach (string m_time in m_times)
+                    {
+                        ItemCountsByDay item = new ItemCountsByDay();
+
+                        DateTime time = DateTime.ParseExact(m_time, "dd-MM-yyyy", null);
+                        ItemCountsPlotInDay m_counts = calcGetCountHour(time, datas);
+                        item.date = m_time;
+                        item.totalCount = m_counts.item.totalCount;
+                        tmp.items.Add(item);
+                        tmp.groups = m_counts.groups;
+                        tmp.totals = new List<int>();
+                        for (int i = 0; i < tmp.groups.Count; i++)
+                        {
+                            tmp.totals.Add(0);
+                            foreach (ItemCountsByDay m_item in tmp.items)
+                            {
+                                tmp.totals[i] += m_item.totalCount[i];
+                            }
+                        }
+                    }
+
+                    return tmp;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    return new ItemCountsPlotByDay();
+                }
+
+
+            }
+        }
+
         public ItemCountsPlotInDay getCountHour(DateTime time)
         {
 
@@ -97,13 +361,10 @@ namespace CBA.APIs
                     }
                 }
 
-
-                //ItemCounts itemCount = getData(time, start.ToUniversalTime(), stop.ToUniversalTime(), tmp.groups, face_persons);
                 ItemCounts item = new ItemCounts();
                 item.date = begin.ToLocalTime().ToString("dd-MM-yyyy");
                 do
                 {
-
                     for (int i = 0; i < 24; i++)
                     {
                         //Console.WriteLine(i);
@@ -136,8 +397,6 @@ namespace CBA.APIs
                         }
                         item.data.Add(m_item);
                     }
-
-
                 }
                 while (DateTime.Compare(timeHours, end) < 0);
 
