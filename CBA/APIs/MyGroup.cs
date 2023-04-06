@@ -36,18 +36,6 @@ namespace CBA.APIs
                     context.groups!.Add(item);
                 }
 
-                group = context.groups!.Where(s => s.code.CompareTo("LA") == 0 && s.isdeleted == false).FirstOrDefault();
-                if (group == null)
-                {
-                    SqlGroup item = new SqlGroup();
-                    item.ID = DateTime.Now.Ticks;
-                    item.code = "LA";
-                    item.name = "Khách lạ";
-                    item.des = "Khách lạ";
-                    item.isdeleted = false;
-                    context.groups!.Add(item);
-                }
-
                 int rows = await context.SaveChangesAsync();
             }
         }
