@@ -859,7 +859,7 @@ namespace CBA.APIs
                         DateTime time = DateTime.ParseExact(m_time, "dd-MM-yyyy", null);
                         ItemTotalPersons temp = new ItemTotalPersons();
 
-                        ItemPersonsHoursPlot countHours = getPersonsHours(time);
+                        ItemPersonsHoursPlot countHours = calcGetCountPersonHour(time, datas);
                         temp.date = m_time;
                         temp.totalCount = countHours.item.totalCount;
                         tmp.items.Add(temp);
