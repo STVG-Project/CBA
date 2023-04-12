@@ -162,15 +162,14 @@ namespace CBA.APIs
         {
             using (DataContext context = new DataContext())
             {
-                SqlGroup? m_group = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(group) == 0).FirstOrDefault();
+                SqlGroup? m_group = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(group) == 0).Include(s => s.persons).FirstOrDefault();
 
                 if (m_group == null)
                 {
                     return false;
                 }
 
-                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.code.CompareTo(person) == 0).FirstOrDefault();
-
+                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(person) == 0).FirstOrDefault();
                 if (m_person == null)
                 {
                     return false;
@@ -218,31 +217,31 @@ namespace CBA.APIs
         {
             using (DataContext context = new DataContext())
             {
-                SqlGroup? m_group = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(group) == 0).FirstOrDefault();
+                SqlGroup? m_group = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(group) == 0).Include(s => s.persons).FirstOrDefault();
 
                 if (m_group == null)
                 {
                     return false;
                 }
+                if(m_group.persons == null)
+                {
+                    return false;
+                }    
+                    
 
-                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.code.CompareTo(person) == 0).FirstOrDefault();
+                SqlPerson? m_person = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(person) == 0).FirstOrDefault();
 
                 if (m_person == null)
                 {
                     return false;
                 }
 
-
-                if (m_group.persons != null)
+                SqlPerson? tmp = m_group.persons!.Where(s => s.ID == m_person.ID).FirstOrDefault();
+                if (tmp != null)
                 {
-                    SqlPerson? tmp = m_group.persons!.Where(s => s.ID == m_person.ID).FirstOrDefault();
-
-                    if (tmp != null)
-                    {
-                        m_group.persons.Remove(tmp);
-                    }
-
+                    m_group.persons.Remove(tmp);
                 }
+
 
                 bool flag = false;
                 try

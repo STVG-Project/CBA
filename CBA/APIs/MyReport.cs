@@ -558,7 +558,7 @@ namespace CBA.APIs
                     ItemBufferForGroups m_buffer = new ItemBufferForGroups();
                     if (m_face.person != null)
                     {
-                        m_buffer.person = m_face.person.code;
+                        m_buffer.person = m_face.person.codeSystem;
 
                         if (m_face.person.group != null)
                         {
@@ -652,7 +652,6 @@ namespace CBA.APIs
             {
                 DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
                 DateTime end = begin.AddDays(1);
-                DateTime timeHours = begin;
 
                 ItemPersonsHoursPlot tmp = new ItemPersonsHoursPlot();
 
@@ -674,7 +673,7 @@ namespace CBA.APIs
                     ItemBufferForGroups m_buffer = new ItemBufferForGroups();
                     if (m_face.person != null)
                     {
-                        m_buffer.person = m_face.person.code;
+                        m_buffer.person = m_face.person.codeSystem;
 
                         if (m_face.person.group != null)
                         {
@@ -702,7 +701,6 @@ namespace CBA.APIs
                     item.hour = i.ToString();
                     DateTime hourStart = begin.AddHours(i);
                     DateTime hourStop = hourStart.AddHours(1);
-                    timeHours = hourStop;
 
                     foreach (string group in tmp.groups)
                     {
@@ -942,7 +940,7 @@ namespace CBA.APIs
                     ItemBufferForDevice m_buffer = new ItemBufferForDevice();
                     if (m_face.person != null)
                     {
-                        m_buffer.person = m_face.person.code;
+                        m_buffer.person = m_face.person.codeSystem;
                     }
 
                     if (m_face.device != null)
@@ -1037,7 +1035,7 @@ namespace CBA.APIs
                     ItemBufferForDevice m_buffer = new ItemBufferForDevice();
                     if (m_face.person != null)
                     {
-                        m_buffer.person = m_face.person.code;
+                        m_buffer.person = m_face.person.codeSystem;
                     }
 
                     if (m_face.device != null)
@@ -1287,7 +1285,7 @@ namespace CBA.APIs
 
                         if (itemFace.person != null)
                         {
-                            itemBuffer.person = itemFace.person.code;
+                            itemBuffer.person = itemFace.person.codeSystem;
                             if (itemFace.person.level != null)
                             {
                                 itemBuffer.level = itemFace.person.level.name;
@@ -1653,7 +1651,7 @@ namespace CBA.APIs
                             {
                                 ItemGenderPerson tmpPerson = new ItemGenderPerson();
 
-                                tmpPerson.person = face.person.code;
+                                tmpPerson.person = face.person.codeSystem;
                                 tmpPerson.gender = face.gender;
                                 tmpPerson.count = 1;
                                 mCodes.Add(tmpPerson);
@@ -1723,47 +1721,42 @@ namespace CBA.APIs
 
 
                 buffers = buffers.OrderBy(s => s.person).ThenByDescending(s => s.gender).ToList();
-                DateTime hourTime = begin;
                 ItemDataWithGender data = new ItemDataWithGender();
 
                 data.date = time.ToString("dd-MM-yyyy");
 
-                do
+                for (int i = 0; i < 24; i++)
                 {
-                    for (int i = 0; i < 24; i++)
+                    ItemHours hour = new ItemHours();
+
+                    hour.hour = i.ToString();
+
+                    DateTime hourStart = begin.AddHours(i);
+                    DateTime hourStop = hourStart.AddHours(1);
+
+                    foreach (string gender in tmp.genders)
                     {
-                        ItemHours hour = new ItemHours();
+                        List<string> persons = new List<string>();
 
-                        hour.hour = i.ToString();
-
-                        DateTime hourStart = begin.AddHours(i);
-                        DateTime hourStop = hourStart.AddHours(1);
-                        hourTime = hourStop;
-
-                        foreach (string gender in tmp.genders)
+                        List<ItemBufferForGender>? mGenders = buffers.Where(s => s.gender.CompareTo(gender) == 0).ToList();
+                        foreach (ItemBufferForGender m_gender in mGenders)
                         {
-                            List<string> persons = new List<string>();
-
-                            List<ItemBufferForGender>? mGenders = buffers.Where(s => s.gender.CompareTo(gender) == 0).ToList();
-                            foreach (ItemBufferForGender m_gender in mGenders)
+                            if (DateTime.Compare(hourStart.ToUniversalTime(), m_gender.time) <= 0 && DateTime.Compare(hourStop.ToUniversalTime(), m_gender.time) > 0)
                             {
-                                if (DateTime.Compare(hourStart.ToUniversalTime(), m_gender.time) <= 0 && DateTime.Compare(hourStop.ToUniversalTime(), m_gender.time) > 0)
+                                string? m_person = persons.Where(s => s.CompareTo(m_gender.person) == 0).FirstOrDefault();
+                                if (m_person == null)
                                 {
-                                    string? m_person = persons.Where(s => s.CompareTo(m_gender.person) == 0).FirstOrDefault();
-                                    if (m_person == null)
-                                    {
 
-                                        persons.Add(m_gender.person);
-                                    }
+                                    persons.Add(m_gender.person);
                                 }
-
-
                             }
-                            hour.number.Add(persons.Count);
+
+
                         }
-                        data.data.Add(hour);
+                        hour.number.Add(persons.Count);
                     }
-                } while (DateTime.Compare(hourTime, end) < 0);
+                    data.data.Add(hour);
+                }
                 foreach (string m_item in tmp.genders)
                 {
                     List<ItemGenderPerson> mCounts = mCodes.Where(s => s.gender.CompareTo(m_item) == 0).OrderBy(s => s.gender).ToList();

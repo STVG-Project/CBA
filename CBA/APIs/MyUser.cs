@@ -127,7 +127,7 @@ namespace CBA.APIs
                 {
                     return -1;
                 }
-                if (user.role!.code.CompareTo("system") != 0)
+                if (user.role!.code.CompareTo("system") != 0 || user.role!.code.CompareTo("admin") == 0)
                 {
                     return -1;
                 }
