@@ -51,6 +51,17 @@ public class Program
                     builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).WithExposedHeaders("Grpc-Status", "Grpc-Encoding", "Grpc-Accept-Encoding");
                 });
             });
+
+            using (StreamReader sr = new StreamReader("Config.txt"))
+            {
+                string? line = sr.ReadLine();
+                if (!string.IsNullOrEmpty(line))
+                {
+                    DataContext.configSql = line;
+                }
+            }
+            Log.Information("Connected to Server : " + DataContext.configSql);
+
             builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(DataContext.configSql));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddControllers();
