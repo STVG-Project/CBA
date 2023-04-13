@@ -1643,9 +1643,9 @@ namespace CBA.APIs
 
                         if (face.person != null)
                         {
-                            itemBuffer.person = face.person.code;
+                            itemBuffer.person = face.person.codeSystem;
 
-                            ItemGenderPerson? person = mCodes.Where(s => s.person.CompareTo(face.person.code) == 0 && s.gender.CompareTo(face.gender) == 0).FirstOrDefault();
+                            ItemGenderPerson? person = mCodes.Where(s => s.person.CompareTo(face.person.codeSystem) == 0 && s.gender.CompareTo(face.gender) == 0).FirstOrDefault();
 
                             if (person == null)
                             {
