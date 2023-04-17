@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Drawing;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Serilog;
+using static CBA.APIs.MyReport;
 
 namespace CBA.Controllers
 {
@@ -12,6 +16,52 @@ namespace CBA.Controllers
         {
             _logger = logger;
         }
+
+        [HttpGet]
+        [Route("countPersonForDeviceDate")]
+        public IActionResult countPersonForDeviceDate(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsPersonForDeviceDate(_time));
+        }
+
+        [HttpGet]
+        [Route("countPersonForDevice")]
+        public IActionResult countPersonForDevice(string begin, string end)
+        {
+            DateTime _timebegin = DateTime.MinValue;
+            try
+            {
+                _timebegin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timebegin = DateTime.MinValue;
+            }
+
+            DateTime _timeend = DateTime.MinValue;
+            try
+            {
+                _timeend = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timeend = DateTime.MinValue;
+            }
+
+            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForDevice(_timebegin, _timeend)));
+            //return Ok(Program.api_report.getStatisticsPersonForDevice(_timebegin, _timeend));
+        }
+
 
         [HttpGet]
         [Route("showPlotCount")]
@@ -248,5 +298,22 @@ namespace CBA.Controllers
 
             return Ok(Program.api_report.showPlotGenderForDatesV2(time_begin, time_end));
         }
+
+        //[HttpGet]
+        //[Route("statisticsPersonForDevice")]
+        //public IActionResult statisticsPersonForDevice(string time)
+        //{
+        //    DateTime m_time = DateTime.MinValue;
+        //    try
+        //    {
+        //        m_time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+        //        return Ok(Program.api_report.getStatisticsPersonForDevice(m_time));
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Log.Error(e.ToString());
+        //        return Ok(new List<ItemPersonForDevice>());
+        //    }
+        //}
     }
 }
