@@ -70,7 +70,7 @@ namespace CBA.APIs
             public DateTime lastestTime { get; set; }
             public DateTime createdTime { get; set; }
         }
-       
+
         public class DataGroupRaw
         {
             public long ID { get; set; }
@@ -105,7 +105,7 @@ namespace CBA.APIs
                                                     .Include(s => s.device)
                                                     .ToList();
                 List<DataRaw> datas = new List<DataRaw>();
-                foreach(SqlFace face in faces)
+                foreach (SqlFace face in faces)
                 {
                     DataRaw item = new DataRaw();
                     item.ID = face.ID;
@@ -113,9 +113,9 @@ namespace CBA.APIs
                     item.gender = face.gender;
                     item.createdTime = face.createdTime.ToLocalTime();
                     item.image = face.image;
-                    if(face.person != null)
+                    if (face.person != null)
                     {
-                        if(face.person.isdeleted == false)
+                        if (face.person.isdeleted == false)
                         {
                             item.person.ID = face.person.ID;
                             item.person.name = face.person.name;
@@ -126,9 +126,9 @@ namespace CBA.APIs
                             item.person.age = face.person.age;
                             item.person.createdTime = face.person.createdTime.ToLocalTime();
                             item.person.lastestTime = face.person.lastestTime.ToLocalTime();
-                            if(face.person.group != null)
+                            if (face.person.group != null)
                             {
-                                if(face.person.group.isdeleted == false)
+                                if (face.person.group.isdeleted == false)
                                 {
                                     item.person.group.ID = face.person.group.ID;
                                     item.person.group.code = face.person.group.code;
@@ -178,10 +178,21 @@ namespace CBA.APIs
             public List<int> number { get; set; } = new List<int>();
             public List<int> count { get; set; } = new List<int>();
         }
+        public class ItemCountHourWithDevice
+        {
+            public string hour { get; set; } = "";
+            public List<ItemPersonForDevice> data { get; set; } = new List<ItemPersonForDevice>();
+        } 
+        public class ItemPersonHourForDevice
+        {
+                public List<string> devices { get; set; } = new List<string>();
+                public ItemCountHourWithDevice item { get; set; } = new ItemCountHourWithDevice();
+        }
 
         public class ReportPersonForDevice
         {
             public List<string> devices { get; set; } = new List<string>();
+
             public List<ItemReportPersonForDevice> datas = new List<ItemReportPersonForDevice>();
         }
 
@@ -193,6 +204,7 @@ namespace CBA.APIs
 
             List<DataRaw> datas = raws.OrderBy(s => s.device.code).ThenBy(s => s.person.codeSystem).ToList();
             List<ItemPersonForDevice> items = new List<ItemPersonForDevice>();
+           
             while (datas.Count > 0)
             {
                 string tmp = datas[0].device.name;
@@ -249,7 +261,7 @@ namespace CBA.APIs
             while (DateTime.Compare(_begin, _end) < 0)
             {
                 DateTime _tmp = _begin.AddDays(1.0);
-                List<DataRaw> buffer = raws.Where(s => s.createdTime.CompareTo(_begin) >= 0 && s.createdTime.CompareTo(_end) < 0).ToList();
+                List<DataRaw> buffer = raws.Where(s => s.createdTime.CompareTo(_begin) >= 0 && s.createdTime.CompareTo(_tmp) < 0).ToList();
                 buffer = buffer.OrderBy(s => s.device.ID).ThenBy(s => s.person.ID).ToList();
                 ItemReportPersonForDevice data = new ItemReportPersonForDevice();
                 data.time = _begin.ToString("dd-MM-yyyy");
@@ -308,9 +320,306 @@ namespace CBA.APIs
             return report;
         }
 
+        public class ItemPersonForLevel
+        {
+            public string codeLevel { get; set; } = "";
+            public string nameLevel { get; set; } = "";
+            public int number { get; set; } = 0;
+            public int count { get; set; } = 0;
+        }
+        public class ItemReportPersonForLevel
+        {
+            public string time { get; set; } = "";
+            public List<int> number { get; set; } = new List<int>();
+            public List<int> count { get; set; } = new List<int>();
+        }
+        public class ReportPersonForLevel
+        {
+            public List<string> levels { get; set; } = new List<string>();
+            public List<ItemReportPersonForLevel> datas { get; set; } = new List<ItemReportPersonForLevel>();
+        }
+
+        public List<ItemPersonForLevel> getStatisticsPersonForLevelDate(DateTime time)
+        {
+            
+            DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+            DateTime end = begin.AddDays(1.0);
+
+            List<DataRaw> raws = getRawData(begin, end);
+
+            List<DataRaw> datas = raws.OrderBy(s => s.person.level.code).ThenBy(s => s.person.codeSystem).ToList();
+            List<ItemPersonForLevel> list = new List<ItemPersonForLevel>();
+            while (datas.Count > 0)
+            {
+                string tmp = datas[0].person.level.name;
+                ItemPersonForLevel item = new ItemPersonForLevel();
+                item.codeLevel = datas[0].person.level.code;
+                item.nameLevel = datas[0].person.level.name;
+                item.number = 0;
+                item.count = 0;
+                string codePerson = datas[0].person.codeSystem;
+                for (int i = 0; i < datas.Count; i++)
+                {
+                    if (item.codeLevel.CompareTo(datas[i].person.level.code) == 0)
+                    {
+                        if (datas[i].person.codeSystem.CompareTo(codePerson) == 0)
+                        {
+                            item.count++;
+                        }
+                        else
+                        {
+                            codePerson = datas[i].person.codeSystem;
+                            item.number++;
+                            item.count++;
+                        }
+                        datas.RemoveAt(0);
+                        i--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                list.Add(item);
+            }
+
+            return list;
+        }
+        public ReportPersonForLevel getStatisticsPersonForLevel(DateTime begin, DateTime end)
+        {
+            DateTime _begin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
+            DateTime _end = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
+            _end = _end.AddDays(1.0);
+            List<DataRaw> raws = getRawData(_begin, _end);
+
+            ReportPersonForLevel report = new ReportPersonForLevel();
+            List<long> idLevels = new List<long>();
+
+            using (DataContext context = new DataContext())
+            {
+                List<SqlAgeLevel> levels = context.ages!.Where(s => s.isdeleted == false).ToList();
+                foreach (SqlAgeLevel level in levels)
+                {
+                    idLevels.Add(level.ID);
+                    report.levels.Add(level.name);
+                }
+            }
+
+            while (DateTime.Compare(_begin, _end) < 0)
+            {
+                DateTime _tmp = _begin.AddDays(1.0);
+                List<DataRaw> buffer = raws.Where(s => s.createdTime.CompareTo(_begin) >= 0 && s.createdTime.CompareTo(_tmp) < 0).ToList();
+                buffer = buffer.OrderBy(s => s.person.level.ID).ThenBy(s => s.person.ID).ToList();
+                ItemReportPersonForLevel data = new ItemReportPersonForLevel();
+                data.time = _begin.ToString("dd-MM-yyyy");
+                foreach (long tmp in idLevels)
+                {
+                    data.number.Add(0);
+                    data.count.Add(0);
+                }
+
+                while (buffer.Count > 0)
+                {
+                    long idLevel = buffer[0].person.level.ID;
+                    long idPerson = buffer[0].person.ID;
+
+                    int index = -1;
+                    for (int i = 0; i < idLevels.Count; i++)
+                    {
+                        if (idLevel == idLevels[i])
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    for (int i = 0; i < buffer.Count; i++)
+                    {
+                        if (idLevel == buffer[i].person.level.ID)
+                        {
+                            if (idPerson == buffer[i].person.ID)
+                            {
+                                if (index >= 0)
+                                {
+                                    data.count[index]++;
+                                }
+                            }
+                            else
+                            {
+                                if (index >= 0)
+                                {
+                                    idPerson = buffer[i].person.ID;
+                                    data.number[index]++;
+                                    data.count[index]++;
+                                }
+                            }
+                            buffer.RemoveAt(0);
+                            i--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                report.datas.Add(data);
+                _begin = _tmp;
+            }
+            return report;
+        }
+
+        public class ItemPersonForGender
+        {
+            public string gender { get; set; } = "";
+            public int number { get; set; } = 0;
+            public int count { get; set; } = 0;
+        }
+        public class ItemReportPersonForGender
+        {
+            public string time { get; set; } = "";
+            public List<int> number { get; set; } = new List<int>();
+            public List<int> count { get; set; } = new List<int>();
+        }
+        public class ReportPersonForGender
+        {
+            public List<string> genders { get; set; } = new List<string>();
+            public List<ItemReportPersonForGender> datas { get; set; } = new List<ItemReportPersonForGender>();
+        }
+
+        public List<ItemPersonForGender> getStatisticsPersonForGenderDate(DateTime time)
+        {
+
+            DateTime begin = new DateTime(time.Year, time.Month, time.Day, 00, 00, 00);
+            DateTime end = begin.AddDays(1.0);
+
+            List<DataRaw> raws = getRawData(begin, end);
+
+            List<DataRaw> datas = raws.OrderBy(s => s.person.gender).ThenBy(s => s.person.codeSystem).ToList();
+            List<ItemPersonForGender> list = new List<ItemPersonForGender>();
+            while (datas.Count > 0)
+            {
+                string tmp = datas[0].person.gender;
+                ItemPersonForGender item = new ItemPersonForGender();
+                item.gender = datas[0].person.gender;
+                item.number = 0;
+                item.count = 0;
+                string codePerson = datas[0].person.codeSystem;
+                for (int i = 0; i < datas.Count; i++)
+                {
+                    if (item.gender.CompareTo(datas[i].person.gender) == 0)
+                    {
+                        if (datas[i].person.codeSystem.CompareTo(codePerson) == 0)
+                        {
+                            item.count++;
+                        }
+                        else
+                        {
+                            codePerson = datas[i].person.codeSystem;
+                            item.number++;
+                            item.count++;
+                        }
+                        datas.RemoveAt(0);
+                        i--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                list.Add(item);
+            }
+
+            return list;
+        }
+        public ReportPersonForGender getStatisticsPersonForGender(DateTime begin, DateTime end)
+        {
+            DateTime _begin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
+            DateTime _end = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
+            _end = _end.AddDays(1.0);
+            List<DataRaw> raws = getRawData(_begin, _end);
+
+            ReportPersonForGender report = new ReportPersonForGender();
+            List<string> genders = new List<string>();
+
+            report.genders.Add("0");
+            report.genders.Add("1");
+            report.genders.Add("2");
+            genders.Add("0");
+            genders.Add("1");
+            genders.Add("2");
+
+            while (DateTime.Compare(_begin, _end) < 0)
+            {
+                DateTime _tmp = _begin.AddDays(1.0);
+                List<DataRaw> buffer = raws.Where(s => s.createdTime.CompareTo(_begin) >= 0 && s.createdTime.CompareTo(_tmp) < 0).ToList();
+                buffer = buffer.OrderBy(s => s.person.gender).ThenBy(s => s.person.ID).ToList();
+                ItemReportPersonForGender data = new ItemReportPersonForGender();
+                data.time = _begin.ToString("dd-MM-yyyy");
+                foreach (string tmp in genders)
+                {
+                    data.number.Add(0);
+                    data.count.Add(0);
+                }
+
+                while (buffer.Count > 0)
+                {
+                    string gender = buffer[0].person.gender;
+                    long idPerson = buffer[0].person.ID;
+
+                    int index = -1;
+                    for (int i = 0; i < genders.Count; i++)
+                    {
+                        if (gender == genders[i])
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+
+                    for (int i = 0; i < buffer.Count; i++)
+                    {
+                        if (gender == buffer[i].person.gender)
+                        {
+                            if (idPerson == buffer[i].person.ID)
+                            {
+                                if (index >= 0)
+                                {
+                                    data.count[index]++;
+                                }
+                            }
+                            else
+                            {
+                                if (index >= 0)
+                                {
+                                    idPerson = buffer[i].person.ID;
+                                    data.number[index]++;
+                                    data.count[index]++;
+                                }
+                            }
+                            buffer.RemoveAt(0);
+                            i--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                report.datas.Add(data);
+                _begin = _tmp;
+            }
+            return report;
+        }
 
 
 
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         public ItemCountsPlotInDay calcGetCountHour(DateTime time, List<DataRaw> datas)
         {
             using (DataContext context = new DataContext())
@@ -528,10 +837,6 @@ namespace CBA.APIs
             List<DataRaw> datas = getRawData(begin, end);
             return calcGetCountHour(time, datas);
         }
-
-       
-
-
 
         public class ItemCountsByDay
         {
