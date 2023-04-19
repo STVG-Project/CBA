@@ -45,7 +45,7 @@ namespace CBA.APIs
                     m_file.time = DateTime.Now.ToUniversalTime();
                     context.files!.Add(m_file);
 
-                    Log.Information(m_file.ID.ToString());
+                    //Log.Information(m_file.ID.ToString());
 
                     int rows = await context.SaveChangesAsync();
                     if (rows > 0)

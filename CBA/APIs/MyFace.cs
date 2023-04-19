@@ -14,10 +14,11 @@ namespace CBA.APIs
             try
             {
                 codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
-                Log.Information(codefile);
+                //Log.Information(codefile);
             }
             catch (Exception ex)
             {
+              
                 Log.Error(ex.ToString());
             }
 
