@@ -73,7 +73,7 @@ namespace CBA.APIs
 
         public class DataGroupRaw
         {
-            public long ID { get; set; }
+            //public long ID { get; set; }
             public string code { get; set; } = "";
             public string name { get; set; } = "";
             public string des { get; set; } = "";
@@ -84,8 +84,8 @@ namespace CBA.APIs
             public string code { get; set; } = "";
             public string name { get; set; } = "";
             public string des { get; set; } = "";
-            public int low { get; set; } = int.MinValue;
-            public int high { get; set; } = int.MaxValue;
+            //public int low { get; set; } = int.MinValue;
+           // public int high { get; set; } = int.MaxValue;
         }
         public class DataDeviceRaw
         {
@@ -130,7 +130,7 @@ namespace CBA.APIs
                             {
                                 if (face.person.group.isdeleted == false)
                                 {
-                                    item.person.group.ID = face.person.group.ID;
+                                   // item.person.group.ID = face.person.group.ID;
                                     item.person.group.code = face.person.group.code;
                                     item.person.group.name = face.person.group.name;
                                     item.person.group.des = face.person.group.des;
@@ -145,8 +145,8 @@ namespace CBA.APIs
                                     item.person.level.code = face.person.level.code;
                                     item.person.level.name = face.person.level.name;
                                     item.person.level.des = face.person.level.des;
-                                    item.person.level.low = face.person.level.low;
-                                    item.person.level.high = face.person.level.high;
+                                    //item.person.level.low = face.person.level.low;
+                                    //item.person.level.high = face.person.level.high;
                                 }
                             }
                         }
