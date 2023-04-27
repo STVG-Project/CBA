@@ -27,7 +27,6 @@ public class Program
                .MinimumLevel.Information()
                .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                .WriteTo.File("mylog.txt", rollingInterval: RollingInterval.Day)
-               //.WriteTo.Seq("http://log.smartlook.com.vn:8090", apiKey: "FTidLKHRnxm8y7BaUNvX")
                .CreateLogger();
         try
         {

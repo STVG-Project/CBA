@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Drawing;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Serilog;
+using static CBA.APIs.MyReport;
 
 namespace CBA.Controllers
 {
@@ -11,6 +15,277 @@ namespace CBA.Controllers
         public ReportController(ILogger<ReportController> logger)
         {
             _logger = logger;
+        }
+
+        /*  [HttpGet]
+          [Route("countPersonForDeviceDate")]
+          public IActionResult countPersonForDeviceDate(string time)
+          {
+              DateTime _time = DateTime.MinValue;
+              try
+              {
+                  _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+              }
+              catch (Exception e)
+              {
+                  _time = DateTime.MinValue;
+              }
+
+              return Ok(Program.api_report.getStatisticsPersonForDeviceDate(_time));
+          }*/
+
+        [HttpGet]
+        [Route("getStatisticsCountPersonForYear")]
+        public IActionResult countPersonGroupForYear(string time, string group)
+        {
+            if (group.CompareTo("0") == 0)
+            {
+                group = "";
+            }
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsCountPersonForYear(_time, group));
+        }
+
+        [HttpGet]
+        [Route("getStatisticsCountPersonForMonth")]
+        public IActionResult countPersonGroupForMonth(string time, string group)
+        {
+            if (group.CompareTo("0") == 0)
+            {
+                group = "";
+            }
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsCountPersonForMonth(_time, group));
+        }
+
+        [HttpGet]
+        [Route("getDetailStatisticsCountPersonForYear")]
+        public IActionResult countDetailPersonGroupForYear(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getDetailStatisticsForYear(_time));
+        }
+
+        [HttpGet]
+        [Route("getComparePersonMOM")]
+        public IActionResult getComparePersonMOM(string begin, string end)
+        {
+           
+            DateTime m_begin = DateTime.MinValue;
+            try
+            {
+                m_begin = DateTime.ParseExact(begin, "MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                m_begin = DateTime.MinValue;
+            }
+
+            DateTime m_end = DateTime.MinValue;
+            try
+            {
+                m_end = DateTime.ParseExact(end, "MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                m_end = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getComparePersonMOM(m_begin, m_end));
+        }
+        [HttpGet]
+        [Route("getStatisticsPersonForDevice")]
+        public IActionResult countPersonForDeviceDateV2(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsCountPersonForDevice(_time));
+        }
+
+
+
+
+        [HttpGet]
+        [Route("getStatisticsPersonForDeviceDates")]
+        public IActionResult countPersonForDevice(string begin, string end)
+        {
+            DateTime _timebegin = DateTime.MinValue;
+            try
+            {
+                _timebegin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timebegin = DateTime.MinValue;
+            }
+
+            DateTime _timeend = DateTime.MinValue;
+            try
+            {
+                _timeend = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timeend = DateTime.MinValue;
+            }
+
+            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForDevice(_timebegin, _timeend)));
+        }
+
+        /*[HttpGet]
+        [Route("countPersonForLevelDate")]
+        public IActionResult countPersonForLevelDate(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsPersonForLevelDate(_time));
+        }*/
+
+        [HttpGet]
+        [Route("getStatisticsPersonForLevel")]
+        public IActionResult countPersonForLevelDateV2(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsCountPersonForLevel(_time));
+        }
+
+        [HttpGet]
+        [Route("getStatisticsPersonForLevelDates")]
+        public IActionResult countPersonForLevel(string begin, string end)
+        {
+            DateTime _timebegin = DateTime.MinValue;
+            try
+            {
+                _timebegin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timebegin = DateTime.MinValue;
+            }
+
+            DateTime _timeend = DateTime.MinValue;
+            try
+            {
+                _timeend = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timeend = DateTime.MinValue;
+            }
+
+            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForLevel(_timebegin, _timeend)));
+        }
+
+        /* [HttpGet]
+         [Route("countPersonForGenderDate")]
+         public IActionResult countPersonForGenderDate(string time)
+         {
+             DateTime _time = DateTime.MinValue;
+             try
+             {
+                 _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+             }
+             catch (Exception e)
+             {
+                 _time = DateTime.MinValue;
+             }
+
+             return Ok(Program.api_report.getStatisticsPersonForGenderDate(_time));
+         }*/
+        [HttpGet]
+        [Route("getStatisticsPersonForGender")]
+        public IActionResult countPersonForGenderDateV2(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsCountPersonForGender(_time));
+        }
+
+        [HttpGet]
+        [Route("getStatisticsPersonForGenderDates")]
+        public IActionResult countPersonForGender(string begin, string end)
+        {
+            DateTime _timebegin = DateTime.MinValue;
+            try
+            {
+                _timebegin = DateTime.ParseExact(begin, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timebegin = DateTime.MinValue;
+            }
+
+            DateTime _timeend = DateTime.MinValue;
+            try
+            {
+                _timeend = DateTime.ParseExact(end, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _timeend = DateTime.MinValue;
+            }
+
+            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForGender(_timebegin, _timeend)));
         }
 
         [HttpGet]
@@ -248,5 +523,22 @@ namespace CBA.Controllers
 
             return Ok(Program.api_report.showPlotGenderForDatesV2(time_begin, time_end));
         }
+
+        //[HttpGet]
+        //[Route("statisticsPersonForDevice")]
+        //public IActionResult statisticsPersonForDevice(string time)
+        //{
+        //    DateTime m_time = DateTime.MinValue;
+        //    try
+        //    {
+        //        m_time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+        //        return Ok(Program.api_report.getStatisticsPersonForDevice(m_time));
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Log.Error(e.ToString());
+        //        return Ok(new List<ItemPersonForDevice>());
+        //    }
+        //}
     }
 }

@@ -114,7 +114,7 @@ namespace CBA.APIs
                 {
                     return -1;
                 }
-                return 0;
+                return user.ID;
             }
         }
 
@@ -131,7 +131,7 @@ namespace CBA.APIs
                 {
                     return -1;
                 }
-                return 0;
+                return user.ID;
             }
         }
 
