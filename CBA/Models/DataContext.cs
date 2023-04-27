@@ -22,7 +22,8 @@ namespace CBA.Models
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
-        public static string configSql = "Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg";
+        public static string configSql = "";
+        //public static string configSql = "Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg";
         //public static string configSql = "Host=192.168.1.241:60001;Database=db_stvg_cba;Username=postgres;Password=stvg";
         //public static string configSql = "Host=192.100.1.11:5432;Database=db_stvg_cba;Username=postgres;Password=stvg";
 

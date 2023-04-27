@@ -51,15 +51,15 @@ public class Program
                 });
             });
 
-            //using (StreamReader sr = new StreamReader("Config.txt"))
-            //{
-            //    string? line = sr.ReadLine();
-            //    if (!string.IsNullOrEmpty(line))
-            //    {
-            //        DataContext.configSql = line;
-            //    }
-            //}
-            //Log.Information("Connected to Server : " + DataContext.configSql);
+            using (StreamReader sr = new StreamReader("Config.txt"))
+            {
+                string? line = sr.ReadLine();
+                if (!string.IsNullOrEmpty(line))
+                {
+                    DataContext.configSql = line;
+                }
+            }
+            Log.Information("Connected to Server : " + DataContext.configSql);
 
             builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(DataContext.configSql));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
