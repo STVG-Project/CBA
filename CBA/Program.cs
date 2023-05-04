@@ -5,6 +5,7 @@ using CBA.Models;
 using CBA.APIs;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using static CBA.APIs.MyPerson;
+using Newtonsoft.Json;
 
 namespace CBA;
 
@@ -21,6 +22,10 @@ public class Program
     public static MyReport api_report = new MyReport();
     public static MyAgeLevel api_age = new MyAgeLevel();
    
+    public class ItemHost
+    {
+        public List<string> host { get; set; } = new List<string>();
+    }
     public static async Task Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
@@ -51,14 +56,47 @@ public class Program
                 });
             });
 
-            using (StreamReader sr = new StreamReader("Config.txt"))
+            
+            using (StreamReader sr = new StreamReader("Config.json"))
+            {
+
+                string line = sr.ReadToEnd();
+                ItemHost? tmp = JsonConvert.DeserializeObject<ItemHost>(line);
+                if(tmp != null)
+                {
+                    if(tmp.host.Count > 0)
+                    {
+                        foreach (string item in tmp.host)
+                        {
+                            DataContext.configSql = item;
+                           /* try
+                            {
+
+                            }
+                            catch (Exception )
+                            {
+
+                                continue;
+                            }*/
+                        }
+                    }
+                }
+                /*if (!string.IsNullOrEmpty(line))
+                {
+                    DataContext.configSql = line;
+                }*/
+            }
+
+            /*string link_file = "File/" + "Config" + ".txt";
+
+            using (StreamReader sr = new StreamReader(link_file))
             {
                 string? line = sr.ReadLine();
                 if (!string.IsNullOrEmpty(line))
                 {
                     DataContext.configSql = line;
                 }
-            }
+            }*/
             Log.Information("Connected to Server : " + DataContext.configSql);
 
             builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(DataContext.configSql));

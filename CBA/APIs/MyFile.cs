@@ -1,7 +1,9 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using RestSharp;
 using Serilog;
+using static CBA.APIs.MyReport;
 
 namespace CBA.APIs
 {
@@ -79,6 +81,19 @@ namespace CBA.APIs
                 return data;
             }
         }
+
+       /* public string LoadDataContext()
+        {
+            string link_file = "File/" + "data_report_0423" + ".json";
+            using (StreamReader sr = new StreamReader("Config.txt"))
+            {
+                string? line = sr.ReadLine();
+                if (!string.IsNullOrEmpty(line))
+                {
+                    DataContext.configSql = line;
+                }
+            }
+        }*/
 
        /* public async Task<byte[]>? getImageChanged(byte[] data)
         {

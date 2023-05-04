@@ -297,76 +297,59 @@ namespace CBA.APIs
             DateTime end = begin.AddMonths(1);
 
             List<DataRaw> raws = getRawData(begin, end);
-            if(group.CompareTo("") == 0)
+            List<DataRaw> datas = raws.OrderBy(s => s.person.group.code).ThenBy(s => s.person.codeSystem).ToList();
+
+            if (group.CompareTo("") == 0)
             {
-                List<DataRaw> datas = raws.OrderBy(s => s.person.group.code).ThenBy(s => s.person.codeSystem).Where(s => s.person.group.code.CompareTo(group) == 0).ToList();
-
-
-                for (int i = 0; i < DateTime.DaysInMonth(begin.Year, begin.Month); i++)
+                /*if (begin.CompareTo(new DateTime(2023, 4, 1, 0, 0, 0)) == 0)
                 {
-                    ItemMonthPerson itemPerson = new ItemMonthPerson();
-
-                    itemPerson.time = (i + 1).ToString();
-                    DateTime dayStart = begin.AddDays(i);
-                    DateTime dayStop = dayStart.AddDays(1);
-
-                    List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(dayStart, s.createdTime) <= 0 && DateTime.Compare(dayStop, s.createdTime) > 0).ToList();
-                    while (tmp_datas.Count > 0)
+                    string result = Program.api_file.LoadJson();
+                    ItemCountPersonGroup? tmp = JsonConvert.DeserializeObject<ItemCountPersonGroup>(result);
+                    if (tmp == null)
                     {
-                        itemPerson.person = 0;
-                        string codePerson = tmp_datas[0].person.codeSystem;
-                        for (int j = 0; j < tmp_datas.Count; j++)
-                        {
-                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
-                            {
-                                codePerson = tmp_datas[j].person.codeSystem;
-
-                                itemPerson.person++;
-                            }
-                            tmp_datas.RemoveAt(0);
-                            j--;
-                        }
+                        return new ItemCountPersonGroup();
                     }
-                    item.data.Add(itemPerson);
-                }
+                    return tmp;
+                }*/
+
+                datas = datas.Where(s => s.person.group.code.CompareTo("") == 0).ToList();
+
+
+                
             }
             else if(group.CompareTo("1") == 0)
             {
-                List<DataRaw> datas = raws.OrderBy(s => s.person.group.code).ThenBy(s => s.person.codeSystem).Where(s => s.person.group.code.CompareTo("") != 0).ToList();
-                for (int i = 0; i < DateTime.DaysInMonth(begin.Year, begin.Month); i++)
-                {
-                    ItemMonthPerson itemPerson = new ItemMonthPerson();
+                datas = datas.Where(s => s.person.group.code.CompareTo("") != 0).ToList();
 
-                    itemPerson.time = (i + 1).ToString();
-                    DateTime dayStart = begin.AddDays(i);
-                    DateTime dayStop = dayStart.AddDays(1);
-
-                    List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(dayStart, s.createdTime) <= 0 && DateTime.Compare(dayStop, s.createdTime) > 0).ToList();
-                    while (tmp_datas.Count > 0)
-                    {
-                        itemPerson.person = 0;
-                        string codePerson = tmp_datas[0].person.codeSystem;
-                        for (int j = 0; j < tmp_datas.Count; j++)
-                        {
-                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
-                            {
-                                codePerson = tmp_datas[j].person.codeSystem;
-
-                                itemPerson.person++;
-                            }
-                            tmp_datas.RemoveAt(0);
-                            j--;
-                        }
-                    }
-                    item.data.Add(itemPerson);
-                }
             }
-            else
+
+            for (int i = 0; i < DateTime.DaysInMonth(begin.Year, begin.Month); i++)
             {
-                return new ItemCountPersonGroup();
-            }
-           
+                ItemMonthPerson itemPerson = new ItemMonthPerson();
 
+                itemPerson.time = (i + 1).ToString();
+                DateTime dayStart = begin.AddDays(i);
+                DateTime dayStop = dayStart.AddDays(1);
+
+                List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(dayStart, s.createdTime) <= 0 && DateTime.Compare(dayStop, s.createdTime) > 0).ToList();
+                while (tmp_datas.Count > 0)
+                {
+                    itemPerson.person = 0;
+                    string codePerson = tmp_datas[0].person.codeSystem;
+                    for (int j = 0; j < tmp_datas.Count; j++)
+                    {
+                        if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
+                        {
+                            codePerson = tmp_datas[j].person.codeSystem;
+
+                            itemPerson.person++;
+                        }
+                        tmp_datas.RemoveAt(0);
+                        j--;
+                    }
+                }
+                item.data.Add(itemPerson);
+            }
             return item;
         }
 
