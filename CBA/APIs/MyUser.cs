@@ -1,5 +1,7 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
+using static CBA.APIs.MyDevice;
+using static CBA.APIs.MyReport;
 
 namespace CBA.APIs
 {
@@ -238,7 +240,7 @@ namespace CBA.APIs
                     return false;
                 }
 
-                if(m_user.role!.code.CompareTo("system") == 0)
+                if (m_user.role!.code.CompareTo("system") == 0)
                 {
                     return false;
                 }
@@ -362,16 +364,16 @@ namespace CBA.APIs
             }
         }
 
-      
 
-        
-/*
-        public class ItemGroupForUser
-        {
-            public string code { get; set; } = "";
-            public string name { get; set; } = "";
-            public string des { get; set; } = "";
-        }*/
+
+
+        /*
+                public class ItemGroupForUser
+                {
+                    public string code { get; set; } = "";
+                    public string name { get; set; } = "";
+                    public string des { get; set; } = "";
+                }*/
 
         public class ItemUser
         {
@@ -406,7 +408,7 @@ namespace CBA.APIs
                 List<ItemUser> items = new List<ItemUser>();
                 foreach (SqlUser user in users)
                 {
-                    if(user.role!.code.CompareTo("system") != 0)
+                    if (user.role!.code.CompareTo("system") != 0)
                     {
                         ItemUser item = new ItemUser();
                         item.user = user.user;
@@ -428,5 +430,102 @@ namespace CBA.APIs
             }
         }
 
+        public class ItemPersonDetect
+        {
+            public string codeSystem { get; set; } = "";
+            public string name { get; set; } = "";
+            public string gender { get; set; } = "";
+            public int age { get; set; } = 0;
+        }
+
+        public class DataLogRaw
+        {
+            public ItemPersonDetect person { get; set; } = new ItemPersonDetect();
+            public string device { get; set; } = "";
+            public string group { get; set; } = "";
+            public string image { get; set; } = "";
+            public string note { get; set; } = "";
+            public DateTime time { get; set; }
+        }
+
+        public List<DataLogRaw> getDataRaw(DateTime begin, DateTime end)
+        {
+            List<DataLogRaw> list = new List<DataLogRaw>();
+            using (DataContext context = new DataContext())
+            {
+                List<SqlLogPerson> datas = context.logs!.Include(s => s.person!).ThenInclude(s => s.group)
+                                                        .Where(s => DateTime.Compare(begin, s.time) <= 0
+                                                                    && DateTime.Compare(end, s.time) >= 0)
+                                                        .Include(s => s.device).OrderByDescending(s => s.time)
+                                                        .ToList();
+                if(datas.Count > 0)
+                {
+                    foreach (SqlLogPerson item in datas)
+                    {
+                        DataLogRaw tmp = new DataLogRaw();
+                        tmp.person.codeSystem = item.person!.codeSystem;
+                        tmp.person.name = item.person.name;
+                        tmp.person.gender = item.person.gender;
+                        tmp.person.age = item.person.age;
+                        if(item.person!.group != null)
+                        {
+                            tmp.group = item.person.group.code;
+                        }
+                        else
+                        {
+                            tmp.group = "0";
+                        }
+
+                        tmp.image = item.image;
+                        tmp.note = item.note;
+                        tmp.time = item.time;
+
+                        if (item.device != null)
+                        {
+                            tmp.device = item.device.name;
+                        }
+                        
+                        list.Add(tmp);
+                    }
+                }
+                return list;
+            }
+        }
+      
+        public class ItemDetect
+        {
+            public ItemPersonDetect person { get; set; } = new ItemPersonDetect();
+            public string image { get; set; } = "";
+            public string time { get; set; } = "";
+            public string note { get; set; } = "";
+            public string group { get; set; } = "";
+            public string device { get; set; } = "";
+        }
+        public List<ItemDetect> detectBlackList(string group)
+        {
+            DateTime m_end = DateTime.Now.ToUniversalTime();
+            m_end = m_end.AddHours(-3);
+            DateTime m_begin = m_end.AddMinutes(-3);
+            List<ItemDetect> list = new List<ItemDetect>();
+            List<DataLogRaw> datas = getDataRaw(m_begin, m_end);
+            List<DataLogRaw> m_datas = datas.Where(s => s.group.CompareTo(group) == 0).ToList();
+            foreach (DataLogRaw item in m_datas)
+            {
+                ItemDetect tmp = new ItemDetect();
+                tmp.person.codeSystem = item.person.codeSystem;
+                tmp.person.name = item.person.name;
+                tmp.person.gender = item.person.gender;
+                tmp.person.age = item.person.age;
+
+                tmp.image = item.image;
+                tmp.group = item.group;
+                tmp.time = item.time.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                
+                tmp.device = item.device;
+
+                list.Add(tmp);
+            }
+            return list;
+        }
     }
 }

@@ -10,6 +10,7 @@ using System;
 using System.Drawing;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
+using static CBA.APIs.MyDevice;
 using static CBA.APIs.MyGroup;
 using static System.Reflection.Metadata.BlobBuilder;
 using Log = Serilog.Log;
@@ -3093,6 +3094,78 @@ namespace CBA.APIs
                     }
                 }
                 return tmp;
+            }
+        }
+
+        public class ItemPersonDetect
+        {
+            public string code { get; set; } = "";
+            public string codeSystem { get; set; } = "";
+            public string name { get; set; } = "";
+            public string gender { get; set; } = "";
+            public int age { get; set; } = 0;
+        }
+        public class ItemDetect
+        {
+            public ItemPersonDetect person { get; set; } = new ItemPersonDetect();
+            public string image { get; set; } = "";
+            public string time { get; set; } = "";
+            public ItemDevice device { get; set; } = new ItemDevice();
+        }
+        public List<ItemDetect> detectBlackList(DateTime begin, string code)
+        {
+            DateTime m_begin = new DateTime(begin.Year, begin.Month, begin.Day, begin.Hour, begin.Minute, begin.Second);
+            DateTime m_end = begin.AddSeconds(10);
+            List<DataRaw> raws = getRawData(m_begin, m_end);
+            List<ItemDetect> list = new List<ItemDetect>();
+            using (DataContext context = new DataContext())
+            {
+                /* SqlGroup? m_group = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(code) == 0).FirstOrDefault();
+                 if(m_group == null)
+                 {
+                     return new List<ItemDetect>(); 
+                 }*/
+                List<SqlLogPerson> datas = context.logs!.Include(s => s.person!).ThenInclude(s => s.group)
+                                                        .Where(s => DateTime.Compare(begin.ToUniversalTime(), s.time) <= 0
+                                                                    && DateTime.Compare(m_end.ToUniversalTime(), s.time) > 0)
+                                                        .Include(s => s.device).OrderByDescending(s => s.time)
+                                                        .ToList();
+                if (datas.Count < 1)
+                {
+                    return new List<ItemDetect>();
+                }
+                foreach (SqlLogPerson item in datas)
+                {
+                    if (item.person!.group != null)
+                    {
+                        if (item.person.group.code.CompareTo(code) == 0)
+                        {
+                            ItemDetect tmp = new ItemDetect();
+                            tmp.person.code = item.person.code;
+                            tmp.person.codeSystem = item.person.codeSystem;
+                            tmp.person.name = item.person.name;
+                            tmp.person.gender = item.person.gender;
+                            tmp.person.age = item.person.age;
+
+                            tmp.image = item.image;
+                            tmp.time = item.time.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+
+                            if (item.device != null)
+                            {
+                                tmp.device.code = item.device.code;
+                                tmp.device.name = item.device.name;
+                                tmp.device.des = item.device.des;
+                            }
+
+                            list.Add(tmp);
+                        }
+                        else
+                        {
+                            return new List<ItemDetect>();
+                        }
+                    }
+                }
+                return list;
             }
         }
 

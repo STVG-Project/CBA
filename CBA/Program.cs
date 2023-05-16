@@ -11,6 +11,12 @@ namespace CBA;
 
 public class Program
 {
+    public class HttpNotification
+    {
+        public string group { get; set; } = "";
+        public string id { get; set; } = "";
+        public List<string> messagers { get; set; } = new List<string>();
+    }
 
     public static MyRole api_role = new MyRole();
     public static MyUser api_user = new MyUser();
@@ -21,7 +27,9 @@ public class Program
     public static MyFace api_face = new MyFace();
     public static MyReport api_report = new MyReport();
     public static MyAgeLevel api_age = new MyAgeLevel();
-   
+    public static List<HttpNotification> httpNotifications = new List<HttpNotification>();
+
+
     public class ItemHost
     {
         public List<string> host { get; set; } = new List<string>();

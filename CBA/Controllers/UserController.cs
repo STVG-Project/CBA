@@ -152,6 +152,14 @@ namespace CBA.Controllers
             //return Ok(JsonConvert.SerializeObject(Program.api_user.listUser(token)));
         }
 
+        [HttpGet]
+        [Route("getLogPerson")]
+        public IActionResult detectBlackList(string group)
+        {
+            return Ok(Program.api_user.detectBlackList(group));
+
+        }
+
 
         //For role
 

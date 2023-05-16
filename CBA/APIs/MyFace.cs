@@ -1,13 +1,32 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Serilog;
 using System.Text;
+using static CBA.Program;
 
 namespace CBA.APIs
 {
     public class MyFace
     {
-
+       /* public class ItemPersonDetect
+        {
+            public string codeSystem { get; set; } = "";
+            public string name { get; set; } = "";
+            public string gender { get; set; } = "";
+            public int age { get; set; } = 0;
+        }*/
+        public class ItemDetectPerson
+        {
+            public string codeSystem { get; set; } = "";
+            public string name { get; set; } = "";
+            public string gender { get; set; } = "";
+            public int age { get; set; } = 0;
+            public string image { get; set; } = "";
+            public string time { get; set; } = "";
+            public string group { get; set; } = "";
+            public string device { get; set; } = "";
+        }
         public async Task<bool> createFace(int age, string gender, byte[] image, string device, string codeSystem)
         {
             string codefile = "";
@@ -35,7 +54,7 @@ namespace CBA.APIs
             {
                 List<SqlAgeLevel>? levels = context.ages!.Where(s => s.isdeleted == false).OrderByDescending(s => s.high).ToList();
 
-                SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).FirstOrDefault();
+                SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
                 if (sqlPerson == null)
                 {
                     sqlPerson = new SqlPerson();
@@ -107,8 +126,22 @@ namespace CBA.APIs
                     await context.SaveChangesAsync();
                 }
 
+                ItemDetectPerson itemDetect = new ItemDetectPerson();
+                itemDetect.codeSystem = codeSystem;
+                itemDetect.name = sqlPerson.name;
+                itemDetect.gender = sqlPerson.gender;
+                itemDetect.age = sqlPerson.age;
+                itemDetect.image = codefile;
+                itemDetect.group = sqlPerson.group == null? "0": sqlPerson.group.code;
+                itemDetect.device = sqlDevice.code;
+                itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
-
+                List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
+                
+                foreach (HttpNotification notification in notifications)
+                {
+                    notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
+                }
 
                 SqlLogPerson log = new SqlLogPerson();
                 log.ID = DateTime.Now.Ticks;
