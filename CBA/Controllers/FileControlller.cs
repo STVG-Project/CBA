@@ -30,6 +30,33 @@ namespace ServerWater.Controllers
             }
             return File(data!, "image/jpeg");
         }
+
+        //public async Task<bool> createConfig(string lang, byte[] data)
+        //{
+        //    string path = "./Configs";
+        //    string fileName = "DataBaseConfig" + ".json";
+        //    try
+        //    {
+        //        if (!Directory.Exists(path))
+        //        {
+        //            Directory.CreateDirectory(path);
+        //        }
+        //        if (data.Length > 0)
+        //        {
+        //            string link = Path.Combine(path, fileName);
+        //            await File.WriteAllBytesAsync(link, data);
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return false;
+        //    }
+        //}
     }
 }
 

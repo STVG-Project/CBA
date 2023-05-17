@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
+using static CBA.APIs.MyUser;
 
 namespace CBA.Controllers
 {
@@ -29,7 +31,8 @@ namespace CBA.Controllers
         [Route("login")]
         public IActionResult Login(ItemLoginUser item)
         {
-            return Ok(Program.api_user.login(item.username, item.password));
+            InfoUserSystem tmp = Program.api_user.login(item.username, item.password);
+            return Ok(tmp);
         }
 
         public class ItemUser
@@ -270,6 +273,5 @@ namespace CBA.Controllers
                 return Unauthorized();
             }
         }
-
     }
 }

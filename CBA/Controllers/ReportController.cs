@@ -17,23 +17,6 @@ namespace CBA.Controllers
             _logger = logger;
         }
 
-        /*  [HttpGet]
-          [Route("countPersonForDeviceDate")]
-          public IActionResult countPersonForDeviceDate(string time)
-          {
-              DateTime _time = DateTime.MinValue;
-              try
-              {
-                  _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
-              }
-              catch (Exception e)
-              {
-                  _time = DateTime.MinValue;
-              }
-
-              return Ok(Program.api_report.getStatisticsPersonForDeviceDate(_time));
-          }*/
-
         [HttpGet]
         [Route("getStatisticsCountPersonForYear")]
         public IActionResult countPersonGroupForYear(string time, string group)

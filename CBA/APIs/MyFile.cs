@@ -1,9 +1,11 @@
 ﻿using CBA.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using RestSharp;
 using Serilog;
 using static CBA.APIs.MyReport;
+using static CBA.Program;
 
 namespace CBA.APIs
 {
@@ -82,37 +84,67 @@ namespace CBA.APIs
             }
         }
 
-       /* public string LoadDataContext()
+        public string getFileConfig()
         {
-            string link_file = "File/" + "data_report_0423" + ".json";
-            using (StreamReader sr = new StreamReader("Config.txt"))
+            try
             {
-                string? line = sr.ReadLine();
-                if (!string.IsNullOrEmpty(line))
+                string filePath = string.Format("Configs/configSql.json");
+                string data = File.ReadAllText(filePath);
+                return data;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return "";
+            }
+        }
+
+        public bool createConfig(string m_file)
+        {
+            string path = "./Configs";
+            string fileName = m_file + ".json";
+            try
+            {
+                if (!Directory.Exists(path))
                 {
-                    DataContext.configSql = line;
+                    Directory.CreateDirectory(path);
                 }
-            }
-        }*/
+                string link = Path.Combine(path, fileName);
+                ItemHost tmp = new ItemHost();
 
-       /* public async Task<byte[]>? getImageChanged(byte[] data)
-        {
-            var client = new RestClient("http://office.stvg.vn:59073/image");
-            var request = new RestRequest();
-            request.Method = Method.Post;
-            request.AddHeader("Content-Type", "multipart/form-data");
-            request.AddFile("file", data, String.Format("{0}.jpg", DateTime.Now.Ticks));
-            request.Timeout = 10000;
-            RestResponse response = await client.ExecuteAsync(request);
+                string data = "Host=192.100.1.11:5432;Database=db_stvg_cba;Username=postgres;Password=stvg";
+                tmp.host.Add(data);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                return response.RawBytes;
+                data = "Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg";
+                tmp.host.Add(data);
+                string file = JsonConvert.SerializeObject(tmp);
+                File.WriteAllText(link, file);
+                return true;
             }
-            else
+            catch (Exception ex)
             {
-                return null;
+                return false;
             }
-        }*/
+        }
+
+        /* public async Task<byte[]>? getImageChanged(byte[] data)
+         {
+             var client = new RestClient("http://office.stvg.vn:59073/image");
+             var request = new RestRequest();
+             request.Method = Method.Post;
+             request.AddHeader("Content-Type", "multipart/form-data");
+             request.AddFile("file", data, String.Format("{0}.jpg", DateTime.Now.Ticks));
+             request.Timeout = 10000;
+             RestResponse response = await client.ExecuteAsync(request);
+
+             if (response.StatusCode == System.Net.HttpStatusCode.OK)
+             {
+                 return response.RawBytes;
+             }
+             else
+             {
+                 return null;
+             }
+         }*/
     }
 }

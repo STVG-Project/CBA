@@ -1,7 +1,9 @@
 ﻿using CBA.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using static CBA.APIs.MyDevice;
-using static CBA.APIs.MyReport;
+using System.Threading;
+using static CBA.APIs.MyPerson;
+using static CBA.Program;
 
 namespace CBA.APIs
 {
@@ -9,6 +11,7 @@ namespace CBA.APIs
     {
         public MyUser()
         {
+            
         }
         public async Task initAsync()
         {
@@ -85,23 +88,59 @@ namespace CBA.APIs
                 int rows = await context.SaveChangesAsync();
             }
         }
-        /*public long checkAdmin(string token)
+
+        
+
+        public async Task callUserLoginAsync(CancellationToken cancellationToken, string id)
+        {
+            await Task.Delay(100);
+            Thread t = new Thread(async () =>
+            {
+                while (true)
+                {
+                    Program.CacheForUser? m_cache = Program.caches.Where(s => s.id.CompareTo(id) == 0).FirstOrDefault();
+                    if (m_cache == null)
+                    {
+                        break;
+                    }
+
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        Console.WriteLine("Cancel !!!");
+                        Program.caches.Remove(m_cache);
+                        break;
+                    }
+                    if (!m_cache.flag)
+                    {
+                        Console.WriteLine("Check connection !!!");
+                        Program.caches.Remove(m_cache);
+                        break;
+                    }
+                    await Task.Delay(1000);
+                }
+            });
+            t.Start();
+        }
+        public CacheForUser checkUserLogin(string token)
         {
             using (DataContext context = new DataContext())
             {
                 SqlUser? user = context.users!.Where(s => s.isdeleted == false && s.token.CompareTo(token) == 0).Include(s => s.role).FirstOrDefault();
                 if (user == null)
                 {
-                    return -1;
+                    return new CacheForUser();
                 }
-                if (user.role!.code.CompareTo("admin") != 0)
-                {
-                    return -1;
-                }
-                return 0;
+
+
+                string id = DateTime.Now.Ticks.ToString();
+                Program.CacheForUser httpcache = new Program.CacheForUser();
+                httpcache.id = id;
+                httpcache.flag = true;
+                Program.caches.Add(httpcache);
+
+                return httpcache;
             }
         }
-*/
 
         public long checkUser(string token)
         {
@@ -158,6 +197,7 @@ namespace CBA.APIs
                 info.user = user.user;
                 info.token = user.token;
                 info.role = user.role!.code;
+
                 return info;
             }
         }
