@@ -55,7 +55,7 @@ public class Program
                .WriteTo.File("mylog.txt", rollingInterval: RollingInterval.Day)
                .CreateLogger();
         string path = "./Configs";
-        if (!Directory.Exists(path))
+        /*if (!Directory.Exists(path))
         {
             bool flag = Program.api_file.createConfig("configSql");
             if (!flag)
@@ -82,8 +82,22 @@ public class Program
                     }
                 }
             }    
-        }    
+        }*/
+        string link = Path.Combine(path, "configSql.json"); 
         
+        if (!File.Exists(link))
+        {
+            bool flag = Program.api_file.createConfig("configSql");
+            if (!flag)
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
+                    Console.WriteLine("DB null !!! ");
+                }
+            }
+        }
+
         string file = Program.api_file.getFileConfig();
 
         ItemHost? tmp = JsonConvert.DeserializeObject<ItemHost>(file);

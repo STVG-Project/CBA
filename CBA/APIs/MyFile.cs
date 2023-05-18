@@ -115,8 +115,8 @@ namespace CBA.APIs
                 string data = "Host=192.100.1.11:5432;Database=db_stvg_cba;Username=postgres;Password=stvg";
                 tmp.host.Add(data);
 
-                data = "Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg";
-                tmp.host.Add(data);
+                //data = "Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg";
+                //tmp.host.Add(data);
                 string file = JsonConvert.SerializeObject(tmp);
                 File.WriteAllText(link, file);
                 return true;
