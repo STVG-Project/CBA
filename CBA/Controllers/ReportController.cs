@@ -147,7 +147,7 @@ namespace CBA.Controllers
                 _timeend = DateTime.MinValue;
             }
 
-            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForDevice(_timebegin, _timeend)));
+            return Ok(Program.api_report.getStatisticsPersonForDevice(_timebegin, _timeend));
         }
 
         /*[HttpGet]
@@ -208,7 +208,7 @@ namespace CBA.Controllers
                 _timeend = DateTime.MinValue;
             }
 
-            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForLevel(_timebegin, _timeend)));
+            return Ok(Program.api_report.getStatisticsPersonForLevel(_timebegin, _timeend));
         }
 
         /* [HttpGet]
@@ -268,7 +268,7 @@ namespace CBA.Controllers
                 _timeend = DateTime.MinValue;
             }
 
-            return Ok(JsonConvert.SerializeObject(Program.api_report.getStatisticsPersonForGender(_timebegin, _timeend)));
+            return Ok(Program.api_report.getStatisticsPersonForGender(_timebegin, _timeend));
         }
 
         [HttpGet]
@@ -381,7 +381,7 @@ namespace CBA.Controllers
                 time_input = DateTime.MinValue;
             }
 
-            return Ok(Program.api_report.getCountWithDeviceV2(time_input));
+            return Ok(Program.api_report.getStatisticsCountPersonForDevice(time_input));
 
         }
 
@@ -410,7 +410,7 @@ namespace CBA.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_report.getCountWithDeviceForDatesV2(time_begin, time_end));
+            return Ok(Program.api_report.getStatisticsPersonForDevice(time_begin, time_end));
         }
 
         [HttpGet]
@@ -428,7 +428,7 @@ namespace CBA.Controllers
                 time_input = DateTime.MinValue;
             }
 
-            return Ok(Program.api_report.showPlotLevelV2(time_input));
+            return Ok(Program.api_report.getStatisticsCountPersonForLevel(time_input));
 
         }
 
@@ -457,7 +457,7 @@ namespace CBA.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_report.showPlotLevelForDatesV2(time_begin, time_end));
+            return Ok(Program.api_report.getStatisticsPersonForLevel(time_begin, time_end));
         }
 
         [HttpGet]
@@ -475,7 +475,7 @@ namespace CBA.Controllers
                 time_input = DateTime.MinValue;
             }
 
-            return Ok(Program.api_report.showPlotGenderV2(time_input));
+            return Ok(Program.api_report.getStatisticsCountPersonForGender(time_input));
 
         }
 
@@ -504,7 +504,7 @@ namespace CBA.Controllers
                 time_end = DateTime.MaxValue;
             }
 
-            return Ok(Program.api_report.showPlotGenderForDatesV2(time_begin, time_end));
+            return Ok(Program.api_report.getStatisticsPersonForGender(time_begin, time_end));
         }
 
         //[HttpGet]
