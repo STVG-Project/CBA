@@ -12,6 +12,10 @@ namespace CBA.Controllers
         [Route("{token}/callbackface")]
         public async Task callbackfaceAsync([FromRoute] string token, string group)
         {
+            if(group.CompareTo("0") == 0)
+            {
+                group = "BL";
+            }
             CancellationToken cancellationToken = HttpContext.RequestAborted;
             try
             {

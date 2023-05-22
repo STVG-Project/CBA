@@ -126,22 +126,30 @@ namespace CBA.APIs
                     await context.SaveChangesAsync();
                 }
 
-                ItemDetectPerson itemDetect = new ItemDetectPerson();
-                itemDetect.codeSystem = codeSystem;
-                itemDetect.name = sqlPerson.name;
-                itemDetect.gender = sqlPerson.gender;
-                itemDetect.age = sqlPerson.age;
-                itemDetect.image = codefile;
-                itemDetect.group = sqlPerson.group == null? "0": sqlPerson.group.code;
-                itemDetect.device = sqlDevice.code;
-                itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-
-                List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
-                
-                foreach (HttpNotification notification in notifications)
+                if (sqlPerson.group != null)
                 {
-                    notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
+                    if(sqlPerson.group.code.CompareTo("BL") == 0)
+                    {
+                        ItemDetectPerson itemDetect = new ItemDetectPerson();
+                        itemDetect.codeSystem = codeSystem;
+                        itemDetect.name = sqlPerson.name;
+                        itemDetect.gender = sqlPerson.gender;
+                        itemDetect.age = sqlPerson.age;
+                        itemDetect.image = codefile;
+                        itemDetect.group =  sqlPerson.group.code;
+                        itemDetect.device = sqlDevice.code;
+                        itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+                        List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
+
+                        foreach (HttpNotification notification in notifications)
+                        {
+                            notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
+                        }
+                    }
                 }
+
+               
 
                 SqlLogPerson log = new SqlLogPerson();
                 log.ID = DateTime.Now.Ticks;
