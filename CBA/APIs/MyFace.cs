@@ -52,8 +52,6 @@ namespace CBA.APIs
 
             using (DataContext context = new DataContext())
             {
-                List<SqlAgeLevel>? levels = context.ages!.Where(s => s.isdeleted == false).OrderByDescending(s => s.high).ToList();
-
                 SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
                 if (sqlPerson == null)
                 {
@@ -66,7 +64,7 @@ namespace CBA.APIs
                     sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     sqlPerson.isdeleted = false;
-                    sqlPerson.level = levels.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
+                    sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
 
                     context.persons!.Add(sqlPerson);
 
@@ -120,36 +118,28 @@ namespace CBA.APIs
                     }
                     sqlPerson.age = totalAge / sqlPerson.faces.Count;
                     //                    Console.WriteLine(sqlPerson.age);
-                    sqlPerson.level = levels.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
+                    sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
 
                     sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                     await context.SaveChangesAsync();
                 }
 
-                if (sqlPerson.group != null)
+                ItemDetectPerson itemDetect = new ItemDetectPerson();
+                itemDetect.codeSystem = codeSystem;
+                itemDetect.name = sqlPerson.name;
+                itemDetect.gender = sqlPerson.gender;
+                itemDetect.age = sqlPerson.age;
+                itemDetect.image = codefile;
+                itemDetect.group = sqlPerson.group == null? "0": sqlPerson.group.code;
+                itemDetect.device = sqlDevice.code;
+                itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+                List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
+                
+                foreach (HttpNotification notification in notifications)
                 {
-                    if(sqlPerson.group.code.CompareTo("BL") == 0)
-                    {
-                        ItemDetectPerson itemDetect = new ItemDetectPerson();
-                        itemDetect.codeSystem = codeSystem;
-                        itemDetect.name = sqlPerson.name;
-                        itemDetect.gender = sqlPerson.gender;
-                        itemDetect.age = sqlPerson.age;
-                        itemDetect.image = codefile;
-                        itemDetect.group =  sqlPerson.group.code;
-                        itemDetect.device = sqlDevice.code;
-                        itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-
-                        List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
-
-                        foreach (HttpNotification notification in notifications)
-                        {
-                            notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
-                        }
-                    }
+                    notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
                 }
-
-               
 
                 SqlLogPerson log = new SqlLogPerson();
                 log.ID = DateTime.Now.Ticks;
