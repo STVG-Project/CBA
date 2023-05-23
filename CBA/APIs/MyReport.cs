@@ -197,30 +197,31 @@ namespace CBA.APIs
 
         public ItemCountPersonGroup getStatisticsCountPersonForYear(DateTime time, string group)
         {
+            DateTime now = DateTime.Now;
+
             ItemCountPersonGroup item = new ItemCountPersonGroup();
             DateTime begin = new DateTime(time.Year, 1, 1, 0, 0, 0);
             DateTime end = begin.AddYears(1);
 
             List<DataRaw> raws = getRawData(begin, end);
-            List<DataRaw> datas = raws.OrderBy(s => s.person.group.code).ThenBy(s => s.person.codeSystem).ToList();
+            //List<DataRaw> datas = raws.OrderBy(s => s.person.group.code).ThenBy(s => s.person.codeSystem).ToList();
 
             if (group.CompareTo("") == 0)
             {
-                datas = datas.Where(s => s.person.group.code.CompareTo("") == 0).ToList();
+                raws = raws.Where(s => s.person.group.code.CompareTo("") == 0).ToList();
             }
             else if (group.CompareTo("1") == 0)
             {
-                datas = datas.Where(s => s.person.group.code.CompareTo("") != 0).ToList();
+                raws = raws.Where(s => s.person.group.code.CompareTo("") != 0).ToList();
             }
-            
-            for (int i = 0; i < 12; i++)
-            {
+
+            Parallel.For(0, 12, index => {
                 ItemMonthPerson itemPerson = new ItemMonthPerson();
 
-                itemPerson.time = (i + 1).ToString();
-                DateTime monthStart = begin.AddMonths(i);
+                itemPerson.time = (index + 1).ToString();
+                DateTime monthStart = begin.AddMonths(index);
                 DateTime monthStop = monthStart.AddMonths(1);
-                List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(monthStart, s.createdTime) <= 0 && DateTime.Compare(monthStop, s.createdTime) > 0).ToList();
+                List<DataRaw> tmp_datas = raws.Where(s => DateTime.Compare(monthStart, s.createdTime) <= 0 && DateTime.Compare(monthStop, s.createdTime) > 0).OrderBy(s => s.person.codeSystem).ToList();
                 while (tmp_datas.Count > 0)
                 {
                     itemPerson.person = 0;
@@ -241,7 +242,41 @@ namespace CBA.APIs
                     }
                 }
                 item.data.Add(itemPerson);
-            }
+            });
+
+            item.data = item.data.OrderBy(s => int.Parse(s.time)).ToList();
+
+            //for (int i = 0; i < 12; i++)
+            //{
+            //    ItemMonthPerson itemPerson = new ItemMonthPerson();
+            //    itemPerson.time = (i + 1).ToString();
+            //    DateTime monthStart = begin.AddMonths(i);
+            //    DateTime monthStop = monthStart.AddMonths(1);
+            //    List<DataRaw> tmp_datas = raws.Where(s => DateTime.Compare(monthStart, s.createdTime) <= 0 && DateTime.Compare(monthStop, s.createdTime) > 0).OrderBy(s => s.person.codeSystem).ToList();
+            //    while (tmp_datas.Count > 0)
+            //    {
+            //        itemPerson.person = 0;
+            //        string codePerson = tmp_datas[0].person.codeSystem;
+            //        if (!string.IsNullOrEmpty(codePerson))
+            //        {
+            //            itemPerson.person++;
+            //        }
+            //        for (int j = 0; j < tmp_datas.Count; j++)
+            //        {
+            //            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
+            //            {
+            //                codePerson = tmp_datas[j].person.codeSystem;
+            //                itemPerson.person++;
+            //            }
+            //            tmp_datas.RemoveAt(0);
+            //            j--;
+            //        }
+            //    }
+            //    item.data.Add(itemPerson);
+            //}
+
+            TimeSpan timeSpan = DateTime.Now.Subtract(now);
+            Log.Debug(string.Format("Time : {0}s", timeSpan.TotalSeconds));
 
             return item;
         }

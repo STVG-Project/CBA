@@ -1,23 +1,25 @@
-2023-05-22 08:52:11.749 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:25:50.333 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:27:43.178 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:29:31.431 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:32:07.337 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:32:48.239 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:34:40.205 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:36:28.851 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:46:25.370 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:50:13.007 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:51:33.921 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 09:53:24.440 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 10:04:55.830 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 10:25:14.891 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 10:45:14.669 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 10:49:57.071 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 10:56:18.831 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 10:57:51.653 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 11:03:34.707 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 11:05:44.274 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 11:08:01.591 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 11:12:57.779 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
-2023-05-22 11:42:21.398 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 22:58:16.182 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:32:04.227 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:32:55.301 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:33:58.402 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:34:14.853 +07:00 [DBG] Time : 10,719832s
+2023-05-22 23:37:30.041 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:37:45.767 +07:00 [DBG] Time : 10,735371s
+2023-05-22 23:38:21.698 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:38:31.396 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:38:43.910 +07:00 [DBG] Time : 10,91184s
+2023-05-22 23:45:39.181 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:45:56.208 +07:00 [DBG] Time : 9,991728s
+2023-05-22 23:47:20.147 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:47:32.261 +07:00 [DBG] Time : 9,975366s
+2023-05-22 23:48:17.120 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:48:28.876 +07:00 [DBG] Time : 10,155832s
+2023-05-22 23:49:12.974 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:49:25.709 +07:00 [DBG] Time : 10,154758s
+2023-05-22 23:50:44.297 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:50:56.665 +07:00 [DBG] Time : 9,742306s
+2023-05-22 23:52:02.156 +07:00 [DBG] Time : 9,783882s
+2023-05-22 23:52:16.637 +07:00 [DBG] Time : 9,960225s
+2023-05-22 23:52:34.914 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-22 23:52:47.134 +07:00 [DBG] Time : 9,720308s
+2023-05-22 23:53:10.226 +07:00 [DBG] Time : 9,937635s
