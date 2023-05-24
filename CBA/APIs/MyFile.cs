@@ -23,24 +23,24 @@ namespace CBA.APIs
 
         public async Task<string> saveFileAsync(string file, byte[] data)
         {
-            using (DataContext context = new DataContext())
+            try
             {
+                string code = createKey(file);
+                string link_file = "Data/" + code + ".file";
                 try
                 {
-                    string code = createKey(file);
-                    string link_file = "Data/" + code + ".file";
-                    try
-                    {
-                        await File.WriteAllBytesAsync(link_file, data);
-                    }
-                    catch (Exception ex)
-                    {
-                        code = "";
-                    }
-                    if (string.IsNullOrEmpty(code))
-                    {
-                        return code;
-                    }
+                    await File.WriteAllBytesAsync(link_file, data);
+                }
+                catch (Exception ex)
+                {
+                    code = "";
+                }
+                if (string.IsNullOrEmpty(code))
+                {
+                    return code;
+                }
+                using (DataContext context = new DataContext())
+                {
                     SqlFile m_file = new SqlFile();
                     m_file.ID = DateTime.Now.Ticks;
                     m_file.key = code;
@@ -61,13 +61,13 @@ namespace CBA.APIs
                         return "";
                     }
                 }
-                catch (Exception ex)
-                {
-                    Log.Error(ex.ToString());
-                    return "";
-                }
+
             }
-            
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return "";
+            }
         }
 
         public byte[]? readFile(string code)

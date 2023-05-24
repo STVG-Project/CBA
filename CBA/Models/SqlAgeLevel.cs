@@ -11,7 +11,6 @@ namespace CBA.Models
         public string des { get; set; } = "";
         public int low { get; set; } = int.MinValue;
         public int high { get; set; } = int.MaxValue;
-
         public bool isdeleted { get; set; } = false;
 
     }

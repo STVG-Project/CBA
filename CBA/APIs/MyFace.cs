@@ -9,13 +9,15 @@ namespace CBA.APIs
 {
     public class MyFace
     {
-       /* public class ItemPersonDetect
-        {
-            public string codeSystem { get; set; } = "";
-            public string name { get; set; } = "";
-            public string gender { get; set; } = "";
-            public int age { get; set; } = 0;
-        }*/
+        public bool flag = false;
+
+        /* public class ItemPersonDetect
+         {
+             public string codeSystem { get; set; } = "";
+             public string name { get; set; } = "";
+             public string gender { get; set; } = "";
+             public int age { get; set; } = 0;
+         }*/
         public class ItemDetectPerson
         {
             public string codeSystem { get; set; } = "";
@@ -41,14 +43,10 @@ namespace CBA.APIs
                 Log.Error(ex.ToString());
             }
 
-            int totalAge = 0;
-
             if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile) || string.IsNullOrEmpty(device))
             {
                 return false;
             }
-
-
 
             using (DataContext context = new DataContext())
             {
@@ -95,63 +93,92 @@ namespace CBA.APIs
                     await context.SaveChangesAsync();
                 }
 
-
-                SqlFace? face = new SqlFace();
-                face.ID = DateTime.Now.Ticks;
-                face.gender = gender;
-                face.person = sqlPerson;
-                face.age = age;
-                face.device = sqlDevice;
-                face.image = codefile;
-                face.createdTime = DateTime.Now.ToUniversalTime();
-                face.isdeleted = false;
-
-                context.faces!.Add(face);
-                await context.SaveChangesAsync();
-
                 if (sqlPerson.faces != null)
                 {
-                    foreach (SqlFace item in sqlPerson.faces!)
+                    if(sqlPerson.faces.Count > 1)
                     {
-                        totalAge += item.age;
+                        int totalAge = 0;
+                        foreach (SqlFace item in sqlPerson.faces)
+                        {
+                            totalAge += item.age;
 
+                        }
+                        sqlPerson.age = totalAge / sqlPerson.faces.Count;
+                        sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
+
+                        sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                        await context.SaveChangesAsync();
                     }
-                    sqlPerson.age = totalAge / sqlPerson.faces.Count;
-                    //                    Console.WriteLine(sqlPerson.age);
-                    sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
-
-                    sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
-                    await context.SaveChangesAsync();
                 }
 
-                ItemDetectPerson itemDetect = new ItemDetectPerson();
-                itemDetect.codeSystem = codeSystem;
-                itemDetect.name = sqlPerson.name;
-                itemDetect.gender = sqlPerson.gender;
-                itemDetect.age = sqlPerson.age;
-                itemDetect.image = codefile;
-                itemDetect.group = sqlPerson.group == null? "0": sqlPerson.group.code;
-                itemDetect.device = sqlDevice.code;
-                itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-
-                List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
-                
-                foreach (HttpNotification notification in notifications)
+                if(sqlPerson.group != null)
                 {
-                    notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
+                    if(sqlPerson.group.code.CompareTo("BL") == 0)
+                    {
+                        ItemDetectPerson itemDetect = new ItemDetectPerson();
+                        itemDetect.codeSystem = codeSystem;
+                        itemDetect.name = sqlPerson.name;
+                        itemDetect.gender = sqlPerson.gender;
+                        itemDetect.age = sqlPerson.age;
+                        itemDetect.image = codefile;
+                        itemDetect.group = sqlPerson.group.code;
+                        itemDetect.device = sqlDevice.code;
+                        itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+                        List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
+
+                        foreach (HttpNotification notification in notifications)
+                        {
+                            notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
+                        }
+                    }
+                }
+                
+                while(!flag)
+                {
+                    Thread.Sleep(1000);
+
+                    SqlFace? face = new SqlFace();
+                    face.ID = DateTime.Now.Ticks;
+                    face.gender = gender;
+                    face.person = sqlPerson;
+                    face.age = age;
+                    face.device = sqlDevice;
+                    face.image = codefile;
+                    face.createdTime = DateTime.Now.ToUniversalTime();
+                    face.isdeleted = false;
+
+                    context.faces!.Add(face);
+                    int rows = await context.SaveChangesAsync();
+                    if(rows > 0)
+                    {
+                        flag = true;
+                    }
                 }
 
-                SqlLogPerson log = new SqlLogPerson();
-                log.ID = DateTime.Now.Ticks;
-                log.person = sqlPerson;
-                log.device = sqlDevice;
-                log.image = codefile;
-                log.note = string.Format("Person arrived : {0}", face.person.code);
-                log.time = DateTime.Now.ToUniversalTime();
+                try
+                {
+                    SqlLogPerson log = new SqlLogPerson();
+                    log.ID = DateTime.Now.Ticks;
+                    log.person = sqlPerson;
+                    log.device = sqlDevice;
+                    log.image = codefile;
+                    log.note = string.Format("Person arrived : {0}", sqlPerson.codeSystem);
+                    log.time = DateTime.Now.ToUniversalTime();
 
-                context.logs!.Add(log);
+                    context.logs!.Add(log);
 
-                await context.SaveChangesAsync();
+                    int l_rows = await context.SaveChangesAsync();
+                    if (l_rows > 0)
+                    {
+                        flag = false;
+                    }
+                }
+                catch(Exception e)
+                {
+                    Log.Error(string.Format("Person arrived have ID : {0}", sqlPerson.ID) + e.ToString());
+                }
+
 
                 return true;
             }
