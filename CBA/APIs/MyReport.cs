@@ -3,15 +3,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Npgsql;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Serilog;
 using System;
 using System.Drawing;
+using System.Net.NetworkInformation;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using static CBA.APIs.MyDevice;
 using static CBA.APIs.MyGroup;
+using static CBA.APIs.MyPerson;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Reflection.Metadata.BlobBuilder;
 using Log = Serilog.Log;
@@ -527,103 +530,101 @@ namespace CBA.APIs
                 DateTime hourStart = begin.AddHours(i);
                 DateTime hourStop = hourStart.AddHours(1);
 
+                foreach(string m_code in codes)
+                {
+                    itemPerson.number.Add(0);
+                }
+
                 ItemPersonForDevice tmp = new ItemPersonForDevice();
 
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(hourStart, s.createdTime) <= 0 && DateTime.Compare(hourStop, s.createdTime) > 0).ToList();
-                if(tmp_datas.Count < 1)
-                {
-                    foreach(string m_code in codes)
-                    {
-                        itemPerson.number.Add(tmp.number);
-                    }
-                }    
                 while (tmp_datas.Count > 0)
                 {
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeDevice = tmp_datas[0].device.code;
-                    foreach (string m_code in codes) 
-                    {   
-                        if(codeDevice.CompareTo(m_code) == 0)
-                        {
-                            tmp.number++;
-                        }
-                        else
-                        {
-                            tmp.number = 0;
-                        }    
+                    int index = 0;
+                    string? tmp_code = codes.Where(s => s.CompareTo(codeDevice) == 0).FirstOrDefault();
+                    if(tmp_code != null)
+                    {
+                        tmp.number++;
+                        index = codes.IndexOf(tmp_code);
+                    }
 
-                        tmp.count = 0;
-                        tmp.codeDevice = m_code;
-                        
-                        for (int j = 0; j < tmp_datas.Count; j++)
+                    tmp.count = 0;
+                    tmp.codeDevice = codeDevice;
+                    
+
+                    for (int j = 0; j < tmp_datas.Count; j++)
+                    {
+                        if (tmp.codeDevice.CompareTo(tmp_datas[j].device.code) == 0)
                         {
-                            if (tmp.codeDevice.CompareTo(tmp_datas[j].device.code) == 0)
+                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) == 0)
                             {
-                                if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) == 0)
-                                {
-                                    tmp.count++;
-                                }
-                                else
-                                {
-                                    codePerson = tmp_datas[j].person.codeSystem;
-                                    tmp.number++;
-                                    tmp.count++;
-                                }
-                                tmp_datas.RemoveAt(0);
-                                j--;
+                                tmp.count++;
                             }
                             else
                             {
-                                break;
+                                codePerson = tmp_datas[j].person.codeSystem;
+                                tmp.number++;
+                                tmp.count++;
                             }
-                        }
-                        itemPerson.number.Add(tmp.number);
-                    }
-                }
-                item.item.data.Add(itemPerson);
-            }
-            while (datas.Count > 0)
-            {
-                string codePerson = datas[0].person.codeSystem;
-                string codeDevice = datas[0].device.code;
-                foreach (string m_code in codes)
-                {
-                    ItemPersonForDevice tmp_device = new ItemPersonForDevice();
-                    tmp_device.codeDevice = m_code;
-                    if (codeDevice.CompareTo(m_code) == 0)
-                    {
-                        tmp_device.number++;
-                    }
-                    else
-                    {
-                        tmp_device.number = 0;
-                    }
-                    tmp_device.count = 0;
-
-                    for (int a = 0; a < datas.Count; a++)
-                    {
-                        if (tmp_device.codeDevice.CompareTo(datas[a].device.code) == 0)
-                        {
-                            if (datas[a].person.codeSystem.CompareTo(codePerson) == 0)
-                            {
-                                tmp_device.count++;
-                            }
-                            else
-                            {
-                                codePerson = datas[a].person.codeSystem;
-                                tmp_device.number++;
-                                tmp_device.count++;
-                            }
-                            datas.RemoveAt(0);
-                            a--;
+                            tmp_datas.RemoveAt(0);
+                            j--;
                         }
                         else
                         {
                             break;
                         }
                     }
-                    item.item.totalCount.Add(tmp_device.number);
-                }    
+                    itemPerson.number[index] = tmp.number;
+                }
+                item.item.data.Add(itemPerson);
+            }
+
+            foreach (string m_code in codes)
+            {
+                item.item.totalCount.Add(0);
+            }
+
+            while (datas.Count > 0)
+            {
+                string codePerson = datas[0].person.codeSystem;
+                string codeDevice = datas[0].device.code;
+                ItemPersonForDevice tmp_device = new ItemPersonForDevice();
+                int index = 0;
+                string? tmp_code = codes.Where(s => s.CompareTo(codeDevice) == 0).FirstOrDefault();
+                if (tmp_code != null)
+                {
+                    tmp_device.number++;
+                    index = codes.IndexOf(tmp_code);
+                }
+
+                tmp_device.codeDevice = codeDevice;
+                tmp_device.count = 0;
+
+                for (int a = 0; a < datas.Count; a++)
+                {
+                    if (tmp_device.codeDevice.CompareTo(datas[a].device.code) == 0)
+                    {
+                        if (datas[a].person.codeSystem.CompareTo(codePerson) == 0)
+                        {
+                            tmp_device.count++;
+                        }
+                        else
+                        {
+                            codePerson = datas[a].person.codeSystem;
+                            tmp_device.number++;
+                            tmp_device.count++;
+                        }
+                        datas.RemoveAt(0);
+                        a--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                item.item.totalCount[index] = tmp_device.number;
             }
             return item;
         }
@@ -800,106 +801,102 @@ namespace CBA.APIs
                 ItemCountWithLevel itemPerson = new ItemCountWithLevel();
 
                 itemPerson.hour = i.ToString();
+
+                foreach (string m_code in codes)
+                {
+                    itemPerson.number.Add(0);
+                }
+
                 DateTime hourStart = begin.AddHours(i);
                 DateTime hourStop = hourStart.AddHours(1);
                 ItemPersonForLevel tmp = new ItemPersonForLevel();
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(hourStart, s.createdTime) <= 0 && DateTime.Compare(hourStop, s.createdTime) > 0).ToList();
-
-                if (tmp_datas.Count < 1)
-                {
-                    foreach (string m_code in codes)
-                    {
-                        itemPerson.number.Add(tmp.number);
-                    }
-                }
                 while (tmp_datas.Count > 0)
                 {
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeLevel = tmp_datas[0].person.level.code;
-
-                    foreach (string m_code in codes)
+                    int index = 0;
+                    string? tmp_code = codes.Where(s => s.CompareTo(codeLevel) == 0).FirstOrDefault();
+                    if (tmp_code != null)
                     {
-                        if (codeLevel.CompareTo(m_code) == 0)
-                        {
-                            tmp.number++;
-                        }
-                        else
-                        {
-                            tmp.number = 0;
-                        }
+                        tmp.number++;
+                        index = codes.IndexOf(tmp_code);
+                    }
+                    
+                    tmp.count = 0;
+                    tmp.codeLevel = codeLevel;
 
-                        tmp.count = 0;
-                        tmp.codeLevel = m_code;
-
-                        for (int j = 0; j < tmp_datas.Count; j++)
+                    for (int j = 0; j < tmp_datas.Count; j++)
+                    {
+                        if (tmp.codeLevel.CompareTo(tmp_datas[j].person.level.code) == 0)
                         {
-                            if (tmp.codeLevel.CompareTo(tmp_datas[j].person.level.code) == 0)
+                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) == 0)
                             {
-                                if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) == 0)
-                                {
-                                    tmp.count++;
-                                }
-                                else
-                                {
-                                    codePerson = tmp_datas[j].person.codeSystem;
-                                    tmp.number++;
-                                    tmp.count++;
-                                }
-                                tmp_datas.RemoveAt(0);
-                                j--;
+                                tmp.count++;
                             }
                             else
                             {
-                                break;
+                                codePerson = tmp_datas[j].person.codeSystem;
+                                tmp.number++;
+                                tmp.count++;
                             }
-                        }
-                        itemPerson.number.Add(tmp.number);
-                    }
-                }
-                item.item.data.Add(itemPerson);
-            }
-            while (datas.Count > 0)
-            {
-                string codePerson = datas[0].person.codeSystem;
-                string codeLevel = datas[0].person.level.code;
-                foreach (string m_code in codes)
-                {
-                    ItemPersonForLevel tmp_level = new ItemPersonForLevel();
-                    tmp_level.codeLevel = m_code;
-                    if (codeLevel.CompareTo(m_code) == 0)
-                    {
-                        tmp_level.number++;
-                    }
-                    else
-                    {
-                        tmp_level.number = 0;
-                    }
-                    tmp_level.count = 0;
-
-                    for (int a = 0; a < datas.Count; a++)
-                    {
-                        if (tmp_level.codeLevel.CompareTo(datas[a].person.level.code) == 0)
-                        {
-                            if (datas[a].person.codeSystem.CompareTo(codePerson) == 0)
-                            {
-                                tmp_level.count++;
-                            }
-                            else
-                            {
-                                codePerson = datas[a].person.codeSystem;
-                                tmp_level.number++;
-                                tmp_level.count++;
-                            }
-                            datas.RemoveAt(0);
-                            a--;
+                            tmp_datas.RemoveAt(0);
+                            j--;
                         }
                         else
                         {
                             break;
                         }
                     }
-                    item.item.totalCount.Add(tmp_level.number);
+                    itemPerson.number[index] = tmp.number;
                 }
+                item.item.data.Add(itemPerson);
+            }
+
+            foreach (string m_code in codes)
+            {
+                item.item.totalCount.Add(0);
+            }
+
+            while (datas.Count > 0)
+            {
+                
+                string codePerson = datas[0].person.codeSystem;
+                string codeLevel = datas[0].person.level.code;
+                ItemPersonForLevel tmp_level = new ItemPersonForLevel();
+                int index = 0;
+                string? tmp_code = codes.Where(s => s.CompareTo(codeLevel) == 0).FirstOrDefault();
+                if (tmp_code != null)
+                {
+                    tmp_level.number++;
+                    index = codes.IndexOf(tmp_code);
+                }
+                tmp_level.codeLevel = codeLevel;
+                tmp_level.count = 0;
+
+                for (int a = 0; a < datas.Count; a++)
+                {
+                    if (tmp_level.codeLevel.CompareTo(datas[a].person.level.code) == 0)
+                    {
+                        if (datas[a].person.codeSystem.CompareTo(codePerson) == 0)
+                        {
+                            tmp_level.count++;
+                        }
+                        else
+                        {
+                            codePerson = datas[a].person.codeSystem;
+                            tmp_level.number++;
+                            tmp_level.count++;
+                        }
+                        datas.RemoveAt(0);
+                        a--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                item.item.totalCount[index] = tmp_level.number;
             }
             return item;
         }
@@ -1142,108 +1139,102 @@ namespace CBA.APIs
             for (int i = 0; i < 24; i++)
             {
                 ItemCountWithGenderV2 itemPerson = new ItemCountWithGenderV2();
+                foreach (string m_code in codes)
+                {
+                    itemPerson.number.Add(0);
+                }
 
                 itemPerson.hour = i.ToString();
                 DateTime hourStart = begin.AddHours(i);
                 DateTime hourStop = hourStart.AddHours(1);
                 ItemPersonForGender tmp = new ItemPersonForGender();
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(hourStart, s.createdTime) <= 0 && DateTime.Compare(hourStop, s.createdTime) > 0).ToList();
-
-                if (tmp_datas.Count < 1)
-                {
-                    foreach (string m_code in codes)
-                    {
-                        itemPerson.number.Add(tmp.number);
-                    }
-                }
                 while (tmp_datas.Count > 0)
                 {
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeGender = tmp_datas[0].person.gender;
 
-                    foreach (string m_code in codes)
+                    int index = 0;
+                    string? tmp_code = codes.Where(s => s.CompareTo(codeGender) == 0).FirstOrDefault();
+                    if (tmp_code != null)
                     {
-                        if (codeGender.CompareTo(m_code) == 0)
-                        {
-                            tmp.number++;
-                        }
-                        else
-                        {
-                            tmp.number = 0;
-                        }
+                        tmp.number++;
+                        index = codes.IndexOf(tmp_code);
+                    }
+                    tmp.count = 0;
+                    tmp.gender = codeGender;
 
-                        tmp.count = 0;
-                        tmp.gender = m_code;
-
-                        for (int j = 0; j < tmp_datas.Count; j++)
+                    for (int j = 0; j < tmp_datas.Count; j++)
+                    {
+                        if (tmp.gender.CompareTo(tmp_datas[j].person.gender) == 0)
                         {
-                            if (tmp.gender.CompareTo(tmp_datas[j].person.gender) == 0)
+                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) == 0)
                             {
-                                if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) == 0)
-                                {
-                                    tmp.count++;
-                                }
-                                else
-                                {
-                                    codePerson = tmp_datas[j].person.codeSystem;
-                                    tmp.number++;
-                                    tmp.count++;
-                                }
-                                tmp_datas.RemoveAt(0);
-                                j--;
+                                tmp.count++;
                             }
                             else
                             {
-                                break;
+                                codePerson = tmp_datas[j].person.codeSystem;
+                                tmp.number++;
+                                tmp.count++;
                             }
-                        }
-                        itemPerson.number.Add(tmp.number);
-                    }
-                }
-                item.item.data.Add(itemPerson);
-            }
-            while (datas.Count > 0)
-            {
-                string codePerson = datas[0].person.codeSystem;
-                string codeGender = datas[0].person.gender;
-                foreach (string m_code in codes)
-                {
-                    ItemPersonForGender tmp_gender = new ItemPersonForGender();
-                    tmp_gender.gender = m_code;
-                    if (codeGender.CompareTo(m_code) == 0)
-                    {
-                        tmp_gender.number++;
-                    }
-                    else
-                    {
-                        tmp_gender.number = 0;
-                    }
-                    tmp_gender.count = 0;
-
-                    for (int a = 0; a < datas.Count; a++)
-                    {
-                        if (tmp_gender.gender.CompareTo(datas[a].person.gender) == 0)
-                        {
-                            if (datas[a].person.codeSystem.CompareTo(codePerson) == 0)
-                            {
-                                tmp_gender.count++;
-                            }
-                            else
-                            {
-                                codePerson = datas[a].person.codeSystem;
-                                tmp_gender.number++;
-                                tmp_gender.count++;
-                            }
-                            datas.RemoveAt(0);
-                            a--;
+                            tmp_datas.RemoveAt(0);
+                            j--;
                         }
                         else
                         {
                             break;
                         }
                     }
-                    item.item.totalCount.Add(tmp_gender.number);
+                    itemPerson.number[index] = tmp.number;
                 }
+                item.item.data.Add(itemPerson);
+            }
+
+            foreach (string m_code in codes)
+            {
+                item.item.totalCount.Add(0);
+            }
+
+            while (datas.Count > 0)
+            {
+                
+                string codePerson = datas[0].person.codeSystem;
+                string codeGender = datas[0].person.gender;
+                int index = 0;
+
+                ItemPersonForGender tmp_gender = new ItemPersonForGender();
+                string? tmp_code = codes.Where(s => s.CompareTo(codeGender) == 0).FirstOrDefault();
+                if (tmp_code != null)
+                {
+                    tmp_gender.number++;
+                    index = codes.IndexOf(tmp_code);
+                }
+                tmp_gender.count = 0;
+                tmp_gender.gender = codeGender;
+                for (int a = 0; a < datas.Count; a++)
+                {
+                    if (tmp_gender.gender.CompareTo(datas[a].person.gender) == 0)
+                    {
+                        if (datas[a].person.codeSystem.CompareTo(codePerson) == 0)
+                        {
+                            tmp_gender.count++;
+                        }
+                        else
+                        {
+                            codePerson = datas[a].person.codeSystem;
+                            tmp_gender.number++;
+                            tmp_gender.count++;
+                        }
+                        datas.RemoveAt(0);
+                        a--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                item.item.totalCount[index] = tmp_gender.number;
             }
             return item;
         }
