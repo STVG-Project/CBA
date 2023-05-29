@@ -1,0 +1,2 @@
+2023-05-23 09:02:41.689 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-23 09:03:31.972 +07:00 [DBG] Time : 23,251982s
