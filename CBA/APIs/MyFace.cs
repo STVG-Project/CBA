@@ -38,72 +38,169 @@ namespace CBA.APIs
                 return false;
             }
 
-            using (DataContext context = new DataContext())
+            SqlPerson? sqlPerson = null;
+            SqlDevice? sqlDevice = null;
+            try
             {
-                SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
-                if (sqlPerson == null)
+                while (flag)
                 {
-                    sqlPerson = new SqlPerson();
-                    sqlPerson.ID = DateTime.Now.Ticks;
-                    sqlPerson.codeSystem = codeSystem;
-                    sqlPerson.code = "identify_" + codeSystem;
-                    sqlPerson.gender = gender;
-                    sqlPerson.age = age;
-                    sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
-                    sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
-                    sqlPerson.isdeleted = false;
-                    sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
-
-                    context.persons!.Add(sqlPerson);
-
-                    await context.SaveChangesAsync();
+                    Thread.Sleep(1);
                 }
-                //else
-                //{
-                //    if(sqlPerson.level == null)
-                //    {
-                //        sqlPerson.level = levels.Where(s => s.low.CompareTo(sqlPerson.age) <= 0 && s.high.CompareTo(sqlPerson.age) >= 0).FirstOrDefault();
-                //        sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
-                //        await context.SaveChangesAsync();
-                //    }
-                //}
-
-
-                SqlDevice? sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
-                if (sqlDevice == null)
+                flag = true;
+                using (DataContext context = new DataContext())
                 {
-                    sqlDevice = new SqlDevice();
-                    sqlDevice.ID = DateTime.Now.Ticks;
-                    sqlDevice.code = device;
-                    sqlDevice.name = "tb_" + device;
-                    sqlDevice.des = "tb_" + device;
-                    sqlDevice.isdeleted = false;
-
-                    context.devices!.Add(sqlDevice);
-                    await context.SaveChangesAsync();
-                }
-
-                if (sqlPerson.faces != null)
-                {
-                    if(sqlPerson.faces.Count > 1)
+                    sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
+                    if (sqlPerson == null)
                     {
-                        int totalAge = 0;
-                        foreach (SqlFace item in sqlPerson.faces)
-                        {
-                            totalAge += item.age;
-
-                        }
-                        sqlPerson.age = totalAge / sqlPerson.faces.Count;
+                        sqlPerson = new SqlPerson();
+                        sqlPerson.ID = DateTime.Now.Ticks;
+                        sqlPerson.codeSystem = codeSystem;
+                        sqlPerson.code = "identify_" + codeSystem;
+                        sqlPerson.gender = gender;
+                        sqlPerson.age = age;
+                        sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
+                        sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                        sqlPerson.isdeleted = false;
                         sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
 
-                        sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                        context.persons!.Add(sqlPerson);
+
                         await context.SaveChangesAsync();
+                        
+                    }
+                    else
+                    {
+                        if (sqlPerson.faces != null)
+                        {
+                            if (sqlPerson.faces.Count > 1)
+                            {
+                                int totalAge = 0;
+                                foreach (SqlFace item in sqlPerson.faces)
+                                {
+                                    totalAge += item.age;
+
+                                }
+                                sqlPerson.age = totalAge / sqlPerson.faces.Count;
+                                sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
+
+                                sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                                await context.SaveChangesAsync();
+                            }
+                        }
+                    }
+                    flag = false;
+                }
+                while (flag)
+                {
+                    Thread.Sleep(1);
+                }
+                flag = true;
+                using (DataContext context = new DataContext())
+                { 
+                    sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
+                    if (sqlDevice == null)
+                    {
+                        sqlDevice = new SqlDevice();
+                        sqlDevice.ID = DateTime.Now.Ticks;
+                        sqlDevice.code = device;
+                        sqlDevice.name = "tb_" + device;
+                        sqlDevice.des = "tb_" + device;
+                        sqlDevice.isdeleted = false;
+
+                        context.devices!.Add(sqlDevice);
+                        await context.SaveChangesAsync();
+
+                        flag = false;
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex.ToString());
+
+            }
+
+            while (flag)
+            {
+                Thread.Sleep(1);
+            }
+            flag = true;
+            try
+            {
+                using (DataContext context = new DataContext())
+                {
+                    SqlFace? face = new SqlFace();
+                    face.ID = DateTime.Now.Ticks;
+                    face.gender = gender;
+                    face.person = sqlPerson;
+                    face.age = age;
+                    face.device = sqlDevice;
+                    face.image = codefile;
+                    face.createdTime = DateTime.Now.ToUniversalTime();
+                    face.isdeleted = false;
+
+                    context.faces!.Add(face);
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        flag = false;
+                    }
+                    else
+                    {
+                        Log.Information("Face haven't yet save DB !!!");
+                        return false;
+                    }
+
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(string.Format("Person arrived have codeSystem : {0}", sqlPerson!.codeSystem) + e.ToString());
+            }
+
+            while (flag)
+            {
+                Thread.Sleep(1);
+            }
+            flag = true;
+            try
+            {
+                using (DataContext context = new DataContext())
+                {
+
+                    SqlLogPerson log = new SqlLogPerson();
+                    log.ID = DateTime.Now.Ticks;
+                    log.person = sqlPerson;
+                    log.device = sqlDevice;
+                    log.image = codefile;
+                    log.note = string.Format("Person arrived : {0}", sqlPerson!.codeSystem);
+                    log.time = DateTime.Now.ToUniversalTime();
+
+                    context.logs!.Add(log);
+
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        flag = false;
+                    }
+                    else
+                    {
+                        Log.Information("Log face fail save DB !!!");
+                        return false;
                     }
                 }
 
-                if(sqlPerson.group != null)
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+            
+            if(sqlPerson != null)
+            {
+                if (sqlPerson!.group != null)
                 {
-                    if(sqlPerson.group.code.CompareTo("BL") == 0)
+                    if (sqlPerson.group.code.CompareTo("BL") == 0)
                     {
                         ItemDetectPerson itemDetect = new ItemDetectPerson();
                         itemDetect.codeSystem = codeSystem;
@@ -123,55 +220,9 @@ namespace CBA.APIs
                         }
                     }
                 }
-                
-                while(!flag)
-                {
-                    Thread.Sleep(1000);
-
-                    SqlFace? face = new SqlFace();
-                    face.ID = DateTime.Now.Ticks;
-                    face.gender = gender;
-                    face.person = sqlPerson;
-                    face.age = age;
-                    face.device = sqlDevice;
-                    face.image = codefile;
-                    face.createdTime = DateTime.Now.ToUniversalTime();
-                    face.isdeleted = false;
-
-                    context.faces!.Add(face);
-                    int rows = await context.SaveChangesAsync();
-                    if(rows > 0)
-                    {
-                        flag = true;
-                    }
-                }
-
-                try
-                {
-                    SqlLogPerson log = new SqlLogPerson();
-                    log.ID = DateTime.Now.Ticks;
-                    log.person = sqlPerson;
-                    log.device = sqlDevice;
-                    log.image = codefile;
-                    log.note = string.Format("Person arrived : {0}", sqlPerson.codeSystem);
-                    log.time = DateTime.Now.ToUniversalTime();
-
-                    context.logs!.Add(log);
-
-                    int l_rows = await context.SaveChangesAsync();
-                    if (l_rows > 0)
-                    {
-                        flag = false;
-                    }
-                }
-                catch(Exception e)
-                {
-                    Log.Error(string.Format("Person arrived have ID : {0}", sqlPerson.ID) + e.ToString());
-                }
-
-
-                return true;
             }
+
+            return true;
         }
 
         public async Task<bool> setConvertFace(string s1, string s2)
