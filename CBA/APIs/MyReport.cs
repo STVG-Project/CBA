@@ -530,7 +530,6 @@ namespace CBA.APIs
                     itemPerson.number.Add(0);
                 }
 
-                ItemPersonForDevice tmp = new ItemPersonForDevice();
 
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(hourStart, s.createdTime) <= 0 && DateTime.Compare(hourStop, s.createdTime) > 0).ToList();
                 while (tmp_datas.Count > 0)
@@ -538,6 +537,8 @@ namespace CBA.APIs
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeDevice = tmp_datas[0].device.code;
                     int index = 0;
+                    ItemPersonForDevice tmp = new ItemPersonForDevice();
+
                     string? tmp_code = codes.Where(s => s.CompareTo(codeDevice) == 0).FirstOrDefault();
                     if(tmp_code != null)
                     {
@@ -804,12 +805,13 @@ namespace CBA.APIs
 
                 DateTime hourStart = begin.AddHours(i);
                 DateTime hourStop = hourStart.AddHours(1);
-                ItemPersonForLevel tmp = new ItemPersonForLevel();
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(hourStart, s.createdTime) <= 0 && DateTime.Compare(hourStop, s.createdTime) > 0).ToList();
                 while (tmp_datas.Count > 0)
                 {
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeLevel = tmp_datas[0].person.level.code;
+                    ItemPersonForLevel tmp = new ItemPersonForLevel();
+
                     int index = 0;
                     string? tmp_code = codes.Where(s => s.CompareTo(codeLevel) == 0).FirstOrDefault();
                     if (tmp_code != null)
@@ -1142,12 +1144,12 @@ namespace CBA.APIs
                 itemPerson.hour = i.ToString();
                 DateTime hourStart = begin.AddHours(i);
                 DateTime hourStop = hourStart.AddHours(1);
-                ItemPersonForGender tmp = new ItemPersonForGender();
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(hourStart, s.createdTime) <= 0 && DateTime.Compare(hourStop, s.createdTime) > 0).ToList();
                 while (tmp_datas.Count > 0)
                 {
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeGender = tmp_datas[0].person.gender;
+                    ItemPersonForGender tmp = new ItemPersonForGender();
 
                     int index = 0;
                     string? tmp_code = codes.Where(s => s.CompareTo(codeGender) == 0).FirstOrDefault();

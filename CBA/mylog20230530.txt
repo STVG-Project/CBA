@@ -1,0 +1,10 @@
+2023-05-30 15:24:55.027 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-30 15:39:18.686 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-30 15:46:10.525 +07:00 [INF] Connected to Server : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg
+2023-05-30 16:00:32.718 +07:00 [ERR] Microsoft.Extensions.Hosting.HostAbortedException: The host was aborted.
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.ThrowHostAborted()
+   at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.OnNext(KeyValuePair`2 value)
+   at System.Diagnostics.DiagnosticListener.Write(String name, Object value)
+   at Microsoft.Extensions.Hosting.HostBuilder.Build()
+   at Microsoft.AspNetCore.Builder.WebApplicationBuilder.Build()
+   at CBA.Program.Main(String[] args) in C:\Users\ASUS\Documents\GitHub\CBA\CBA\Program.cs:line 113

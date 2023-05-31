@@ -111,11 +111,7 @@ namespace CBA.APIs
             if (Program.api_person.cacheHistoryPersons.Count > 0)
             {
                 //Console.WriteLine(" Remove cache History");
-                for (int i = 0; i < Program.api_person.cacheHistoryPersons.Count; i++)
-                {
-                    Program.api_person.cacheHistoryPersons.RemoveAt(i);
-                    i--;
-                }
+                Program.api_person.cacheHistoryPersons.Clear();
                 Console.WriteLine(" Remove cache History, Done !!!");
             }
 
@@ -124,12 +120,8 @@ namespace CBA.APIs
             if (Program.api_person.cacheListAllPersons.Count > 0)
             {
                 //Console.WriteLine(" Remove cache List Person");
-                for (int i = 0; i < Program.api_person.cacheListAllPersons.Count; i++)
-                {
-                    Program.api_person.cacheListAllPersons.RemoveAt(i);
-                    i--;
+                Program.api_person.cacheListAllPersons.Clear();
 
-                }
                 Console.WriteLine(" Remove cache List Person, Done !!!");
             }
             return true;
