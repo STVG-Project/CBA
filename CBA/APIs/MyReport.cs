@@ -536,15 +536,12 @@ namespace CBA.APIs
                 {
                     string codePerson = tmp_datas[0].person.codeSystem;
                     string codeDevice = tmp_datas[0].device.code;
-                    int index = 0;
                     ItemPersonForDevice tmp = new ItemPersonForDevice();
-
-                    string? tmp_code = codes.Where(s => s.CompareTo(codeDevice) == 0).FirstOrDefault();
-                    if(tmp_code != null)
+                    int index = codes.FindIndex(x => x.CompareTo(codeDevice) == 0);
+                    if (!string.IsNullOrEmpty(codes[index]))
                     {
                         tmp.number++;
-                        index = codes.IndexOf(tmp_code);
-                    }
+                    }    
 
                     tmp.count = 0;
                     tmp.codeDevice = codeDevice;
@@ -587,12 +584,10 @@ namespace CBA.APIs
                 string codePerson = datas[0].person.codeSystem;
                 string codeDevice = datas[0].device.code;
                 ItemPersonForDevice tmp_device = new ItemPersonForDevice();
-                int index = 0;
-                string? tmp_code = codes.Where(s => s.CompareTo(codeDevice) == 0).FirstOrDefault();
-                if (tmp_code != null)
+                int index = codes.FindIndex(x => x.CompareTo(codeDevice) == 0);
+                if (!string.IsNullOrEmpty(codes[index]))
                 {
                     tmp_device.number++;
-                    index = codes.IndexOf(tmp_code);
                 }
 
                 tmp_device.codeDevice = codeDevice;
@@ -812,14 +807,12 @@ namespace CBA.APIs
                     string codeLevel = tmp_datas[0].person.level.code;
                     ItemPersonForLevel tmp = new ItemPersonForLevel();
 
-                    int index = 0;
-                    string? tmp_code = codes.Where(s => s.CompareTo(codeLevel) == 0).FirstOrDefault();
-                    if (tmp_code != null)
+                    int index = codes.FindIndex(x => x.CompareTo(codeLevel) == 0);
+                    if (!string.IsNullOrEmpty(codes[index]))
                     {
                         tmp.number++;
-                        index = codes.IndexOf(tmp_code);
                     }
-                    
+
                     tmp.count = 0;
                     tmp.codeLevel = codeLevel;
 
@@ -861,12 +854,11 @@ namespace CBA.APIs
                 string codePerson = datas[0].person.codeSystem;
                 string codeLevel = datas[0].person.level.code;
                 ItemPersonForLevel tmp_level = new ItemPersonForLevel();
-                int index = 0;
-                string? tmp_code = codes.Where(s => s.CompareTo(codeLevel) == 0).FirstOrDefault();
-                if (tmp_code != null)
+                
+                int index = codes.FindIndex(x => x.CompareTo(codeLevel) == 0);
+                if (!string.IsNullOrEmpty(codes[index]))
                 {
                     tmp_level.number++;
-                    index = codes.IndexOf(tmp_code);
                 }
                 tmp_level.codeLevel = codeLevel;
                 tmp_level.count = 0;
@@ -1151,13 +1143,12 @@ namespace CBA.APIs
                     string codeGender = tmp_datas[0].person.gender;
                     ItemPersonForGender tmp = new ItemPersonForGender();
 
-                    int index = 0;
-                    string? tmp_code = codes.Where(s => s.CompareTo(codeGender) == 0).FirstOrDefault();
-                    if (tmp_code != null)
+                    int index = codes.FindIndex(x => x.CompareTo(codeGender) == 0);
+                    if (!string.IsNullOrEmpty(codes[index]))
                     {
                         tmp.number++;
-                        index = codes.IndexOf(tmp_code);
                     }
+
                     tmp.count = 0;
                     tmp.gender = codeGender;
 
@@ -1198,15 +1189,14 @@ namespace CBA.APIs
                 
                 string codePerson = datas[0].person.codeSystem;
                 string codeGender = datas[0].person.gender;
-                int index = 0;
-
                 ItemPersonForGender tmp_gender = new ItemPersonForGender();
-                string? tmp_code = codes.Where(s => s.CompareTo(codeGender) == 0).FirstOrDefault();
-                if (tmp_code != null)
+
+                int index = codes.FindIndex(x => x.CompareTo(codeGender) == 0);
+                if (!string.IsNullOrEmpty(codes[index]))
                 {
                     tmp_gender.number++;
-                    index = codes.IndexOf(tmp_code);
                 }
+
                 tmp_gender.count = 0;
                 tmp_gender.gender = codeGender;
                 for (int a = 0; a < datas.Count; a++)

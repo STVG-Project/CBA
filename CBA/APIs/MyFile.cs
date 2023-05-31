@@ -23,24 +23,26 @@ namespace CBA.APIs
 
         public async Task<string> saveFileAsync(string file, byte[] data)
         {
-            try
+            using (DataContext context = new DataContext())
             {
-                string code = createKey(file);
-                string link_file = "Data/" + code + ".file";
+                string error_ID = "";
                 try
                 {
-                    await File.WriteAllBytesAsync(link_file, data);
-                }
-                catch (Exception ex)
-                {
-                    code = "";
-                }
-                if (string.IsNullOrEmpty(code))
-                {
-                    return code;
-                }
-                using (DataContext context = new DataContext())
-                {
+                    string code = createKey(file);
+                    string link_file = "Data/" + code + ".file";
+                    try
+                    {
+                        await File.WriteAllBytesAsync(link_file, data);
+                    }
+                    catch (Exception ex)
+                    {
+                        code = "";
+                    }
+                    if (string.IsNullOrEmpty(code))
+                    {
+                        return code;
+                    }
+
                     SqlFile m_file = new SqlFile();
                     m_file.ID = DateTime.Now.Ticks;
                     m_file.key = code;
@@ -49,7 +51,7 @@ namespace CBA.APIs
                     m_file.time = DateTime.Now.ToUniversalTime();
                     context.files!.Add(m_file);
 
-                    //Log.Information(m_file.ID.ToString());
+                    error_ID = m_file.ID.ToString();
 
                     int rows = await context.SaveChangesAsync();
                     if (rows > 0)
@@ -61,13 +63,14 @@ namespace CBA.APIs
                         return "";
                     }
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(error_ID);
+                    Log.Error(e.ToString());
+                    return "";
+                }
+            }
 
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-                return "";
-            }
         }
 
         public byte[]? readFile(string code)

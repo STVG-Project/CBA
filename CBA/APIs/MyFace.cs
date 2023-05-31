@@ -31,17 +31,7 @@ namespace CBA.APIs
         }
         public async Task<bool> createFace(int age, string gender, byte[] image, string device, string codeSystem)
         {
-            string codefile = "";
-            try
-            {
-                codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
-                //Log.Information(codefile);
-            }
-            catch (Exception ex)
-            {
-              
-                Log.Error(ex.ToString());
-            }
+            string codefile = await Program.api_file.saveFileAsync(DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss.image"), image);
 
             if (string.IsNullOrEmpty(gender) || string.IsNullOrEmpty(codeSystem) || string.IsNullOrEmpty(codefile) || string.IsNullOrEmpty(device))
             {
