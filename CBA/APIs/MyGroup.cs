@@ -65,10 +65,9 @@ namespace CBA.APIs
                 context.groups!.Add(group);
 
                 int rows = await context.SaveChangesAsync();
-                bool flag = false;
                 if (rows > 0)
                 {
-                    return flag;
+                    return true;
                 }
                 else
                 {
