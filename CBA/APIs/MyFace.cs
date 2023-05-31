@@ -129,7 +129,7 @@ namespace CBA.APIs
             {
                 using (DataContext context = new DataContext())
                 {
-                    SqlFace? face = new SqlFace();
+                    SqlFace face = new SqlFace();
                     face.ID = DateTime.Now.Ticks;
                     face.gender = gender;
                     face.person = sqlPerson;
@@ -209,7 +209,7 @@ namespace CBA.APIs
                         itemDetect.age = sqlPerson.age;
                         itemDetect.image = codefile;
                         itemDetect.group = sqlPerson.group.code;
-                        itemDetect.device = sqlDevice.code;
+                        itemDetect.device = sqlDevice!.code;
                         itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
                         List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
