@@ -1,6 +1,4 @@
-﻿using GIS.Controllers;
-using Microsoft.AspNetCore.Mvc;
-using static GIS.Controllers.HomeController;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace CBA.Controllers
 {

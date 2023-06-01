@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using static CBA.APIs.MyPerson;
 
-namespace GIS.Controllers
+namespace CBA.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

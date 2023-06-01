@@ -1,8 +1,7 @@
-﻿using System;
-using CBA;
+﻿
 using Microsoft.AspNetCore.Mvc;
 
-namespace ServerWater.Controllers
+namespace CBA.Controllers
 {
     [ApiController]
     [Route("[controller]")]
