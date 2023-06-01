@@ -221,7 +221,6 @@ namespace CBA.APIs
                 {
 
                     ListPersonPage info = new ListPersonPage();
-                    info.page = index;
                     List<ItemPerson> items = new List<ItemPerson>();
 
                     List<SqlPerson> persons = context.persons!.Where(s => s.isdeleted == false)
@@ -380,12 +379,26 @@ namespace CBA.APIs
                 info.total = items.Count;
                 if (index + number < items.Count)
                 {
-                    items.RemoveRange(0, index);
-                    items.RemoveRange(number, items.Count - number);
+                    try
+                    {
+                        items.RemoveRange(0, index);
+                        items.RemoveRange(number, items.Count - number);
+                    }
+                    catch(Exception e)
+                    {
+                        Log.Error(string.Format("{0} : {1}", index, e.ToString()));
+                    }
                 }
                 else
                 {
-                    items.RemoveRange(0, index);
+                    try
+                    {
+                        items.RemoveRange(0, index);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(string.Format("{0} : {1}", index, e.ToString()));
+                    }
                 }
                 info.items = items;
                 return info;
@@ -534,12 +547,26 @@ namespace CBA.APIs
                     info.total = items.Count;
                     if (index + number < items.Count)
                     {
-                        items.RemoveRange(0, index);
-                        items.RemoveRange(number, items.Count - number);
+                        try
+                        {
+                            items.RemoveRange(0, index);
+                            items.RemoveRange(number, items.Count - number);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(string.Format("{0} : {1}", index, e.ToString()));
+                        }
                     }
                     else
                     {
-                        items.RemoveRange(0, index);
+                        try
+                        {
+                            items.RemoveRange(0, index);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(string.Format("{0} : {1}", index, e.ToString()));
+                        }
                     }
                     info.items = items;
 

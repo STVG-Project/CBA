@@ -40,15 +40,20 @@ namespace CBA.APIs
 
             SqlPerson? sqlPerson = null;
             SqlDevice? sqlDevice = null;
+
             try
             {
-                while (flag)
-                {
-                    Thread.Sleep(1);
-                }
-                flag = true;
+                
                 using (DataContext context = new DataContext())
                 {
+                    //while (flag)
+                    //{
+                    //    Thread.Sleep(1);
+                    //}
+                    //flag = true;
+
+                    List<SqlAgeLevel> ages = context.ages!.Where(s => s.isdeleted == false).AsNoTracking().ToList();
+                   
                     sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
                     if (sqlPerson == null)
                     {
@@ -61,12 +66,10 @@ namespace CBA.APIs
                         sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
                         sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
                         sqlPerson.isdeleted = false;
-                        sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
+                        sqlPerson.level = ages.Where(s => s.low <= sqlPerson.age && s.high >= sqlPerson.age).FirstOrDefault();
 
                         context.persons!.Add(sqlPerson);
 
-                        await context.SaveChangesAsync();
-                        
                     }
                     else
                     {
@@ -81,22 +84,15 @@ namespace CBA.APIs
 
                                 }
                                 sqlPerson.age = totalAge / sqlPerson.faces.Count;
-                                sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
+                                sqlPerson.level = ages.Where(s => s.low <= sqlPerson.age && s.high >= sqlPerson.age).FirstOrDefault();
 
                                 sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
-                                await context.SaveChangesAsync();
+                                
                             }
                         }
                     }
-                    flag = false;
-                }
-                while (flag)
-                {
-                    Thread.Sleep(1);
-                }
-                flag = true;
-                using (DataContext context = new DataContext())
-                { 
+                    await context.SaveChangesAsync();
+
                     sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
                     if (sqlDevice == null)
                     {
@@ -110,25 +106,8 @@ namespace CBA.APIs
                         context.devices!.Add(sqlDevice);
                         await context.SaveChangesAsync();
 
-                        flag = false;
                     }
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.Error(ex.ToString());
 
-            }
-
-            while (flag)
-            {
-                Thread.Sleep(1);
-            }
-            flag = true;
-            try
-            {
-                using (DataContext context = new DataContext())
-                {
                     SqlFace face = new SqlFace();
                     face.ID = DateTime.Now.Ticks;
                     face.gender = gender;
@@ -140,33 +119,7 @@ namespace CBA.APIs
                     face.isdeleted = false;
 
                     context.faces!.Add(face);
-                    int rows = await context.SaveChangesAsync();
-                    if (rows > 0)
-                    {
-                        flag = false;
-                    }
-                    else
-                    {
-                        Log.Information("Face haven't yet save DB !!!");
-                        return false;
-                    }
-
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(string.Format("Person arrived have codeSystem : {0}", sqlPerson!.codeSystem) + e.ToString());
-            }
-
-            while (flag)
-            {
-                Thread.Sleep(1);
-            }
-            flag = true;
-            try
-            {
-                using (DataContext context = new DataContext())
-                {
+                    await context.SaveChangesAsync();
 
                     SqlLogPerson log = new SqlLogPerson();
                     log.ID = DateTime.Now.Ticks;
@@ -177,26 +130,18 @@ namespace CBA.APIs
                     log.time = DateTime.Now.ToUniversalTime();
 
                     context.logs!.Add(log);
+                    await context.SaveChangesAsync();
 
-                    int rows = await context.SaveChangesAsync();
-                    if (rows > 0)
-                    {
-                        flag = false;
-                    }
-                    else
-                    {
-                        Log.Information("Log face fail save DB !!!");
-                        return false;
-                    }
+                    //flag = false;
                 }
-
             }
             catch(Exception ex)
             {
                 Log.Error(ex.ToString());
+
             }
-            
-            if(sqlPerson != null)
+
+            if (sqlPerson != null)
             {
                 if (sqlPerson!.group != null)
                 {
@@ -218,7 +163,9 @@ namespace CBA.APIs
                         {
                             notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
                         }
+
                     }
+
                 }
             }
 
