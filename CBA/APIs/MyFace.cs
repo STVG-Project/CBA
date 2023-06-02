@@ -26,7 +26,9 @@ namespace CBA.APIs
             public string time { get; set; } = "";
             public string group { get; set; } = "";
             public string device { get; set; } = "";
+            public bool alert { get; set; } = false;
         }
+
         public async Task<bool> createFace(int age, string gender, byte[] image, string device, string codeSystem)
         {
             string codefile = "";
@@ -126,30 +128,47 @@ namespace CBA.APIs
                     await context.SaveChangesAsync();
                 }
 
+                Log.Information("Had Notification");
+                ItemDetectPerson itemDetect = new ItemDetectPerson();
+                itemDetect.codeSystem = codeSystem;
+                itemDetect.name = sqlPerson.name;
+                itemDetect.gender = sqlPerson.gender;
+                itemDetect.age = sqlPerson.age;
+                itemDetect.image = codefile;
+                itemDetect.device = sqlDevice.code;
+                itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
+
+                if (sqlPerson.group != null && sqlPerson.group.code.CompareTo("BL") == 0)
+                {
+                    itemDetect.alert = true;
+                    itemDetect.group = sqlPerson.group.name;
+                } else
+                {
+                    itemDetect.alert = false;
+                }
+
                 if (sqlPerson.group != null)
                 {
                     if(sqlPerson.group.code.CompareTo("BL") == 0)
                     {
-                        ItemDetectPerson itemDetect = new ItemDetectPerson();
-                        itemDetect.codeSystem = codeSystem;
-                        itemDetect.name = sqlPerson.name;
-                        itemDetect.gender = sqlPerson.gender;
-                        itemDetect.age = sqlPerson.age;
-                        itemDetect.image = codefile;
-                        itemDetect.group =  sqlPerson.group.code;
-                        itemDetect.device = sqlDevice.code;
-                        itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
-
-                        List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
-
-                        foreach (HttpNotification notification in notifications)
-                        {
-                            notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
-                        }
+                        itemDetect.alert = true;
+                        itemDetect.group = sqlPerson.group.name;
+                    } else
+                    {
+                        itemDetect.alert = false;
+                        itemDetect.group = sqlPerson.group.name;
                     }
+                } else
+                {
+                    itemDetect.alert = false;
+                    itemDetect.group = "";
                 }
 
-               
+                List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
+                foreach (HttpNotification notification in notifications)
+                {
+                    notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
+                }
 
                 SqlLogPerson log = new SqlLogPerson();
                 log.ID = DateTime.Now.Ticks;
