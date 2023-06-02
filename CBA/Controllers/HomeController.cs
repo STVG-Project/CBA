@@ -1,10 +1,4 @@
-﻿using CBA;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Serilog;
-using System.Diagnostics;
-using System.Globalization;
+﻿using Microsoft.AspNetCore.Mvc;
 using static CBA.APIs.MyPerson;
 
 namespace CBA.Controllers

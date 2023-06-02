@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Serilog;
 
 namespace CBA.Controllers
@@ -12,10 +13,6 @@ namespace CBA.Controllers
         [Route("{token}/callbackface")]
         public async Task callbackfaceAsync([FromRoute] string token, string group)
         {
-            if(group.CompareTo("0") == 0)
-            {
-                group = "BL";
-            }
             CancellationToken cancellationToken = HttpContext.RequestAborted;
             try
             {
@@ -45,6 +42,7 @@ namespace CBA.Controllers
                     {
                         break;
                     }
+
                     List<string> list = notification.messagers.ToList();
                     notification.messagers.Clear();
                     if (list.Count == 0)
@@ -60,6 +58,7 @@ namespace CBA.Controllers
                         await Response.Body.FlushAsync();
                         await Task.Delay(100);
                     }
+
                     if (cancellationToken.IsCancellationRequested)
                     {
                         Program.httpNotifications.Remove(notification);

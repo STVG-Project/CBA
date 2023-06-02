@@ -6,6 +6,7 @@ using CBA.APIs;
 using static CBA.APIs.MyPerson;
 using Newtonsoft.Json;
 using System.Drawing.Drawing2D;
+using static CBA.APIs.MyFace;
 
 namespace CBA;
 
@@ -121,8 +122,9 @@ public class Program
 
             }
 
+            int index = 1;
 
-            Log.Information("Connected to Server : " + DataContext.configSql);
+            Log.Information(String.Format("Connected to Server {0}_v{1} : {2} " , DateTime.Now, index.ToString() , DataContext.configSql));
 
             // Configure the HTTP request pipeline.
             app.UseSwagger();

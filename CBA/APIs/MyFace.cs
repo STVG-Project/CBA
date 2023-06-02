@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Serilog;
 using System.Text;
+using System.Text.RegularExpressions;
+using static CBA.APIs.MyUser;
 using static CBA.Program;
 
 namespace CBA.APIs
@@ -28,6 +30,7 @@ namespace CBA.APIs
             public string time { get; set; } = "";
             public string group { get; set; } = "";
             public string device { get; set; } = "";
+            public bool alert { get; set; } = false; 
         }
         public async Task<bool> createFace(int age, string gender, byte[] image, string device, string codeSystem)
         {
@@ -38,76 +41,67 @@ namespace CBA.APIs
                 return false;
             }
 
-            SqlPerson? sqlPerson = null;
-            SqlDevice? sqlDevice = null;
-
-            try
+             
+            
+            using (DataContext context = new DataContext())
             {
-                
-                using (DataContext context = new DataContext())
+                SqlPerson? sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
+                if (sqlPerson == null)
                 {
-                    //while (flag)
-                    //{
-                    //    Thread.Sleep(1);
-                    //}
-                    //flag = true;
+                    sqlPerson = new SqlPerson();
+                    sqlPerson.ID = DateTime.Now.Ticks;
+                    sqlPerson.codeSystem = codeSystem;
+                    sqlPerson.code = "identify_" + codeSystem;
+                    sqlPerson.gender = gender;
+                    sqlPerson.age = age;
+                    sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
+                    sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                    sqlPerson.isdeleted = false;
+                    sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
 
-                    List<SqlAgeLevel> ages = context.ages!.Where(s => s.isdeleted == false).AsNoTracking().ToList();
-                   
-                    sqlPerson = context.persons!.Where(s => s.isdeleted == false && s.codeSystem.CompareTo(codeSystem) == 0).Include(s => s.faces).Include(s => s.group).FirstOrDefault();
-                    if (sqlPerson == null)
-                    {
-                        sqlPerson = new SqlPerson();
-                        sqlPerson.ID = DateTime.Now.Ticks;
-                        sqlPerson.codeSystem = codeSystem;
-                        sqlPerson.code = "identify_" + codeSystem;
-                        sqlPerson.gender = gender;
-                        sqlPerson.age = age;
-                        sqlPerson.createdTime = DateTime.Now.ToUniversalTime();
-                        sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
-                        sqlPerson.isdeleted = false;
-                        sqlPerson.level = ages.Where(s => s.low <= sqlPerson.age && s.high >= sqlPerson.age).FirstOrDefault();
-
-                        context.persons!.Add(sqlPerson);
-
-                    }
-                    else
-                    {
-                        if (sqlPerson.faces != null)
-                        {
-                            if (sqlPerson.faces.Count > 1)
-                            {
-                                int totalAge = 0;
-                                foreach (SqlFace item in sqlPerson.faces)
-                                {
-                                    totalAge += item.age;
-
-                                }
-                                sqlPerson.age = totalAge / sqlPerson.faces.Count;
-                                sqlPerson.level = ages.Where(s => s.low <= sqlPerson.age && s.high >= sqlPerson.age).FirstOrDefault();
-
-                                sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
-                                
-                            }
-                        }
-                    }
+                    context.persons!.Add(sqlPerson);
                     await context.SaveChangesAsync();
 
-                    sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
-                    if (sqlDevice == null)
+                }
+                else
+                {
+                    if (sqlPerson.faces != null)
                     {
-                        sqlDevice = new SqlDevice();
-                        sqlDevice.ID = DateTime.Now.Ticks;
-                        sqlDevice.code = device;
-                        sqlDevice.name = "tb_" + device;
-                        sqlDevice.des = "tb_" + device;
-                        sqlDevice.isdeleted = false;
+                        if (sqlPerson.faces.Count > 1)
+                        {
+                            int totalAge = 0;
+                            foreach (SqlFace item in sqlPerson.faces)
+                            {
+                                totalAge += item.age;
 
-                        context.devices!.Add(sqlDevice);
-                        await context.SaveChangesAsync();
+                            }
+                            sqlPerson.age = totalAge / sqlPerson.faces.Count;
+                            sqlPerson.level = context.ages!.Where(s => (s.low <= sqlPerson.age && s.high >= sqlPerson.age) && s.isdeleted == false).FirstOrDefault();
 
+                            sqlPerson.lastestTime = DateTime.Now.ToUniversalTime();
+                            await context.SaveChangesAsync();
+
+                        }
                     }
+                }
 
+                SqlDevice? sqlDevice = context.devices!.Where(s => s.isdeleted == false && s.code.CompareTo(device) == 0).FirstOrDefault();
+                if (sqlDevice == null)
+                {
+                    sqlDevice = new SqlDevice();
+                    sqlDevice.ID = DateTime.Now.Ticks;
+                    sqlDevice.code = device;
+                    sqlDevice.name = "tb_" + device;
+                    sqlDevice.des = "tb_" + device;
+                    sqlDevice.isdeleted = false;
+
+                    context.devices!.Add(sqlDevice);
+                    await context.SaveChangesAsync();
+
+                }
+
+                try
+                {
                     SqlFace face = new SqlFace();
                     face.ID = DateTime.Now.Ticks;
                     face.gender = gender;
@@ -119,7 +113,11 @@ namespace CBA.APIs
                     face.isdeleted = false;
 
                     context.faces!.Add(face);
-                    await context.SaveChangesAsync();
+                    int rows = await context.SaveChangesAsync();
+                    if (rows > 0)
+                    {
+                        Log.Information("Create new face !!!");
+                    }
 
                     SqlLogPerson log = new SqlLogPerson();
                     log.ID = DateTime.Now.Ticks;
@@ -131,45 +129,69 @@ namespace CBA.APIs
 
                     context.logs!.Add(log);
                     await context.SaveChangesAsync();
-
-                    //flag = false;
                 }
-            }
-            catch(Exception ex)
-            {
-                Log.Error(ex.ToString());
-
-            }
-
-            if (sqlPerson != null)
-            {
-                if (sqlPerson!.group != null)
+                catch(Exception ex)
                 {
-                    if (sqlPerson.group.code.CompareTo("BL") == 0)
+                    Log.Error(ex.ToString());
+                }
+
+                
+
+
+                try
+                {
+                    string group = "";
+                    if (sqlPerson != null)
                     {
+                        if (sqlPerson!.group != null)
+                        {
+                            if (sqlPerson.group.code.CompareTo("BL") == 0)
+                            {
+                                group = "1";
+
+                            }
+                            else
+                            {
+                                group = "2";
+                            }    
+
+                        }
+                        else
+                        {
+                            group = "0";
+                           
+                        }
+
                         ItemDetectPerson itemDetect = new ItemDetectPerson();
                         itemDetect.codeSystem = codeSystem;
                         itemDetect.name = sqlPerson.name;
                         itemDetect.gender = sqlPerson.gender;
                         itemDetect.age = sqlPerson.age;
                         itemDetect.image = codefile;
-                        itemDetect.group = sqlPerson.group.code;
+                        itemDetect.group = group;
+                        if (itemDetect.group.CompareTo("0") == 0)
+                        {
+                            itemDetect.alert = true;
+                        }
+
                         itemDetect.device = sqlDevice!.code;
                         itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
-                        List<HttpNotification> notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
-
+                        List<HttpNotification>? notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
                         foreach (HttpNotification notification in notifications)
                         {
+                            Log.Debug("Person Arrived : {0}", itemDetect.codeSystem);
                             notification.messagers.Add(JsonConvert.SerializeObject(itemDetect));
                         }
-
                     }
 
                 }
+                catch(Exception ex)
+                {
+                    Log.Error(String.Format("Notification of Person : {0}**************************{1}", codeSystem, ex.ToString()));
+                }
+                return true;
             }
-
-            return true;
         }
 
         public async Task<bool> setConvertFace(string s1, string s2)
@@ -310,5 +332,51 @@ namespace CBA.APIs
                 return list;
             }
         }
+
+        //public List<ItemDetectPerson> getListPersonArrived(string token)
+        //{
+        //    using(DataContext context = new DataContext())
+        //    {
+        //        SqlUser? m_user = context.users!.Where(s => s.isdeleted == false && s.token.CompareTo(token) == 0).AsNoTracking().FirstOrDefault();
+        //        if(m_user == null)
+        //        {
+        //            return new List<ItemDetectPerson>();
+        //        }
+
+        //        List<ItemDetectPerson> items = new List<ItemDetectPerson>();
+        //        List<string> groups = new List<string>();
+        //        groups.Add("0");
+        //        groups.Add("1");
+        //        groups.Add("2");
+        //        foreach (string m_group in groups)
+        //        {
+        //            if (Program.httpNotifications.Count > 0)
+        //            {
+        //                HttpNotification? notification = Program.httpNotifications.Where(s => s.group.CompareTo(m_group) == 0).FirstOrDefault();
+        //                if (notification == null)
+        //                {
+        //                    continue;
+        //                }
+        //                if (notification.infos.Count > 0)
+        //                {
+        //                    foreach (ItemDetectPerson m_item in notification.infos)
+        //                    {
+        //                        items.Add(m_item);
+        //                    }
+        //                }
+        //            }
+        //            else
+        //            {
+        //                Console.WriteLine("No connection !!!");
+        //            }
+        //        }
+        //        if(items.Count == 0)
+        //        {
+        //            Console.WriteLine("Person not yet arrived !!!");
+        //        }
+                
+        //        return items;
+        //    }    
+        //}
     }
 }

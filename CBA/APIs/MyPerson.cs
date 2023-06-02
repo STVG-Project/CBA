@@ -12,6 +12,7 @@ using System.Drawing;
 using static CBA.APIs.MyPerson;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 
 namespace CBA.APIs
 {
@@ -63,19 +64,28 @@ namespace CBA.APIs
                     Thread.Sleep(1000);
                     for (int i = 0; i < cacheHistoryPersons.Count; i++)
                     {
+                        
                         TimeSpan time = DateTime.Now.Subtract(cacheHistoryPersons[i].create);
-                        if (time.Minutes > 5.0)
+                        if (time.Minutes > 1.0)
                         {
+                            DateTime now = DateTime.Now;
                             cacheHistoryPersons.RemoveAt(i);
                             i--;
+                            if (cacheHistoryPersons.Count == 0)
+                            {
+                                TimeSpan timeSpan = DateTime.Now.Subtract(now);
+                                Log.Debug(string.Format("Time clear cache done : {0}s", timeSpan.TotalSeconds));
+                            }
                         }
                     }
+                        
+                    
 
                     Thread.Sleep(1000);
                     for (int i = 0; i < cacheListAllPersons.Count; i++)
                     {
                         TimeSpan time = DateTime.Now.Subtract(cacheListAllPersons[i].create);
-                        if (time.Minutes > 5.0)
+                        if (time.Minutes > 1.0)
                         {
                             cacheListAllPersons.RemoveAt(i);
                             i--;
@@ -85,7 +95,7 @@ namespace CBA.APIs
                     for (int i = 0; i < cacheExcels.Count; i++)
                     {
                         TimeSpan time = DateTime.Now.Subtract(cacheExcels[i].create);
-                        if (time.Minutes > 5.0)
+                        if (time.Minutes > 1.0)
                         {
                             cacheExcels.RemoveAt(i);
                             i--;
@@ -219,6 +229,7 @@ namespace CBA.APIs
             {
                 using (DataContext context = new DataContext())
                 {
+                    DateTime now = DateTime.Now;
 
                     ListPersonPage info = new ListPersonPage();
                     List<ItemPerson> items = new List<ItemPerson>();
@@ -318,7 +329,6 @@ namespace CBA.APIs
 
 
                     }
-                    
                     return info;
 
                 }
@@ -407,8 +417,7 @@ namespace CBA.APIs
             {
                 using (DataContext context = new DataContext())
                 {
-                    //Stopwatch sw = new Stopwatch();
-                    //sw.Start();
+                    DateTime now = DateTime.Now;
 
                     DateTime dateBegin = new DateTime(begin.Year, begin.Month, begin.Day, 00, 00, 00);
                     DateTime dateEnd = new DateTime(end.Year, end.Month, end.Day, 00, 00, 00);
@@ -445,9 +454,11 @@ namespace CBA.APIs
 
                                 if(m_log.person.faces != null)
                                 {
-                                    List<SqlFace> tmp = m_log.person.faces.OrderByDescending(s => s.createdTime).ToList();
-                                    item.image = m_log.person.faces[tmp.Count - 1].image;
-                                   
+                                    if(m_log.person.faces.Count > 0)
+                                    {
+                                        List<SqlFace> tmp = m_log.person.faces.OrderByDescending(s => s.createdTime).ToList();
+                                        item.image = m_log.person.faces[tmp.Count - 1].image;
+                                    }    
                                 }
 
                                 ItemFaceForPerson tmpFace = new ItemFaceForPerson();
@@ -569,6 +580,9 @@ namespace CBA.APIs
                         }
                     }
                     info.items = items;
+
+                    TimeSpan timeSpan = DateTime.Now.Subtract(now);
+                    Log.Debug(string.Format("Time get data in cache : {0}s", timeSpan.TotalSeconds));
 
                     return info;
                 }
