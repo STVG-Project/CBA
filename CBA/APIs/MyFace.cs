@@ -140,44 +140,29 @@ namespace CBA.APIs
 
                 try
                 {
-                    string group = "";
                     if (sqlPerson != null)
                     {
-                        if (sqlPerson!.group != null)
-                        {
-                            if (sqlPerson.group.code.CompareTo("BL") == 0)
-                            {
-                                group = "1";
-
-                            }
-                            else
-                            {
-                                group = "2";
-                            }    
-
-                        }
-                        else
-                        {
-                            group = "0";
-                           
-                        }
-
+                     
                         ItemDetectPerson itemDetect = new ItemDetectPerson();
                         itemDetect.codeSystem = codeSystem;
                         itemDetect.name = sqlPerson.name;
                         itemDetect.gender = sqlPerson.gender;
                         itemDetect.age = sqlPerson.age;
                         itemDetect.image = codefile;
-                        itemDetect.group = group;
-                        if (itemDetect.group.CompareTo("0") == 0)
+                        if(sqlPerson.group != null && sqlPerson.group.code.CompareTo("BL") == 0)
                         {
                             itemDetect.alert = true;
+                            itemDetect.group = sqlPerson.group.name;
                         }
-
-                        itemDetect.device = sqlDevice!.code;
+                        else
+                        {
+                            itemDetect.alert = false;
+                            itemDetect.group = sqlPerson.group?.name;
+                        }
+                        itemDetect.device = sqlDevice!.name;
                         itemDetect.time = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss");
 
-                        List<HttpNotification>? notifications = Program.httpNotifications.Where(s => s.group.CompareTo(itemDetect.group) == 0).ToList();
+                        List<HttpNotification>? notifications = Program.httpNotifications.ToList();
                         foreach (HttpNotification notification in notifications)
                         {
                             Log.Debug("Person Arrived : {0}", itemDetect.codeSystem);

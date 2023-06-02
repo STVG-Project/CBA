@@ -19,7 +19,6 @@ public class Program
 
     public class HttpNotification
     {
-        public string group { get; set; } = "";
         public string id { get; set; } = "";
         public List<string> messagers { get; set; } = new List<string>();
     }

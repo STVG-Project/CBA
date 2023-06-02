@@ -11,7 +11,7 @@ namespace CBA.Controllers
     {
         [HttpGet]
         [Route("{token}/callbackface")]
-        public async Task callbackfaceAsync([FromRoute] string token, string group)
+        public async Task callbackfaceAsync([FromRoute] string token)
         {
             CancellationToken cancellationToken = HttpContext.RequestAborted;
             try
@@ -31,7 +31,6 @@ namespace CBA.Controllers
                 Program.HttpNotification httpNotification = new Program.HttpNotification();
                 httpNotification.id = id;
                 httpNotification.messagers = new List<string>();
-                httpNotification.group = group;
                 Program.httpNotifications.Add(httpNotification);
 
                 while (true)
