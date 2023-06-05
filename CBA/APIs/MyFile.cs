@@ -29,7 +29,7 @@ namespace CBA.APIs
                 try
                 {
                     string code = createKey(file);
-                    string link_file = "Data/" + code + ".file";
+                    string link_file = "/Data/" + code + ".file";
                     try
                     {
                         await File.WriteAllBytesAsync(link_file, data);
