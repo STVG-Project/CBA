@@ -27,7 +27,7 @@ namespace CBA.Controllers
         [Route("createFace")]
         public async Task<IActionResult> CreateFaceAsync([FromHeader] string token, [FromForm] HttpCreateFace face)
         {
-
+            //Console.WriteLine("create face");
             long id = Program.api_user.checkSys(token);
             if (id >= 0)
             {

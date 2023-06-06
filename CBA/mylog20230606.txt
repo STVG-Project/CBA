@@ -1,0 +1,4 @@
+2023-06-06 11:24:12.157 +07:00 [INF] Connected to Server 6/6/2023 11:24:12 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-06 11:24:37.533 +07:00 [DBG] Time get data in cache : 3.2399605s
+2023-06-06 11:29:09.648 +07:00 [INF] Connected to Server 6/6/2023 11:29:09 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-06 11:29:21.491 +07:00 [DBG] Time get data in cache : 3.1530669s

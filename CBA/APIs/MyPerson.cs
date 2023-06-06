@@ -490,8 +490,8 @@ namespace CBA.APIs
                                 }
 
                                 item.createdTime = m_log.person.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                                item.lastestTime = m_log.person.lastestTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-                                
+                                item.lastestTime = m_log.time.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+
                                 items.Add(item);
 
                             }
