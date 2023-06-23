@@ -1,0 +1,34 @@
+2023-06-23 11:36:04.488 +07:00 [INF] Connected to Server 6/23/2023 11:36:04 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:41:07.597 +07:00 [INF] Connected to Server 6/23/2023 11:41:07 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:41:09.004 +07:00 [DBG] Done Unlink 6/23/2023 11:41:09 AM
+2023-06-23 11:44:43.871 +07:00 [INF] Connected to Server 6/23/2023 11:44:43 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:44:45.182 +07:00 [INF] Done Unlink 6/23/2023 11:44:45 AM
+2023-06-23 11:45:27.530 +07:00 [INF] Connected to Server 6/23/2023 11:45:27 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:45:33.201 +07:00 [INF] Done Unlink 6/23/2023 11:45:33 AM
+2023-06-23 11:45:56.399 +07:00 [INF] Connected to Server 6/23/2023 11:45:56 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:46:18.396 +07:00 [INF] Connected to Server 6/23/2023 11:46:18 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:46:44.245 +07:00 [INF] Done Unlink 6/23/2023 11:46:44 AM
+2023-06-23 11:47:05.101 +07:00 [INF] Connected to Server 6/23/2023 11:47:05 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 11:47:11.885 +07:00 [INF] Done Unlink 6/23/2023 11:47:11 AM
+2023-06-23 15:30:22.221 +07:00 [INF] Connected to Server 6/23/2023 3:30:22 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 15:30:23.613 +07:00 [INF] Flase for 638150020439023106 group LA
+2023-06-23 15:30:23.620 +07:00 [INF] Flase for 638150712525314546 group LA
+2023-06-23 15:30:23.625 +07:00 [INF] Flase for 638151610606633391 group LA
+2023-06-23 15:30:23.629 +07:00 [INF] Flase for 638158518282724547 group LA
+2023-06-23 15:30:23.634 +07:00 [INF] Flase for 638158590725718339 group LA
+2023-06-23 15:30:23.639 +07:00 [INF] Flase for 638158551560635459 group LA
+2023-06-23 15:30:23.644 +07:00 [INF] Flase for 638156916905987398 group LA
+2023-06-23 15:30:23.648 +07:00 [INF] Flase for 638211205006498159 group LA
+2023-06-23 15:30:23.652 +07:00 [INF] Flase for 638210603067806199 group LA
+2023-06-23 15:30:23.653 +07:00 [INF] Done Unlink 6/23/2023 3:30:23 PM
+2023-06-23 16:58:57.679 +07:00 [INF] Connected to Server 6/23/2023 4:58:57 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-23 16:58:59.293 +07:00 [INF] Flase for 638150020439023106 group LA
+2023-06-23 16:58:59.303 +07:00 [INF] Flase for 638150712525314546 group LA
+2023-06-23 16:58:59.309 +07:00 [INF] Flase for 638151610606633391 group LA
+2023-06-23 16:58:59.313 +07:00 [INF] Flase for 638158518282724547 group LA
+2023-06-23 16:58:59.319 +07:00 [INF] Flase for 638158590725718339 group LA
+2023-06-23 16:58:59.325 +07:00 [INF] Flase for 638158551560635459 group LA
+2023-06-23 16:58:59.329 +07:00 [INF] Flase for 638156916905987398 group LA
+2023-06-23 16:58:59.335 +07:00 [INF] Flase for 638211205006498159 group LA
+2023-06-23 16:58:59.338 +07:00 [INF] Flase for 638210603067806199 group LA
+2023-06-23 16:58:59.339 +07:00 [INF] Done Unlink 6/23/2023 4:58:59 PM
