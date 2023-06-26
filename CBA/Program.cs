@@ -142,7 +142,7 @@ public class Program
             await api_role.initAsync();
             await api_user.initAsync();
             await api_group.initAsync();
-
+            api_file.initCreateTargetFile();
             app.Run();
         }
         catch (Exception ex)

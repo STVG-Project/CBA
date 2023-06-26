@@ -30,6 +30,8 @@ namespace CBA.Controllers
             return File(data!, "image/jpeg");
         }
 
+        
+
         //public async Task<bool> createConfig(string lang, byte[] data)
         //{
         //    string path = "./Configs";

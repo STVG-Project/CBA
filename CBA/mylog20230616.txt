@@ -1,0 +1,2 @@
+2023-06-16 08:57:29.291 +07:00 [INF] Connected to Server 6/16/2023 8:57:29 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-16 09:00:37.680 +07:00 [INF] Connected to Server 6/16/2023 9:00:37 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 

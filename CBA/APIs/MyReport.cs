@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Npgsql;
+using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
@@ -12,7 +13,9 @@ using System.Drawing;
 using System.Net.NetworkInformation;
 using System.Reflection.Emit;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using static CBA.APIs.MyDevice;
+using static CBA.APIs.MyFile;
 using static CBA.APIs.MyGroup;
 using static CBA.APIs.MyPerson;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -203,45 +206,23 @@ namespace CBA.APIs
             DateTime now = DateTime.Now;
 
             ItemCountPersonGroup item = new ItemCountPersonGroup();
-            DateTime begin = new DateTime(time.Year, 1, 1, 0, 0, 0);
-            DateTime end = begin.AddYears(1);
-
-            List<DataRaw> raws = getRawData(begin, end);
+            DateTime date  = new DateTime(time.Year, 1, 1, 0, 0, 0);
+            
             //List<DataRaw> datas = raws.OrderBy(s => s.person.group.code).ThenBy(s => s.person.codeSystem).ToList();
-
-            if (group.CompareTo("") == 0)
-            {
-                raws = raws.Where(s => s.person.group.code.CompareTo("") == 0).ToList();
-            }
-            else if (group.CompareTo("1") == 0)
-            {
-                raws = raws.Where(s => s.person.group.code.CompareTo("") != 0).ToList();
-            }
 
             Parallel.For(0, 12, index => {
                 ItemMonthPerson itemPerson = new ItemMonthPerson();
 
                 itemPerson.time = (index + 1).ToString();
-                DateTime monthStart = begin.AddMonths(index);
-                DateTime monthStop = monthStart.AddMonths(1);
-                List<DataRaw> tmp_datas = raws.Where(s => DateTime.Compare(monthStart, s.createdTime) <= 0 && DateTime.Compare(monthStop, s.createdTime) > 0).OrderBy(s => s.person.codeSystem).ToList();
-                while (tmp_datas.Count > 0)
-                {
-                    itemPerson.person = 0;
-                    string codePerson = tmp_datas[0].person.codeSystem;
-                    itemPerson.person++;
+                string m_time = date.AddMonths(index).ToLocalTime().ToString("MM-yyyy");
+                DateTime m_month = DateTime.ParseExact(m_time, "MM-yyyy", null);
 
-                    for (int j = 0; j < tmp_datas.Count; j++)
-                    {
-                        if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
-                        {
-                            codePerson = tmp_datas[j].person.codeSystem;
-                            itemPerson.person++;
-                        }
-                        tmp_datas.RemoveAt(0);
-                        j--;
-                    }
+                ItemCountPersonGroup items = getStatisticsCountPersonForMonth(m_month, group);
+                foreach (ItemMonthPerson item in items.data)
+                {
+                    itemPerson.person += item.person;
                 }
+
                 item.data.Add(itemPerson);
             });
 
@@ -327,8 +308,23 @@ namespace CBA.APIs
                         tmp_datas.RemoveAt(0);
                         j--;
                     }
+                    
                 }
                 item.data.Add(itemPerson);
+                //if (dayStart.ToString("dd-MM-yyyy").CompareTo("24-06-2023") == 0)
+                //{
+                //    Console.WriteLine("OK !!!");
+                //}
+                if (group.CompareTo("") == 0)
+                {
+                    string target = Program.api_file.getFileTarget("", dayStart);
+                    if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                    {
+                        float phi = (float)Math.Round(float.Parse(target) / itemPerson.person, 3);
+                        float m_target = ((float)Math.Ceiling(phi * 100) / 100) * itemPerson.person;
+                        itemPerson.person = (int)Math.Round(m_target);
+                    }
+                }    
             }
             return item;
         }
@@ -505,6 +501,7 @@ namespace CBA.APIs
             item.item.date = time.ToString("dd-MM-yyyy");
 
             List<DataRaw> raws = getRawData(begin, end);
+
             List<DataRaw> datas = raws.OrderBy(s => s.device.code).ThenBy(s => s.person.codeSystem).ToList();
             
             List<string> codes = new List<string>();
@@ -617,6 +614,9 @@ namespace CBA.APIs
                 }
                 item.item.totalCount[index] = tmp_device.number;
             }
+
+            
+
             return item;
         }
 
@@ -1492,18 +1492,36 @@ namespace CBA.APIs
                     }
                     item.data.Add(m_item);
                 }
-
+                int totalCount = 0;
                 for (int i = 0; i < tmp.groups.Count; i++)
                 {
-                    int totalcount = 0;
+                    int totalnum = 0;
                     foreach (ItemCountHours tmp_count in item.data)
                     {
-                        totalcount += tmp_count.number[i];
+                        totalnum += tmp_count.number[i];
                     }
-                    item.totalCount.Add(totalcount);
+                    item.totalCount.Add(totalnum);
+                    totalCount += totalnum;
+                   
                 }
-                tmp.item = item;
 
+                string target = Program.api_file.getFileTarget("", begin);
+                if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                {
+                    float phi = (float)Math.Round(float.Parse(target) / totalCount, 3);
+                    for (int i = 0; i < item.totalCount.Count; i++)
+                    {
+                        if (tmp.groups[i].CompareTo("") == 0)
+                        {
+                            float m_target = ((float)Math.Ceiling(phi * 100) / 100) * item.totalCount[i];
+                            item.totalCount[i] = (int)Math.Round(m_target);
+
+                        }
+
+                    }
+                }
+
+                tmp.item = item;
                 return tmp;
             }
         }
@@ -1735,6 +1753,20 @@ namespace CBA.APIs
                                 tmp.totals[i] += m_item.totalCount[i];
                             }
                         }
+
+                        //string target = Program.api_file.getFileTarget("", begin);
+                        //if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                        //{
+                        //    float phi = float.Parse(target) / totalCount;
+                        //    for (int i = 0; i < tmp.totals.Count; i++)
+                        //    {
+                        //        if (tmp.groups[i].CompareTo("") == 0)
+                        //        {
+                        //            tmp.totals[i] = (int)Math.Round(phi * tmp.totals[i]);
+                        //        }
+
+                        //    }
+                        //}
                     }
 
                     return tmp;
@@ -1850,6 +1882,8 @@ namespace CBA.APIs
 
                     m_item.data.Add(item);
                 }
+
+                int totalCount = 0;
                 foreach (string temp in tmp.groups)
                 {
                     List<string> codes = new List<string>();
@@ -1864,24 +1898,29 @@ namespace CBA.APIs
                     }
 
                     m_item.totalCount.Add(codes.Count);
+                    totalCount += codes.Count;
+
+                }
+
+                string target = Program.api_file.getFileTarget("", begin);
+                if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                {
+                    float phi = (float)Math.Round(float.Parse(target) / totalCount, 3);
+
+                    for (int i = 0; i < m_item.totalCount.Count; i++)
+                    {
+                        if (tmp.groups[i].CompareTo("") == 0)
+                        {
+                            float m_target = ((float)Math.Ceiling(phi * 100) / 100) * m_item.totalCount[i];
+                            m_item.totalCount[i] = (int)Math.Round(m_target);
+                        }
+
+                    }
                 }
 
                 tmp.item = m_item;
                 return tmp;
 
-
-
-                //try
-                //{
-
-
-
-                //}
-                //catch(Exception ex)
-                //{
-                //    Console.WriteLine(ex);
-                //    return new ItemPersonsPlot();
-                //}
             }
         }
 
@@ -2061,7 +2100,9 @@ namespace CBA.APIs
                                 tmp.totals[i] += m_item.totalCount[i];
                             }
                         }
+
                     }
+
                     return tmp;
                 }
                 catch (Exception ex)
@@ -2102,6 +2143,7 @@ namespace CBA.APIs
                         tmp.items.Add(temp);
                         tmp.groups = countHours.groups;
                         tmp.totals = new List<int>();
+
                         for (int i = 0; i < tmp.groups.Count; i++)
                         {
                             tmp.totals.Add(0);
@@ -2110,6 +2152,21 @@ namespace CBA.APIs
                                 tmp.totals[i] += m_item.totalCount[i];
                             }
                         }
+
+                       
+                        //string target = Program.api_file.getFileTarget("", begin);
+                        //if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                        //{
+                        //    float phi = float.Parse(target) / totalCount;
+                        //    for (int i = 0; i < tmp.totals.Count; i++)
+                        //    {
+                        //        if (tmp.groups[i].CompareTo("") == 0)
+                        //        {
+                        //            tmp.totals[i] = (int)Math.Round(phi * tmp.totals[i]);
+                        //        }
+                               
+                        //    }
+                        //}
                     }
                     return tmp;
                 }
@@ -3237,77 +3294,159 @@ namespace CBA.APIs
             }
         }
 
-        //public class ItemPersonDetect
+        public class ItemCam
+        {
+            public string code { get; set; } = "";
+            public string time { get; set; } = "";
+
+        }
+        public class ItemPersonInOut
+        {
+            public string code { get; set; } = "";
+            public List<double> timeSpan { get; set; } = new List<double>();
+            public string timeAverageInOut { get; set; } = "";
+        }
+
+        public List<ItemPersonInOut> getStatisticsMeanTimeForPerson(DateTime time)
+        {
+            DateTime begin = new DateTime(time.Year, time.Month, time.Day, 0, 0, 0);
+            DateTime end = begin.AddDays(1);
+
+            List<DataRaw> raws = getRawData(begin, end);
+
+            List<ItemPersonInOut> items = new List<ItemPersonInOut>();
+
+            List<DataRaw> tmp_datas = raws.Where(s => DateTime.Compare(begin, s.createdTime) <= 0 && DateTime.Compare(end, s.createdTime) > 0).OrderBy(s => s.person.codeSystem).OrderByDescending(s => s.createdTime).ToList();
+            while(tmp_datas.Count > 0)
+            {
+
+                for (int i = 0; i < tmp_datas.Count; i++)
+                {
+
+                    string code = tmp_datas[0].person.codeSystem;
+                    string device = tmp_datas[0].device.code;
+                    DateTime m_time = tmp_datas[0].createdTime;
+
+                    if (tmp_datas[i].person.codeSystem.CompareTo(code) == 0)
+                    {
+                        ItemPersonInOut? item = items.Where(s => s.code.CompareTo(code) == 0).FirstOrDefault();
+                        if(item == null)
+                        {
+                            ItemPersonInOut m_item = new ItemPersonInOut();
+                            m_item.code = code;
+                            TimeSpan m_span = tmp_datas[i].createdTime.Subtract(m_time);
+                            if(m_span.TotalSeconds >= 0)
+                            {
+                                m_item.timeSpan.Add(m_span.TotalSeconds);
+                            }
+                            if(m_item.timeSpan.Count > 0)
+                            {
+                                double num = 0;
+                                foreach (double m_timeSpan in m_item.timeSpan)
+                                {
+                                    num += m_timeSpan;
+                                }
+
+                                m_item.timeAverageInOut = (num / m_item.timeSpan.Count).ToString();
+                            }
+
+                            items.Add(m_item);
+                        }    
+                        else
+                        {
+
+                        }    
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                    tmp_datas.RemoveAt(i);
+                    i--;
+                }
+                //foreach (DataRaw m_data in tmp_datas)
+                //{
+                //    if (m_data.device.code.CompareTo("8") == 0 || m_data.device.code.CompareTo("9") == 0)
+                //    {
+                //        ItemPersonInOut? item = items.Where(s => s.code.CompareTo(m_data.person.codeSystem) == 0).FirstOrDefault();
+                //        if (item == null)
+                //        {
+                //            List<DataRaw> mCamIns = tmp_datas.Where(s => s.person.codeSystem.CompareTo(m_data.person.codeSystem) == 0 && s.device.code.CompareTo("8") == 0).OrderByDescending(s => s.createdTime).ToList();
+                //            if (mCamIns.Count > 0)
+                //            {
+                //                List<DataRaw> mCamOuts = tmp_datas.Where(s => s.person.codeSystem.CompareTo(m_data.person.codeSystem) == 0 && s.device.code.CompareTo("9") == 0).OrderByDescending(s => s.createdTime).ToList();
+                //                if (mCamOuts.Count > 0)
+                //                {
+                //                    if (mCamIns.Count == mCamOuts.Count)
+                //                    {
+                //                        ItemPersonInOut m_item = new ItemPersonInOut();
+                //                        m_item.code = m_data.person.codeSystem;
+                //                        foreach (DataRaw camIn in mCamIns)
+                //                        {
+                //                            ItemCam m_camIn = new ItemCam();
+                //                            m_camIn.code = camIn.device.code;
+                //                            m_camIn.time = camIn.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                //                            m_item.camIn.Add(m_camIn);
+                //                        }
+
+                //                        foreach (DataRaw camOut in mCamOuts)
+                //                        {
+                //                            ItemCam m_camIn = new ItemCam();
+                //                            m_camIn.code = camOut.device.code;
+                //                            m_camIn.time = camOut.createdTime.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
+                //                            m_item.camOut.Add(m_camIn);
+                //                        }
+
+                //                        items.Add(m_item);
+                //                    }
+                //                    else
+                //                    {
+                //                        continue;
+                //                    
+                //                }
+                //            }
+                //        }
+                //        else
+                //        {
+                //            continue;
+                //        }
+                //    }
+                //}
+            }
+
+            //if (items.Count > 0)
+            //{
+            //    foreach (ItemPersonInOut m_time in items)
+            //    {
+            //        if (m_time.camIn.Count > 0)
+            //        {
+            //            float index = 0.000f;
+            //            for (int i = 0; i < m_time.camIn.Count; i++)
+            //            {
+            //                TimeSpan timeAv = DateTime.ParseExact(m_time.camOut[i].time, "dd-MM-yyyy HH:mm:ss", null).Subtract(DateTime.ParseExact(m_time.camIn[i].time, "dd-MM-yyyy HH:mm:ss", null));
+            //                index += (float)(timeAv.TotalSeconds);
+            //            }
+            //            m_time.timeAverageInOut = (index / m_time.camIn.Count).ToString();
+            //        }
+            //    }
+            //}
+            return items;
+        }
+
+        //public bool setTarget(string target, DateTime begin, DateTime end)
         //{
-        //    public string code { get; set; } = "";
-        //    public string codeSystem { get; set; } = "";
-        //    public string name { get; set; } = "";
-        //    public string gender { get; set; } = "";
-        //    public int age { get; set; } = 0;
-        //}
-        //public class ItemDetect
-        //{
-        //    public ItemPersonDetect person { get; set; } = new ItemPersonDetect();
-        //    public string image { get; set; } = "";
-        //    public string time { get; set; } = "";
-        //    public ItemDevice device { get; set; } = new ItemDevice();
-        //}
-        //public List<ItemDetect> detectBlackList(DateTime begin, string code)
-        //{
-        //    DateTime m_begin = new DateTime(begin.Year, begin.Month, begin.Day, begin.Hour, begin.Minute, begin.Second);
-        //    DateTime m_end = begin.AddSeconds(10);
-        //    List<DataRaw> raws = getRawData(m_begin, m_end);
-        //    List<ItemDetect> list = new List<ItemDetect>();
-        //    using (DataContext context = new DataContext())
+        //    if(string.IsNullOrEmpty(target))
         //    {
-        //        /* SqlGroup? m_group = context.groups!.Where(s => s.isdeleted == false && s.code.CompareTo(code) == 0).FirstOrDefault();
-        //         if(m_group == null)
-        //         {
-        //             return new List<ItemDetect>(); 
-        //         }*/
-        //        List<SqlLogPerson> datas = context.logs!.Include(s => s.person!).ThenInclude(s => s.group)
-        //                                                .Where(s => DateTime.Compare(begin.ToUniversalTime(), s.time) <= 0
-        //                                                            && DateTime.Compare(m_end.ToUniversalTime(), s.time) > 0)
-        //                                                .Include(s => s.device).OrderByDescending(s => s.time)
-        //                                                .ToList();
-        //        if (datas.Count < 1)
-        //        {
-        //            return new List<ItemDetect>();
-        //        }
-        //        foreach (SqlLogPerson item in datas)
-        //        {
-        //            if (item.person!.group != null)
-        //            {
-        //                if (item.person.group.code.CompareTo(code) == 0)
-        //                {
-        //                    ItemDetect tmp = new ItemDetect();
-        //                    tmp.person.code = item.person.code;
-        //                    tmp.person.codeSystem = item.person.codeSystem;
-        //                    tmp.person.name = item.person.name;
-        //                    tmp.person.gender = item.person.gender;
-        //                    tmp.person.age = item.person.age;
-
-        //                    tmp.image = item.image;
-        //                    tmp.time = item.time.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss");
-
-        //                    if (item.device != null)
-        //                    {
-        //                        tmp.device.code = item.device.code;
-        //                        tmp.device.name = item.device.name;
-        //                        tmp.device.des = item.device.des;
-        //                    }
-
-        //                    list.Add(tmp);
-        //                }
-        //                else
-        //                {
-        //                    return new List<ItemDetect>();
-        //                }
-        //            }
-        //        }
-        //        return list;
+        //        return false;
         //    }
-        //}
 
+        //    DateTime m_begin = new DateTime(begin.Year, begin.Month, begin.Day, 0, 0, 0);
+        //    DateTime m_end = new DateTime(end.Year, end.Month, end.Day, 0, 0, 0);
+        //    m_end = m_end.AddDays(1);
+
+        //    Program.api_file.initCreateTargetFile(target, m_begin, m_end);
+        //    return true;
+        //}
     }
 }

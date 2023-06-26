@@ -235,13 +235,13 @@ namespace CBA.APIs
                 {
                     return false;
                 }
-                if (own_user.role == null)
+                if (own_user.role!.code.CompareTo("admin") != 0)
                 {
                     return false;
                 }
 
-                SqlUser? tmp = context.users!.Where(s => s.isdeleted == false && (s.user.CompareTo(user) == 0 || s.username.CompareTo(username) == 0)).FirstOrDefault();
-                if (tmp != null)
+                SqlUser? m_user = context.users!.Where(s => s.isdeleted == false && (s.user.CompareTo(user) == 0 || s.username.CompareTo(username) == 0)).FirstOrDefault();
+                if (m_user != null)
                 {
                     return false;
                 }
@@ -267,7 +267,7 @@ namespace CBA.APIs
             }
         }
 
-        public async Task<bool> editUserAsync(string token, string user, string password, string displayName, string phoneNumber, string des, string role)
+        public async Task<bool> editUserAsync(string user, string password, string displayName, string phoneNumber, string des, string role)
         {
             if (string.IsNullOrEmpty(user))
             {

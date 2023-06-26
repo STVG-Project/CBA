@@ -83,17 +83,23 @@ namespace CBA.Controllers
         [Route("editUser")]
         public async Task<IActionResult> editUserAsync([FromHeader] string token, ItemUserV2 user)
         {
-
-            bool flag = await Program.api_user.editUserAsync(token, user.user, user.password, user.displayName, user.phoneNumber, user.des, user.role);
-            if (flag)
+            long id = Program.api_user.checkUser(token);
+            if (id >= 0)
             {
-                return Ok();
+                bool flag = await Program.api_user.editUserAsync(user.user, user.password, user.displayName, user.phoneNumber, user.des, user.role);
+                if (flag)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             else
             {
-                return BadRequest();
+                return Unauthorized();
             }
-
         }
 
         [HttpDelete]

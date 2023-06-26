@@ -17,6 +17,62 @@ namespace CBA.Controllers
             _logger = logger;
         }
 
+        //[HttpPost]
+        //[Route("report/{target}")]
+        //public IActionResult SetTarget(string target, string begin, string end)
+        //{
+        //    if (string.IsNullOrEmpty(target))
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    DateTime m_begin = DateTime.MinValue;
+        //    try
+        //    {
+        //        m_begin = DateTime.ParseExact(begin, "MM-yyyy", null);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        m_begin = DateTime.MinValue;
+        //    }
+
+        //    DateTime m_end = DateTime.MinValue;
+        //    try
+        //    {
+        //        m_end = DateTime.ParseExact(end, "MM-yyyy", null);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        m_end = DateTime.MinValue;
+        //    }
+        //    bool flag = Program.api_report.setTarget(target, m_begin, m_end);
+        //    if(flag)
+        //    {
+        //        return Ok();
+        //    }
+        //    else
+        //    {
+        //        return BadRequest();
+        //    }
+        //}
+
+        [HttpGet]
+        [Route("getStatisticsMeanTime")]
+        public IActionResult GetStatisticsMeanTime(string time)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsMeanTimeForPerson(_time));
+        }
+
         [HttpGet]
         [Route("getStatisticsCountPersonForYear")]
         public IActionResult countPersonGroupForYear(string time, string group)

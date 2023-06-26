@@ -1,0 +1,184 @@
+2023-06-24 09:38:06.766 +07:00 [INF] Connected to Server 6/24/2023 9:38:06 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 09:38:50.429 +07:00 [ERR] System.IO.DirectoryNotFoundException: Could not find a part of the path 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'.
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.getFileTarget(DateTime begin, DateTime end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 192
+2023-06-24 10:57:06.199 +07:00 [INF] Connected to Server 6/24/2023 10:57:06 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 10:57:28.877 +07:00 [INF] Connected to Server 6/24/2023 10:57:28 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 10:57:29.826 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Target\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Target\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 175
+2023-06-24 10:58:03.231 +07:00 [INF] Connected to Server 6/24/2023 10:58:03 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:00:54.993 +07:00 [INF] Connected to Server 6/24/2023 11:00:54 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:01:09.856 +07:00 [INF] Connected to Server 6/24/2023 11:01:09 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:01:58.919 +07:00 [INF] Connected to Server 6/24/2023 11:01:58 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:01:59.888 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Target\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Target\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 176
+2023-06-24 11:02:35.044 +07:00 [INF] Connected to Server 6/24/2023 11:02:35 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:04:20.272 +07:00 [INF] Connected to Server 6/24/2023 11:04:20 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:05:20.344 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end)
+2023-06-24 11:07:21.514 +07:00 [INF] Connected to Server 6/24/2023 11:07:21 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:08:24.207 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 176
+2023-06-24 11:10:59.560 +07:00 [INF] Connected to Server 6/24/2023 11:10:59 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:11:00.552 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 176
+2023-06-24 11:16:58.202 +07:00 [INF] Connected to Server 6/24/2023 11:16:58 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:16:59.314 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 184
+2023-06-24 11:17:22.650 +07:00 [INF] Connected to Server 6/24/2023 11:17:22 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:17:45.499 +07:00 [INF] Connected to Server 6/24/2023 11:17:45 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:19:09.922 +07:00 [INF] Connected to Server 6/24/2023 11:19:09 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:19:10.998 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 184
+2023-06-24 11:19:24.104 +07:00 [INF] Connected to Server 6/24/2023 11:19:24 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:19:25.090 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Configs\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 184
+2023-06-24 11:19:35.355 +07:00 [INF] Connected to Server 6/24/2023 11:19:35 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:20:20.450 +07:00 [INF] Connected to Server 6/24/2023 11:20:20 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:21:31.093 +07:00 [INF] Connected to Server 6/24/2023 11:21:31 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:22:52.243 +07:00 [INF] Connected to Server 6/24/2023 11:22:52 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:24:10.729 +07:00 [INF] Connected to Server 6/24/2023 11:24:10 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:25:01.648 +07:00 [INF] Connected to Server 6/24/2023 11:25:01 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:25:11.002 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 184
+2023-06-24 11:27:59.416 +07:00 [INF] Connected to Server 6/24/2023 11:27:59 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:29:54.763 +07:00 [INF] Connected to Server 6/24/2023 11:29:54 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:29:55.951 +07:00 [ERR] System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 176
+2023-06-24 11:30:15.248 +07:00 [INF] Connected to Server 6/24/2023 11:30:15 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:30:20.656 +07:00 [ERR] System.IO.FileNotFoundException: Could not find file 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'.
+File name: 'C:\Users\MrTea\Documents\GitHub\CBA\CBA\Targets\mytarget.json'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategy(FileStream fileStream, String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, Int64 preallocationSize)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.InternalReadAllText(String path, Encoding encoding)
+   at System.IO.File.ReadAllText(String path)
+   at CBA.APIs.MyFile.initCreateTargetFile(String target, String begin, String end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyFile.cs:line 177
+2023-06-24 11:31:53.584 +07:00 [INF] Connected to Server 6/24/2023 11:31:53 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:32:42.464 +07:00 [INF] Connected to Server 6/24/2023 11:32:42 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:47:16.257 +07:00 [INF] Connected to Server 6/24/2023 11:47:16 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:49:32.312 +07:00 [INF] Connected to Server 6/24/2023 11:49:32 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:50:18.145 +07:00 [INF] Connected to Server 6/24/2023 11:50:18 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:51:04.920 +07:00 [INF] Connected to Server 6/24/2023 11:51:04 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:52:29.887 +07:00 [INF] Connected to Server 6/24/2023 11:52:29 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:54:27.241 +07:00 [INF] Connected to Server 6/24/2023 11:54:27 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:54:55.656 +07:00 [INF] Connected to Server 6/24/2023 11:54:55 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:55:26.754 +07:00 [INF] Connected to Server 6/24/2023 11:55:26 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:56:49.073 +07:00 [INF] Connected to Server 6/24/2023 11:56:49 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 11:57:17.590 +07:00 [INF] Connected to Server 6/24/2023 11:57:17 AM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:01:45.890 +07:00 [INF] Connected to Server 6/24/2023 12:01:45 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:02:33.168 +07:00 [INF] Connected to Server 6/24/2023 12:02:33 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:03:33.499 +07:00 [INF] Connected to Server 6/24/2023 12:03:33 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:04:57.678 +07:00 [INF] Connected to Server 6/24/2023 12:04:57 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:07:12.685 +07:00 [INF] Connected to Server 6/24/2023 12:07:12 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:09:53.950 +07:00 [INF] Connected to Server 6/24/2023 12:09:53 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:10:34.840 +07:00 [INF] Connected to Server 6/24/2023 12:10:34 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:10:56.112 +07:00 [INF] Connected to Server 6/24/2023 12:10:56 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:11:53.031 +07:00 [INF] Connected to Server 6/24/2023 12:11:53 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:12:56.063 +07:00 [INF] Connected to Server 6/24/2023 12:12:56 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:14:41.653 +07:00 [INF] Connected to Server 6/24/2023 12:14:41 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:16:09.762 +07:00 [INF] Connected to Server 6/24/2023 12:16:09 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:16:47.115 +07:00 [INF] Connected to Server 6/24/2023 12:16:47 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 12:17:31.729 +07:00 [INF] Connected to Server 6/24/2023 12:17:31 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:34:43.917 +07:00 [INF] Connected to Server 6/24/2023 8:34:43 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:35:20.495 +07:00 [ERR] System.FormatException: Input string was not in a correct format.
+   at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, TypeCode type)
+   at System.Int32.Parse(String s)
+   at CBA.APIs.MyReport.getCountPersonForDateV2(DateTime begin, DateTime end) in C:\Users\MrTea\Documents\GitHub\CBA\CBA\APIs\MyReport.cs:line 2141
+2023-06-24 20:37:11.776 +07:00 [INF] Connected to Server 6/24/2023 8:37:11 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:38:46.542 +07:00 [INF] Connected to Server 6/24/2023 8:38:46 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:39:09.221 +07:00 [INF] Connected to Server 6/24/2023 8:39:09 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:40:53.795 +07:00 [INF] Connected to Server 6/24/2023 8:40:53 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:42:34.844 +07:00 [INF] Connected to Server 6/24/2023 8:42:34 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 
+2023-06-24 20:48:39.759 +07:00 [INF] Connected to Server 6/24/2023 8:48:39 PM_v1 : Host=office.stvg.vn:59061;Database=db_stvg_cba;Username=postgres;Password=stvg 

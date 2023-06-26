@@ -2,8 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using RestSharp;
 using Serilog;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
+using System.Security.Cryptography.Pkcs;
 using static CBA.APIs.MyReport;
 using static CBA.Program;
 
@@ -130,24 +135,71 @@ namespace CBA.APIs
             }
         }
 
-        /* public async Task<byte[]>? getImageChanged(byte[] data)
-         {
-             var client = new RestClient("http://office.stvg.vn:59073/image");
-             var request = new RestRequest();
-             request.Method = Method.Post;
-             request.AddHeader("Content-Type", "multipart/form-data");
-             request.AddFile("file", data, String.Format("{0}.jpg", DateTime.Now.Ticks));
-             request.Timeout = 10000;
-             RestResponse response = await client.ExecuteAsync(request);
+        //public class ItemTarger
+        //{
+        //    public string target { get; set; } = "";
+        //    public string date { get; set; } = "";
+        //}
 
-             if (response.StatusCode == System.Net.HttpStatusCode.OK)
-             {
-                 return response.RawBytes;
-             }
-             else
-             {
-                 return null;
-             }
-         }*/
+        public void initCreateTargetFile()
+        {
+            try
+            {
+                string path = "Targets";
+                List<string> tmps = new List<string>();
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+
+                    string link = Path.Combine(path, "mytarget.txt");
+
+                    string item = "24-06-2023 : 2000";
+                    tmps.Add(item);
+
+                    string data = JsonConvert.SerializeObject(tmps);
+
+                    File.WriteAllText(link, data);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+            }
+        }
+
+        public string getFileTarget(string month, DateTime time)
+        {
+            try
+            {
+                string m_time = time.ToLocalTime().ToString("dd-MM-yyyy");
+
+                string filePath = string.Format("Targets/mytarget.txt");
+                string data = File.ReadAllText(filePath);
+                List<string>? items = JsonConvert.DeserializeObject<List<string>>(data);
+                string m_data = "";
+                if(items != null)
+                {
+                    foreach (string item in items)
+                    {
+                        string[] c = item.Split(":");
+                        if (c[0].Trim().CompareTo(m_time) == 0)
+                        {
+                            m_data = c[1].Trim();
+                            break;
+                        }
+                    }
+                    return m_data;
+                }
+                else
+                {
+                    return "";
+                }    
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.ToString());
+                return "";
+            }
+        }
     }
 }
