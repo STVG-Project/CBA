@@ -23,14 +23,14 @@ public class Program
         public List<string> messagers { get; set; } = new List<string>();
     }
 
-    
+
     public class CacheForUser
     {
         public string id { get; set; } = "";
         public ListPersonPage? dataPersons { get; set; } = null;
         public CacheHistoryPerson dataHistory { get; set; } = new CacheHistoryPerson();
         public bool flag { get; set; } = false;
-        
+
     }
 
 
@@ -85,10 +85,10 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
             builder.WebHost.ConfigureKestrel((context, option) =>
             {
-                option.ListenAnyIP(50000, listenOptions =>
+               /* option.ListenAnyIP(50000, listenOptions =>
                 {
 
-                });
+                });*/
                 option.Limits.MaxConcurrentConnections = null;
                 option.Limits.MaxRequestBodySize = null;
                 option.Limits.MaxRequestBufferSize = null;
@@ -123,7 +123,7 @@ public class Program
 
             int index = 1;
 
-            Log.Information(String.Format("Connected to Server {0}_v{1} : {2} " , DateTime.Now, index.ToString() , DataContext.configSql));
+            Log.Information(String.Format("Connected to Server {0}_v{1} : {2} ", DateTime.Now, index.ToString(), DataContext.configSql));
 
             // Configure the HTTP request pipeline.
             app.UseSwagger();
@@ -143,6 +143,12 @@ public class Program
             await api_user.initAsync();
             await api_group.initAsync();
             api_file.initCreateTargetFile();
+
+            await api_group.cleanGroupAsync();
+           
+
+
+
             app.Run();
         }
         catch (Exception ex)

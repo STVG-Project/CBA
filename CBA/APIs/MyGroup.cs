@@ -378,5 +378,38 @@ namespace CBA.APIs
                 return list;
             }
         }
+
+        public async Task<bool> cleanGroupAsync()
+        {
+            using(DataContext context = new DataContext())
+            {
+                List<SqlPerson> datas = context.persons!.Include(s => s.group).Where(s => s.group != null).ToList();
+                if(datas.Count < 1)
+                {
+                    return false;
+                }
+               /* List<SqlGroup> groups = context.groups!.Where(s => s.isdeleted == false).Include(s => s.persons).ToList();
+                if(groups.Count < 1)
+                {
+                    return false;
+                }*/
+                bool flag = false;
+                foreach (SqlPerson item in datas)
+                {
+                    flag = await cleanPersonAsync(item.codeSystem, item.group!.code);
+                    if (!flag)
+                    {
+                        Log.Information(String.Format("Flase for {0} group {1}", item.codeSystem, item.group.code));
+                    }
+                    else
+                    {
+                        Log.Information(String.Format("Clear group for {0} ", item.codeSystem));
+
+                    }
+                }
+                Log.Information(String.Format("Done Unlink {0}", DateTime.Now));
+                return true;               
+            }
+        }
     }
 }
