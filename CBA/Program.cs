@@ -85,10 +85,10 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
             builder.WebHost.ConfigureKestrel((context, option) =>
             {
-               /* option.ListenAnyIP(50000, listenOptions =>
+                option.ListenAnyIP(50000, listenOptions =>
                 {
 
-                });*/
+                });
                 option.Limits.MaxConcurrentConnections = null;
                 option.Limits.MaxRequestBodySize = null;
                 option.Limits.MaxRequestBufferSize = null;
@@ -144,7 +144,7 @@ public class Program
             await api_group.initAsync();
             api_file.initCreateTargetFile();
 
-            await api_group.cleanGroupAsync();
+            //await api_group.cleanGroupAsync();
            
 
 

@@ -26,6 +26,9 @@ namespace CBA.APIs
 {
     public class MyReport
     {
+        private List<ItemMonthPerson> m_person_g0  = new List<ItemMonthPerson>();
+        private List<ItemMonthPerson> m_person_g1 = new List<ItemMonthPerson>();
+
         public class ItemBufferForGroups
         {
             public string person { get; set; } = "";
@@ -279,52 +282,112 @@ namespace CBA.APIs
             else if(group.CompareTo("1") == 0)
             {
                 datas = datas.Where(s => s.person.group.code.CompareTo("") != 0).ToList();
-
             }
-            
+
             for (int i = 0; i < DateTime.DaysInMonth(begin.Year, begin.Month); i++)
             {
                 ItemMonthPerson itemPerson = new ItemMonthPerson();
-
                 itemPerson.time = (i + 1).ToString();
+                
+
                 DateTime dayStart = begin.AddDays(i);
                 DateTime dayStop = dayStart.AddDays(1);
+
+                int var_gr0 = 0;
+                int var_gr1 = 0;
 
                 List<DataRaw> tmp_datas = datas.Where(s => DateTime.Compare(dayStart, s.createdTime) <= 0 && DateTime.Compare(dayStop, s.createdTime) > 0).ToList();
                 while (tmp_datas.Count > 0)
                 {
-                    itemPerson.person = 0;
                     string codePerson = tmp_datas[0].person.codeSystem;
                     itemPerson.person++;
+                    string group_null = "";
+                    string group_non = "";
+
+                    if (string.IsNullOrEmpty(group) || group.CompareTo("1") == 0)
+                    {
+
+                    }
+                    else
+                    {
+                        if (tmp_datas[0].person.group.code.CompareTo("") == 0)
+                        {
+                            group_null = tmp_datas[0].person.group.code;
+                            var_gr0 = itemPerson.person;
+                        }
+                        else
+                        {
+                            group_non = tmp_datas[0].person.group.code;
+                            var_gr1 = itemPerson.person;
+                        }    
+                    }
+
+
                     for (int j = 0; j < tmp_datas.Count; j++)
                     {
-                        if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
+                        if (string.IsNullOrEmpty(group) || group.CompareTo("1") == 0)
                         {
-                            codePerson = tmp_datas[j].person.codeSystem;
-
-                            itemPerson.person++;
+                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0)
+                            {
+                                codePerson = tmp_datas[j].person.codeSystem;
+                                itemPerson.person++;
+                            }
                         }
-                      
+                        else
+                        {
+                            if (tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0 && tmp_datas[j].person.group.code.CompareTo(group_null) == 0)
+                            {
+                                codePerson = tmp_datas[j].person.codeSystem;
+                                var_gr0++;
+                            }
+                            else if(tmp_datas[j].person.codeSystem.CompareTo(codePerson) != 0 && tmp_datas[j].person.group.code.CompareTo(group_non) == 0)
+                            {
+                                codePerson = tmp_datas[j].person.codeSystem;
+                                var_gr1++;
+                            }    
+                        }    
+                        
+
                         tmp_datas.RemoveAt(0);
                         j--;
                     }
-                    
+                    if(var_gr0 > 0)
+                    {
+                        string target = Program.api_file.getFileTarget("", dayStart);
+                        if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                        {
+                            float phi = (float)Math.Round(float.Parse(target) / var_gr0, 3);
+                            float m_target = ((float)Math.Ceiling(phi * 100) / 100) * var_gr0;
+                            var_gr0 = (int)Math.Round(m_target);
+                        }
+                        itemPerson.person = var_gr0 + var_gr1;
+                    }  
+                    else
+                    {
+                        if (group.CompareTo("") == 0)
+                        {
+                            string target = Program.api_file.getFileTarget("", dayStart);
+                            if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
+                            {
+                                float phi = (float)Math.Round(float.Parse(target) / itemPerson.person, 3);
+                                float m_target = ((float)Math.Ceiling(phi * 100) / 100) * itemPerson.person;
+                                itemPerson.person = (int)Math.Round(m_target);
+                            }
+                        }
+                    }    
                 }
                 item.data.Add(itemPerson);
+
+
+
+
                 //if (dayStart.ToString("dd-MM-yyyy").CompareTo("24-06-2023") == 0)
                 //{
                 //    Console.WriteLine("OK !!!");
                 //}
-                if (group.CompareTo("") == 0)
-                {
-                    string target = Program.api_file.getFileTarget("", dayStart);
-                    if (!string.IsNullOrEmpty(target) && int.Parse(target) > 0)
-                    {
-                        float phi = (float)Math.Round(float.Parse(target) / itemPerson.person, 3);
-                        float m_target = ((float)Math.Ceiling(phi * 100) / 100) * itemPerson.person;
-                        itemPerson.person = (int)Math.Round(m_target);
-                    }
-                }    
+
+
+
             }
             return item;
         }
