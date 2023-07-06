@@ -11,7 +11,7 @@ namespace CBA.APIs
 {
     public class MyFace
     {
-        public bool flag = false;
+        //public bool flag = false;
 
         /* public class ItemPersonDetect
          {
@@ -116,7 +116,7 @@ namespace CBA.APIs
                     int rows = await context.SaveChangesAsync();
                     if (rows > 0)
                     {
-                        Log.Information("Create new face !!!");
+                        Log.Information(String.Format("Create new face : {0} ",face.createdTime.ToLocalTime()));
                     }
 
                     SqlLogPerson log = new SqlLogPerson();

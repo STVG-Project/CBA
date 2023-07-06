@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using Serilog;
 using static CBA.APIs.MyReport;
 
@@ -56,21 +57,72 @@ namespace CBA.Controllers
         //    }
         //}
 
+        //[HttpGet]
+        //[Route("getStatisticsTimeAverageInOut")]
+        //public IActionResult GetStatisticsMeanTimeForPerson(string time)
+        //{
+        //    DateTime _time = DateTime.MinValue;
+        //    try
+        //    {
+        //        _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _time = DateTime.MinValue;
+        //    }
+
+        //    return Ok(Program.api_report.getStatisticsMeanTimeForPerson(_time));
+        //}
+
         [HttpGet]
         [Route("getStatisticsMeanTime")]
-        public IActionResult GetStatisticsMeanTime(string time)
+        public IActionResult GetStatisticsMeanTime(string time, string group)
         {
             DateTime _time = DateTime.MinValue;
             try
             {
-                _time = DateTime.ParseExact(time, "dd-MM-yyyy", null);
+                _time = DateTime.ParseExact(time, "yyyy", null);
             }
             catch (Exception e)
             {
                 _time = DateTime.MinValue;
             }
 
-            return Ok(Program.api_report.getStatisticsMeanTimeForPerson(_time));
+            return Ok(Program.api_report.getStatisticsMeanTimeForYear(_time, group));
+        }
+
+        [HttpGet]
+        [Route("getStatisticsMeanTimeForDate")]
+        public IActionResult GetStatisticsMeanTimeForDate(string time, string group)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsMeanTimeForMonth(_time, group));
+        }
+
+        [HttpGet]
+        [Route("getStatisticsMeanTimeCheck")]
+        public IActionResult GetStatisticsMeanTimeForHour(string time, string group)
+        {
+            DateTime _time = DateTime.MinValue;
+            try
+            {
+                _time = DateTime.ParseExact(time, "MM-yyyy", null);
+            }
+            catch (Exception e)
+            {
+                _time = DateTime.MinValue;
+            }
+
+            return Ok(Program.api_report.getStatisticsMeanTimeForPerson(_time, group));
         }
 
         [HttpGet]
